@@ -68,11 +68,15 @@ export const LoginPage: React.FC = () => {
   const forgotPasswordMutation = useForgotPassword();
 
   // Forms hook setup
+  const DEMO_EMAIL = 'demo@taxvault.in';
+  const DEMO_PASSWORD = 'Demo1234';
+
   const {
     register: loginRegister,
     handleSubmit: handleLoginSubmit,
     formState: { errors: loginErrors },
     reset: resetLoginForm,
+    setValue: setLoginValue,
   } = useForm<LoginInputs>({
     resolver: zodResolver(loginSchema),
   });
@@ -107,6 +111,20 @@ export const LoginPage: React.FC = () => {
     return score; // Max 4
   };
   const pwStrength = calculateStrength(passwordVal);
+
+  const handleDemoLogin = () => {
+    setLoginValue('email', DEMO_EMAIL);
+    setLoginValue('password', DEMO_PASSWORD);
+    loginMutation.mutate({ email: DEMO_EMAIL, password: DEMO_PASSWORD }, {
+      onSuccess: () => {
+        toast.success('Demo login successful. Welcome!');
+        navigate('/');
+      },
+      onError: (err: any) => {
+        toast.error(err.message || 'Demo login failed.');
+      },
+    });
+  };
 
   // Handlers
   const onLogin = (data: LoginInputs) => {
@@ -260,6 +278,7 @@ export const LoginPage: React.FC = () => {
                     <Input
                       id="email"
                       type="email"
+                      autoComplete="email"
                       placeholder="client@taxvault.in"
                       className={`pl-9 text-sm border-surface-border ${loginErrors.email ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
                       {...loginRegister('email')}
@@ -290,6 +309,7 @@ export const LoginPage: React.FC = () => {
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
                       placeholder="••••••••"
                       className={`pl-9 pr-9 text-sm border-surface-border ${loginErrors.password ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
                       {...loginRegister('password')}
@@ -320,6 +340,34 @@ export const LoginPage: React.FC = () => {
                     <span>Sign In</span>
                   )}
                 </Button>
+
+                <div className="relative flex items-center gap-2 py-1">
+                  <div className="flex-1 h-px bg-surface-border" />
+                  <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider">or</span>
+                  <div className="flex-1 h-px bg-surface-border" />
+                </div>
+
+                <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 px-4 py-3 space-y-2">
+                  <p className="text-[10.5px] font-semibold text-amber-700 uppercase tracking-wide">Development Demo Access</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="space-y-0.5">
+                      <p className="text-xs text-text-muted">
+                        <span className="font-medium text-text-primary">Email:</span> {DEMO_EMAIL}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        <span className="font-medium text-text-primary">Password:</span> {DEMO_PASSWORD}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={handleDemoLogin}
+                      disabled={loginMutation.isPending}
+                      className="shrink-0 h-8 px-3 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded-md font-medium"
+                    >
+                      {loginMutation.isPending ? <Loader2 size={12} className="animate-spin" /> : 'Use Demo'}
+                    </Button>
+                  </div>
+                </div>
 
                 <div className="text-center pt-2">
                   <span className="text-xs text-text-muted">
@@ -409,6 +457,7 @@ export const LoginPage: React.FC = () => {
                     <Input
                       id="reg-password"
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       className={`pl-9 pr-9 text-sm border-surface-border ${registerErrors.password ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
                       {...registerRegister('password')}
@@ -455,6 +504,7 @@ export const LoginPage: React.FC = () => {
                     <Input
                       id="confirmPassword"
                       type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       className={`pl-9 text-sm border-surface-border ${registerErrors.confirmPassword ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
                       {...registerRegister('confirmPassword')}
