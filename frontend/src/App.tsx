@@ -1,10 +1,10 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuthStore } from '@/store/authStore';
+
 import Shell from '@/components/Shell';
 
 // Import pages directly
-import LoginPage from '@/pages/Login';
+
 import DashboardPage from '@/pages/Dashboard';
 import ObligationsPage from '@/pages/Obligations';
 import PaymentsPage from '@/pages/Payments';
@@ -13,18 +13,13 @@ import AlertSettingsPage from '@/pages/AlertSettings';
 import ProfilePage from '@/pages/Profile';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const token = useAuthStore((state) => state.accessToken);
-  
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
   return <>{children}</>;
 };
 
 export function App() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={<Navigate to="/" replace />} />
       <Route
         path="/"
         element={
