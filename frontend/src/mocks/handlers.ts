@@ -18,7 +18,9 @@ let alertLogs: AlertLog[] = [...initialAlertLogs];
 let user = { ...currentUser };
 let isLoggedIn = true; // Default to logged in for easy dev preview
 
-const API_PREFIX = 'http://localhost:8000/api/v1';
+const API_PREFIX = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? `${window.location.origin}/api/v1`
+  : 'http://localhost:8000/api/v1';
 
 export const handlers = [
   // ── AUTHENTICATION ────────────────────────────────────────────────────────

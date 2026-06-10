@@ -17,8 +17,8 @@ const queryClient = new QueryClient({
 });
 
 async function enableMocking() {
-  // Use MSW whenever no real backend is configured (local dev + demo deployments)
-  if (import.meta.env.VITE_API_URL) {
+  // Skip MSW only when explicitly disabled (set VITE_MOCK=false for real backend deployments)
+  if (import.meta.env.VITE_MOCK === 'false') {
     return;
   }
   const { worker } = await import('./mocks/browser');

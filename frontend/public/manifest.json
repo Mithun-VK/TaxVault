@@ -5,12 +5,5 @@
   "background_color": "#F8F9FB",
   "display": "standalone",
   "start_url": "/",
-  "icons": [
-    {
-      "src": "/logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
-  ]
+  "icons": []
 }
