@@ -53,6 +53,15 @@ class Individual(Base):
     passport_expiry: Mapped[date | None] = mapped_column(Date)
     passport_photo_key: Mapped[str | None] = mapped_column(String(500))
 
+    # Other government IDs (primary details)
+    driving_license_number: Mapped[str | None] = mapped_column(String(30))
+    voter_id_number: Mapped[str | None] = mapped_column(String(20))
+
+    # Airline / travel loyalty membership numbers
+    skywards_number: Mapped[str | None] = mapped_column(String(30))
+    maharaja_number: Mapped[str | None] = mapped_column(String(30))
+    indigo_chip_number: Mapped[str | None] = mapped_column(String(30))
+
     # Active visas: list of {country, visa_type, visa_number, issue_date, expiry_date}
     visas: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
 

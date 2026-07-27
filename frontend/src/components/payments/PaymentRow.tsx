@@ -21,6 +21,7 @@ export function PaymentRow({ payment, onReceipt }: PaymentRowProps) {
         </div>
         <p className="mt-0.5 text-xs text-slate-600">
           {formatDate(payment.payment_date)} · {getPaymentMethodLabel(payment.payment_method)}
+          {payment.period ? ` · ${payment.period}` : ''}
           {payment.reference_number ? ` · ${payment.reference_number}` : ''}
         </p>
       </div>

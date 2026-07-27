@@ -14,6 +14,7 @@ class PaymentCreate(BaseModel):
     payment_date: date
     payment_method: PaymentMethod | None = None
     reference_number: str | None = Field(default=None, max_length=100)
+    period: str | None = Field(default=None, max_length=100)
     notes: str | None = Field(default=None, max_length=2000)
     receipt_document_id: uuid.UUID | None = None
 
@@ -23,6 +24,7 @@ class PaymentUpdate(BaseModel):
     payment_date: date | None = None
     payment_method: PaymentMethod | None = None
     reference_number: str | None = Field(default=None, max_length=100)
+    period: str | None = Field(default=None, max_length=100)
     notes: str | None = Field(default=None, max_length=2000)
     receipt_document_id: uuid.UUID | None = None
 
@@ -38,6 +40,7 @@ class PaymentOut(BaseModel):
     payment_date: date
     payment_method: str | None
     reference_number: str | None
+    period: str | None
     notes: str | None
     receipt_document_id: uuid.UUID | None
     created_at: datetime

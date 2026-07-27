@@ -152,6 +152,7 @@ async def pay_premium(
     reference_number: str | None,
     notes: str | None,
     receipt_document_id: uuid.UUID | None = None,
+    period: str | None = None,
 ) -> InsuranceOut:
     result = await db.execute(
         select(InsurancePolicy).where(
@@ -171,6 +172,7 @@ async def pay_premium(
         payment_method=payment_method,
         reference_number=reference_number,
         notes=notes,
+        period=period,
         receipt_document_id=receipt_document_id,
     )
     db.add(payment)

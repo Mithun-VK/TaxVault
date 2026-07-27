@@ -19,6 +19,7 @@ class TaxPayRequest(BaseModel):
     payment_date: date
     payment_method: str | None = None
     reference_number: str | None = None
+    period: str | None = None
     notes: str | None = None
     receipt_document_id: uuid.UUID | None = None
 
@@ -90,4 +91,5 @@ async def pay_tax(
         payload.reference_number,
         payload.notes,
         payload.receipt_document_id,
+        payload.period,
     )

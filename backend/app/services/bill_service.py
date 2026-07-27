@@ -119,6 +119,7 @@ async def pay_bill(
     reference_number: str | None,
     notes: str | None,
     receipt_document_id: uuid.UUID | None = None,
+    period: str | None = None,
 ) -> BillOut:
     result = await db.execute(
         select(RecurringBill).where(RecurringBill.id == bill_id, RecurringBill.user_id == user_id)
@@ -136,6 +137,7 @@ async def pay_bill(
         payment_method=payment_method,
         reference_number=reference_number,
         notes=notes,
+        period=period,
         receipt_document_id=receipt_document_id,
     )
     db.add(payment)

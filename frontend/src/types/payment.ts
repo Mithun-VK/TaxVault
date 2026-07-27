@@ -22,6 +22,7 @@ export interface Payment {
   payment_date: string;
   payment_method: PaymentMethod;
   reference_number?: string;
+  period?: string | null;
   receipt_document_id?: string | null;
   notes: string;
   created_at: string;
@@ -35,6 +36,7 @@ export interface PaymentCreate {
   payment_date: string;
   payment_method: PaymentMethod;
   reference_number?: string;
+  period?: string;
   receipt_document_id?: string | null;
   notes?: string;
 }

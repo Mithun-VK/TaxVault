@@ -78,6 +78,11 @@ interface ProfileFields {
   pan_number: string;
   passport_number: string;
   passport_expiry: string;
+  driving_license_number: string;
+  voter_id_number: string;
+  skywards_number: string;
+  maharaja_number: string;
+  indigo_chip_number: string;
 }
 
 function toFields(ind?: Individual): ProfileFields {
@@ -92,6 +97,11 @@ function toFields(ind?: Individual): ProfileFields {
     pan_number: ind?.pan_number ?? '',
     passport_number: ind?.passport_number ?? '',
     passport_expiry: ind?.passport_expiry ? toInputDate(ind.passport_expiry) : '',
+    driving_license_number: ind?.driving_license_number ?? '',
+    voter_id_number: ind?.voter_id_number ?? '',
+    skywards_number: ind?.skywards_number ?? '',
+    maharaja_number: ind?.maharaja_number ?? '',
+    indigo_chip_number: ind?.indigo_chip_number ?? '',
   };
 }
 
@@ -107,6 +117,11 @@ function cleanPayload(f: ProfileFields): IndividualCreate {
     pan_number: f.pan_number.trim().toUpperCase() || undefined,
     passport_number: f.passport_number.trim() || undefined,
     passport_expiry: f.passport_expiry || undefined,
+    driving_license_number: f.driving_license_number.trim().toUpperCase() || undefined,
+    voter_id_number: f.voter_id_number.trim().toUpperCase() || undefined,
+    skywards_number: f.skywards_number.trim() || undefined,
+    maharaja_number: f.maharaja_number.trim() || undefined,
+    indigo_chip_number: f.indigo_chip_number.trim() || undefined,
   };
 }
 
@@ -146,7 +161,16 @@ function IndividualHero({ individual }: { individual: Individual }) {
       label: 'Passport expiry',
       value: individual.passport_expiry ? formatDate(individual.passport_expiry) : '—',
     },
+    { label: 'Driving license', value: individual.driving_license_number ?? '—' },
+    { label: 'Voter ID', value: individual.voter_id_number ?? '—' },
   ];
+
+  const membershipRows: { label: string; value: string }[] = [
+    { label: 'Skywards', value: individual.skywards_number ?? '—' },
+    { label: 'Maharaja', value: individual.maharaja_number ?? '—' },
+    { label: 'Indigo chip', value: individual.indigo_chip_number ?? '—' },
+  ];
+  const hasMembership = membershipRows.some((r) => r.value !== '—');
 
   return (
     <Card className="border-l-4 p-6" style={{ borderLeftColor: '#1A3C6E' }}>
@@ -207,6 +231,22 @@ function IndividualHero({ individual }: { individual: Individual }) {
           </div>
         ))}
       </div>
+
+      {hasMembership && (
+        <div className="mt-5 border-t border-surface-border pt-5">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-600">
+            Membership numbers
+          </p>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
+            {membershipRows.map((row) => (
+              <div key={row.label}>
+                <p className="text-xs text-slate-600">{row.label}</p>
+                <p className="mt-0.5 break-words text-sm font-medium text-slate-800">{row.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {passportDays !== null && passportDays <= 90 && (
         <div
@@ -321,6 +361,47 @@ function EditIndividualForm({
           type="date"
           value={fields.passport_expiry}
           onChange={(e) => set('passport_expiry', e.target.value)}
+        />
+      </Field>
+      <Field label="Driving license number">
+        <Input
+          value={fields.driving_license_number}
+          placeholder="e.g. TN01 20230012345"
+          onChange={(e) => set('driving_license_number', e.target.value.toUpperCase())}
+        />
+      </Field>
+      <Field label="Voter ID number">
+        <Input
+          value={fields.voter_id_number}
+          placeholder="e.g. ABC1234567"
+          onChange={(e) => set('voter_id_number', e.target.value.toUpperCase())}
+        />
+      </Field>
+
+      <div className="sm:col-span-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+          Membership numbers
+        </p>
+      </div>
+      <Field label="Skywards number">
+        <Input
+          value={fields.skywards_number}
+          placeholder="Emirates Skywards"
+          onChange={(e) => set('skywards_number', e.target.value)}
+        />
+      </Field>
+      <Field label="Maharaja number">
+        <Input
+          value={fields.maharaja_number}
+          placeholder="Air India Maharaja Club"
+          onChange={(e) => set('maharaja_number', e.target.value)}
+        />
+      </Field>
+      <Field label="Indigo chip number">
+        <Input
+          value={fields.indigo_chip_number}
+          placeholder="IndiGo"
+          onChange={(e) => set('indigo_chip_number', e.target.value)}
         />
       </Field>
     </form>
@@ -917,7 +998,7 @@ function VisasTab({ individual, readOnly }: { individual: Individual; readOnly: 
                       </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="Visa number">
+                  <Field label="Id number">
                     <Input
                       value={v.visa_number ?? ''}
                       disabled={readOnly}

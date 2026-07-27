@@ -23,6 +23,11 @@ export interface Individual {
   passport_number?: string;
   passport_expiry?: string;
   passport_photo_url?: string;
+  driving_license_number?: string;
+  voter_id_number?: string;
+  skywards_number?: string;
+  maharaja_number?: string;
+  indigo_chip_number?: string;
   visas: VisaEntry[];
   notes?: string;
   is_archived: boolean;
@@ -43,6 +48,11 @@ export type IndividualCreate = {
   pan_number?: string;
   passport_number?: string;
   passport_expiry?: string;
+  driving_license_number?: string;
+  voter_id_number?: string;
+  skywards_number?: string;
+  maharaja_number?: string;
+  indigo_chip_number?: string;
   visas?: VisaEntry[];
   notes?: string;
 };

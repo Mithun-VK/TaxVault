@@ -24,6 +24,11 @@ class IndividualCreate(BaseModel):
     pan_number: str | None = None
     passport_number: str | None = None
     passport_expiry: date | None = None
+    driving_license_number: str | None = None
+    voter_id_number: str | None = None
+    skywards_number: str | None = None
+    maharaja_number: str | None = None
+    indigo_chip_number: str | None = None
     visas: list[VisaEntry] = []
     notes: str | None = None
 
@@ -57,6 +62,11 @@ class IndividualUpdate(BaseModel):
     passport_number: str | None = None
     passport_expiry: date | None = None
     passport_photo_key: str | None = None
+    driving_license_number: str | None = None
+    voter_id_number: str | None = None
+    skywards_number: str | None = None
+    maharaja_number: str | None = None
+    indigo_chip_number: str | None = None
     visas: list[VisaEntry] | None = None
     notes: str | None = None
 
@@ -95,6 +105,11 @@ class IndividualResponse(BaseModel):
     passport_number: str | None = None
     passport_expiry: date | None = None
     passport_photo_url: str | None = None
+    driving_license_number: str | None = None
+    voter_id_number: str | None = None
+    skywards_number: str | None = None
+    maharaja_number: str | None = None
+    indigo_chip_number: str | None = None
     visas: list[dict] = []
     notes: str | None = None
     is_archived: bool = False

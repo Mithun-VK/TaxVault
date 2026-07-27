@@ -27,6 +27,7 @@ const schema = z.object({
   payment_date: z.string().min(1, 'Payment date is required'),
   payment_method: z.string().min(1, 'Select a payment method'),
   reference_number: z.string().optional(),
+  period: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -72,6 +73,7 @@ export function PaymentForm({
       payment_date: toInputDate(new Date()),
       payment_method: 'upi',
       reference_number: '',
+      period: '',
       notes: '',
     },
   });
@@ -85,6 +87,7 @@ export function PaymentForm({
       payment_date: values.payment_date,
       payment_method: values.payment_method,
       reference_number: values.reference_number,
+      period: values.period,
       notes: values.notes,
       receipt_document_id: receiptId,
     });
@@ -137,13 +140,23 @@ export function PaymentForm({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="reference_number">Reference number</Label>
-        <Input
-          id="reference_number"
-          placeholder="UPI / transaction reference"
-          {...register('reference_number')}
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label htmlFor="reference_number">Reference number</Label>
+          <Input
+            id="reference_number"
+            placeholder="UPI / transaction reference"
+            {...register('reference_number')}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="period">Period</Label>
+          <Input
+            id="period"
+            placeholder={entityType === 'bill' ? 'e.g. Mar-May 2026' : 'e.g. 2026-27'}
+            {...register('period')}
+          />
+        </div>
       </div>
 
       <div className="space-y-2">

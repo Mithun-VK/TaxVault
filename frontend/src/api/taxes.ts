@@ -90,6 +90,7 @@ export interface PayEntityPayload {
   payment_date: string;
   payment_method?: string;
   reference_number?: string;
+  period?: string;
   notes?: string;
   receipt_document_id?: string | null;
 }

@@ -267,6 +267,10 @@ export function Payments() {
     },
     { header: 'Method', cell: (p) => getPaymentMethodLabel(p.payment_method) },
     {
+      header: 'Period',
+      cell: (p) => <span className="text-slate-700">{p.period || '—'}</span>,
+    },
+    {
       header: 'Reference',
       cell: (p) => <span className="text-slate-700">{p.reference_number || '—'}</span>,
     },

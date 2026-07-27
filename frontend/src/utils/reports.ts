@@ -166,6 +166,7 @@ export function generatePaymentsReport(payments: Payment[], opts?: ExportOpts): 
     Entity: p.entity_name ?? '—',
     'Amount Paid': formatINR(Number(p.amount_paid)),
     'Payment Method': p.payment_method ? getStatusLabel(p.payment_method) : '—',
+    Period: p.period ?? '—',
     'Reference Number': p.reference_number ?? '—',
     Remarks: p.notes ?? '—',
   }));
