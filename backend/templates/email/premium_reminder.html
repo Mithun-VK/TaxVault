@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Insurance Premium Reminder</title></head>
+<body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px;">
+  <div style="max-width:600px;margin:auto;background:#fff;border-radius:8px;padding:32px;">
+    <h2 style="color:#1e40af;">Insurance Premium Reminder</h2>
+    <p>Hi <strong>{{ user_name }}</strong>,</p>
+    <p>Your insurance premium is due <strong>in {{ days_remaining }} day(s)</strong>.</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <tr><td style="padding:8px;background:#f0f4ff;font-weight:bold;">Policy</td><td style="padding:8px;">{{ entity_name }}</td></tr>
+      <tr><td style="padding:8px;background:#f0f4ff;font-weight:bold;">Premium</td><td style="padding:8px;">₹{{ amount }}</td></tr>
+      <tr><td style="padding:8px;background:#f0f4ff;font-weight:bold;">Due Date</td><td style="padding:8px;">{{ due_date }}</td></tr>
+    </table>
+    <p>Pay your premium to keep your policy active and avoid lapses.</p>
+    <p style="color:#6b7280;font-size:12px;">TaxVault — Your Financial Assistant</p>
+  </div>
+</body>
+</html>

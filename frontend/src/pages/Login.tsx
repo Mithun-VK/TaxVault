@@ -1,577 +1,309 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { toast } from 'sonner';
-import {
-  ShieldCheck,
-  Bell,
-  FolderLock,
-  Lock,
-  Mail,
-  User as UserIcon,
-  Phone,
-  ArrowLeft,
-  Eye,
-  EyeOff,
-  Loader2,
-} from 'lucide-react';
+import { z } from 'zod';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, ShieldCheck, BellRing, FolderLock, Eye, EyeOff } from 'lucide-react';
+import { Logo } from '@/components/shared/Logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
 import { useLogin, useRegister, useForgotPassword } from '@/api/auth';
+import { useAuthStore } from '@/store/authStore';
 
-// Zod schemas
+type Mode = 'login' | 'register' | 'forgot';
+
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
-  password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
+  email: z.string().email('Enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-const registerSchema = z
-  .object({
-    fullName: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-    email: z.string().email({ message: 'Please enter a valid email address.' }),
-    phoneNumber: z
-      .string()
-      .regex(/^\+91[6-9]\d{9}$/, { message: 'Phone must be in Indian format (+919876543210).' }),
-    password: z
-      .string()
-      .min(8, { message: 'Password must be at least 8 characters.' })
-      .regex(/^(?=.*[A-Z])(?=.*[0-9])/, {
-        message: 'Password must contain at least one uppercase letter and one number.',
-      }),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match.',
-    path: ['confirmPassword'],
-  });
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
+const registerSchema = z.object({
+  full_name: z.string().min(2, 'Enter your name'),
+  email: z.string().email('Enter a valid email'),
+  phone_number: z.string().min(10, 'Enter a valid phone number'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
-type LoginInputs = z.infer<typeof loginSchema>;
-type RegisterInputs = z.infer<typeof registerSchema>;
-type ForgotInputs = z.infer<typeof forgotPasswordSchema>;
+const forgotSchema = z.object({ email: z.string().email('Enter a valid email') });
 
-export const LoginPage: React.FC = () => {
+function FieldError({ message }: { message?: string }) {
+  return message ? <p className="text-xs text-brand-danger">{message}</p> : null;
+}
+
+function PasswordInput({
+  id,
+  autoComplete,
+  fieldProps,
+}: {
+  id: string;
+  autoComplete: string;
+  fieldProps: ReturnType<ReturnType<typeof useForm>['register']>;
+}) {
+  const [visible, setVisible] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={visible ? 'text' : 'password'}
+        autoComplete={autoComplete}
+        className="pr-10"
+        {...fieldProps}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        className="absolute inset-y-0 right-0 flex h-full w-10 items-center justify-center text-slate-600 hover:text-text-primary"
+        aria-label={visible ? 'Hide password' : 'Show password'}
+        tabIndex={-1}
+      >
+        {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
+    </div>
+  );
+}
+
+function LoginForm({ onForgot }: { onForgot: () => void }) {
   const navigate = useNavigate();
-  const [view, setView] = useState<'login' | 'register' | 'forgot'>('login');
-  const [showPassword, setShowPassword] = useState(false);
-
-  // API mutations
-  const loginMutation = useLogin();
-  const registerMutation = useRegister();
-  const forgotPasswordMutation = useForgotPassword();
-
-  // Forms hook setup
-  const DEMO_EMAIL = 'demo@taxvault.in';
-  const DEMO_PASSWORD = 'Demo1234';
-
+  const location = useLocation();
+  const login = useLogin();
   const {
-    register: loginRegister,
-    handleSubmit: handleLoginSubmit,
-    formState: { errors: loginErrors },
-    reset: resetLoginForm,
-    setValue: setLoginValue,
-  } = useForm<LoginInputs>({
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
   });
 
+  const onSubmit = handleSubmit(async (values) => {
+    try {
+      await login.mutateAsync(values);
+      const from = (location.state as { from?: string } | null)?.from ?? '/';
+      navigate(from, { replace: true });
+    } catch {
+      // toast already shown by useLogin's onError
+    }
+  });
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" type="email" autoComplete="email" {...register('email')} />
+        <FieldError message={errors.email?.message} />
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <button type="button" onClick={onForgot} className="text-xs font-medium text-brand-navy hover:underline">
+            Forgot password?
+          </button>
+        </div>
+        <PasswordInput id="password" autoComplete="current-password" fieldProps={register('password')} />
+        <FieldError message={errors.password?.message} />
+      </div>
+      <Button type="submit" className="w-full" disabled={login.isPending}>
+        {login.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+        Sign in
+      </Button>
+    </form>
+  );
+}
+
+function RegisterForm() {
+  const navigate = useNavigate();
+  const registerUser = useRegister();
   const {
-    register: registerRegister,
-    handleSubmit: handleRegisterSubmit,
-    formState: { errors: registerErrors },
-    watch: watchRegister,
-    reset: resetRegisterForm,
-  } = useForm<RegisterInputs>({
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
   });
 
-  const {
-    register: forgotRegister,
-    handleSubmit: handleForgotSubmit,
-    formState: { errors: forgotErrors },
-    reset: resetForgotForm,
-  } = useForm<ForgotInputs>({
-    resolver: zodResolver(forgotPasswordSchema),
+  const onSubmit = handleSubmit(async (values) => {
+    try {
+      await registerUser.mutateAsync(values);
+      navigate('/');
+    } catch {
+      // toast already shown by useRegister's onError
+    }
   });
 
-  // Register watch to compute password strength
-  const passwordVal = watchRegister('password', '');
-  const calculateStrength = (pwd: string) => {
-    let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^a-zA-Z0-9]/.test(pwd)) score++;
-    return score; // Max 4
-  };
-  const pwStrength = calculateStrength(passwordVal);
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="full_name">Full name</Label>
+        <Input id="full_name" {...register('full_name')} />
+        <FieldError message={errors.full_name?.message} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="reg-email">Email</Label>
+        <Input id="reg-email" type="email" {...register('email')} />
+        <FieldError message={errors.email?.message} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="phone_number">Phone</Label>
+        <Input id="phone_number" type="tel" placeholder="+91 ..." {...register('phone_number')} />
+        <FieldError message={errors.phone_number?.message} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="reg-password">Password</Label>
+        <PasswordInput id="reg-password" autoComplete="new-password" fieldProps={register('password')} />
+        <FieldError message={errors.password?.message} />
+      </div>
+      <Button type="submit" className="w-full" disabled={registerUser.isPending}>
+        {registerUser.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+        Create account
+      </Button>
+    </form>
+  );
+}
 
-  const handleDemoLogin = () => {
-    setLoginValue('email', DEMO_EMAIL);
-    setLoginValue('password', DEMO_PASSWORD);
-    loginMutation.mutate({ email: DEMO_EMAIL, password: DEMO_PASSWORD }, {
-      onSuccess: () => {
-        toast.success('Demo login successful. Welcome!');
-        navigate('/');
-      },
-      onError: (err: any) => {
-        toast.error(err.message || 'Demo login failed.');
-      },
-    });
-  };
+function ForgotForm({ onBack }: { onBack: () => void }) {
+  const forgot = useForgotPassword();
+  const [sent, setSent] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<z.infer<typeof forgotSchema>>({ resolver: zodResolver(forgotSchema) });
 
-  // Handlers
-  const onLogin = (data: LoginInputs) => {
-    loginMutation.mutate(data, {
-      onSuccess: () => {
-        toast.success('Login successful. Welcome back!');
-        resetLoginForm();
-        navigate('/');
-      },
-      onError: (err: any) => {
-        toast.error(err.message || 'Login failed. Please check your credentials.');
-      },
-    });
-  };
+  const onSubmit = handleSubmit(async (values) => {
+    try {
+      await forgot.mutateAsync(values);
+      setSent(true);
+    } catch {
+      // toast already shown by useForgotPassword's onError
+    }
+  });
 
-  const onRegister = (data: RegisterInputs) => {
-    registerMutation.mutate(data, {
-      onSuccess: () => {
-        toast.success('Registration successful! Secure vault initialized.');
-        resetRegisterForm();
-        navigate('/');
-      },
-      onError: (err: any) => {
-        toast.error(err.message || 'Registration failed. Please try again.');
-      },
-    });
-  };
-
-  const onForgot = (data: ForgotInputs) => {
-    forgotPasswordMutation.mutate(data, {
-      onSuccess: () => {
-        toast.success('Reset guidelines sent! Please check your mailbox.');
-        resetForgotForm();
-        setView('login');
-      },
-      onError: (err: any) => {
-        toast.error(err.message || 'Failed to dispatch reset link.');
-      },
-    });
-  };
-
-  const toggleView = (target: 'login' | 'register' | 'forgot') => {
-    setView(target);
-    // Clear errors or reset states
-  };
+  if (sent) {
+    return (
+      <div className="space-y-4 text-center">
+        <p className="text-sm text-slate-600">
+          If an account exists for that email, you'll receive a reset link shortly.
+        </p>
+        <Button variant="secondary" className="w-full" onClick={onBack}>
+          Back to sign in
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2">
-      {/* ── LEFT PANE: BRAND PANEL (deep navy) ── */}
-      <div className="hidden md:flex flex-col justify-between bg-brand-navy p-12 text-white relative overflow-hidden select-none">
-        {/* Background decorative vectors */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-teal-400 via-blue-900 to-black pointer-events-none" />
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="forgot-email">Email</Label>
+        <Input id="forgot-email" type="email" {...register('email')} />
+        <FieldError message={errors.email?.message} />
+      </div>
+      <Button type="submit" className="w-full" disabled={forgot.isPending}>
+        {forgot.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+        Send reset link
+      </Button>
+      <button type="button" onClick={onBack} className="w-full text-sm text-slate-700 hover:underline">
+        Back to sign in
+      </button>
+    </form>
+  );
+}
 
-        {/* Logo Monogram */}
-        <div className="flex items-center gap-3 relative z-10">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/10 backdrop-blur text-white border border-white/20 shadow-lg">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-          </div>
-          <div>
-            <span className="font-bold text-xl tracking-tight leading-none block">TaxVault</span>
-            <span className="text-[10px] text-teal-400 font-semibold tracking-widest uppercase">Institutional Grade</span>
-          </div>
-        </div>
+const TRUST_SIGNALS = [
+  { icon: ShieldCheck, title: 'Bank-grade encryption', text: 'Your financial records stay private and secure.' },
+  { icon: BellRing, title: 'Deadline alerts', text: 'Never miss a tax, premium or bill due date again.' },
+  { icon: FolderLock, title: 'Document vault', text: 'Every receipt and policy, organised in one place.' },
+];
 
-        {/* Tagline & Focus */}
-        <div className="my-auto max-w-sm space-y-4 relative z-10">
-          <h2 className="text-3xl font-semibold tracking-tight text-white leading-tight">
-            Your taxes. Organized. On time.
+export function Login() {
+  const [mode, setMode] = useState<Mode>('login');
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return (
+    <div className="flex min-h-screen bg-surface-page">
+      {/* Left brand panel */}
+      <div className="relative hidden w-1/2 flex-col justify-between bg-brand-navy p-12 text-white lg:flex">
+        <Logo variant="light" size={36} />
+        <div>
+          <h2 className="max-w-md text-3xl font-semibold leading-tight tracking-tight">
+            Your assets. Your finances. Always on time.
           </h2>
-          <p className="text-sm text-slate-300 leading-relaxed font-light">
-            TaxVault consolidates your private capital accounts, property holdings, and business ledgers under single-client secure encryption.
+          <p className="mt-3 max-w-sm text-sm text-white/70">
+            TaxVault keeps your assets, taxes, insurance and bills in one calm, dependable place.
           </p>
+          <ul className="mt-10 space-y-5">
+            {TRUST_SIGNALS.map(({ icon: Icon, title, text }) => (
+              <li key={title} className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{title}</p>
+                  <p className="text-sm text-white/60">{text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-
-        {/* Trust Signals */}
-        <div className="space-y-4 border-t border-white/10 pt-8 relative z-10">
-          <div className="flex items-start gap-3.5">
-            <div className="p-2 bg-white/10 rounded-lg text-teal-400">
-              <ShieldCheck size={18} />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-white">Bank-grade encryption</p>
-              <p className="text-[10.5px] text-slate-300 mt-0.5 font-light">Zero-knowledge storage layers keep personal records private.</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3.5">
-            <div className="p-2 bg-white/10 rounded-lg text-teal-400">
-              <Bell size={18} />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-white">Deadline alerts</p>
-              <p className="text-[10.5px] text-slate-300 mt-0.5 font-light">Custom SMS and Email alerts warn you before deadlines lapse.</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3.5">
-            <div className="p-2 bg-white/10 rounded-lg text-teal-400">
-              <FolderLock size={18} />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-white">Document vault</p>
-              <p className="text-[10.5px] text-slate-300 mt-0.5 font-light">Attach invoices and statements directly to obligations.</p>
-            </div>
-          </div>
-        </div>
+        <p className="text-xs text-white/40">© {new Date().getFullYear()} TaxVault. All rights reserved.</p>
       </div>
 
-      {/* ── RIGHT PANE: FORM PANEL (off-white) ── */}
-      <div className="flex items-center justify-center p-6 bg-surface-page md:p-12 overflow-y-auto">
-        <Card className="w-full max-w-[420px] bg-white border border-surface-border shadow-premium rounded-xl p-8">
-          <CardContent className="p-0 space-y-6">
-            {/* Header info */}
-            <div>
-              {view !== 'login' && (
-                <button
-                  onClick={() => setView('login')}
-                  className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary transition-all mb-4 focus-visible:outline-none"
-                >
-                  <ArrowLeft size={14} />
-                  <span>Back to sign in</span>
-                </button>
-              )}
-              <h3 className="text-xl font-semibold text-brand-navy">
-                {view === 'login'
-                  ? 'Client Sign In'
-                  : view === 'register'
-                  ? 'Open Account'
-                  : 'Recover Account'}
-              </h3>
-              <p className="text-xs text-text-muted mt-1">
-                {view === 'login'
-                  ? 'Authenticate to access your private tax panel.'
-                  : view === 'register'
-                  ? 'Initialize your secure client vault settings.'
-                  : 'Provide your registered email to reset password.'}
+      {/* Right form panel */}
+      <div className="flex w-full flex-col items-center justify-center px-6 py-12 lg:w-1/2">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          className="w-full max-w-sm"
+        >
+          <div className="mb-8 lg:hidden">
+            <Logo size={36} />
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={mode}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+                {mode === 'login' && 'Welcome back'}
+                {mode === 'register' && 'Create your account'}
+                {mode === 'forgot' && 'Reset your password'}
+              </h1>
+              <p className="mb-8 mt-1 text-sm text-slate-700">
+                {mode === 'login' && 'Sign in to access your vault.'}
+                {mode === 'register' && 'Start managing your assets in minutes.'}
+                {mode === 'forgot' && "We'll email you a secure reset link."}
               </p>
-            </div>
 
-            {/* ── LOGIN VIEW ── */}
-            {view === 'login' && (
-              <form onSubmit={handleLoginSubmit(onLogin)} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs font-semibold text-text-primary">
-                    Email Address
-                  </Label>
-                  <div className="relative">
-                    <Mail size={16} className="absolute left-3 top-3 text-text-muted" />
-                    <Input
-                      id="email"
-                      type="email"
-                      autoComplete="email"
-                      placeholder="client@taxvault.in"
-                      className={`pl-9 text-sm border-surface-border ${loginErrors.email ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
-                      {...loginRegister('email')}
-                    />
-                  </div>
-                  {loginErrors.email && (
-                    <span className="text-[10.5px] text-brand-danger font-medium block">
-                      {loginErrors.email.message}
-                    </span>
-                  )}
-                </div>
+              {mode === 'login' && <LoginForm onForgot={() => setMode('forgot')} />}
+              {mode === 'register' && <RegisterForm />}
+              {mode === 'forgot' && <ForgotForm onBack={() => setMode('login')} />}
+            </motion.div>
+          </AnimatePresence>
 
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-xs font-semibold text-text-primary">
-                      Password
-                    </Label>
-                    <button
-                      type="button"
-                      onClick={() => setView('forgot')}
-                      className="text-xs font-semibold text-brand-navy hover:underline focus-visible:outline-none"
-                    >
-                      Forgot?
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <Lock size={16} className="absolute left-3 top-3 text-text-muted" />
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      className={`pl-9 pr-9 text-sm border-surface-border ${loginErrors.password ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
-                      {...loginRegister('password')}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-text-muted hover:text-text-primary"
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                  {loginErrors.password && (
-                    <span className="text-[10.5px] text-brand-danger font-medium block">
-                      {loginErrors.password.message}
-                    </span>
-                  )}
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={loginMutation.isPending}
-                  className="w-full bg-brand-navy hover:bg-[#153264] text-white py-2 rounded-lg font-medium text-sm transition-all h-10 active:scale-[0.98] flex items-center justify-center gap-2"
-                >
-                  {loginMutation.isPending ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <span>Sign In</span>
-                  )}
-                </Button>
-
-                <div className="relative flex items-center gap-2 py-1">
-                  <div className="flex-1 h-px bg-surface-border" />
-                  <span className="text-[10px] text-text-muted font-medium uppercase tracking-wider">or</span>
-                  <div className="flex-1 h-px bg-surface-border" />
-                </div>
-
-                <div className="rounded-lg border border-dashed border-amber-300 bg-amber-50 px-4 py-3 space-y-2">
-                  <p className="text-[10.5px] font-semibold text-amber-700 uppercase tracking-wide">Development Demo Access</p>
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="space-y-0.5">
-                      <p className="text-xs text-text-muted">
-                        <span className="font-medium text-text-primary">Email:</span> {DEMO_EMAIL}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        <span className="font-medium text-text-primary">Password:</span> {DEMO_PASSWORD}
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={handleDemoLogin}
-                      disabled={loginMutation.isPending}
-                      className="shrink-0 h-8 px-3 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded-md font-medium"
-                    >
-                      {loginMutation.isPending ? <Loader2 size={12} className="animate-spin" /> : 'Use Demo'}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="text-center pt-2">
-                  <span className="text-xs text-text-muted">
-                    New to TaxVault?{' '}
-                    <button
-                      type="button"
-                      onClick={() => toggleView('register')}
-                      className="font-bold text-brand-navy hover:underline"
-                    >
-                      Request access
-                    </button>
-                  </span>
-                </div>
-              </form>
-            )}
-
-            {/* ── REGISTER VIEW ── */}
-            {view === 'register' && (
-              <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="fullName" className="text-xs font-semibold text-text-primary">
-                    Full Name
-                  </Label>
-                  <div className="relative">
-                    <UserIcon size={16} className="absolute left-3 top-3 text-text-muted" />
-                    <Input
-                      id="fullName"
-                      placeholder="Aditya Birla"
-                      className={`pl-9 text-sm border-surface-border ${registerErrors.fullName ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
-                      {...registerRegister('fullName')}
-                    />
-                  </div>
-                  {registerErrors.fullName && (
-                    <span className="text-[10.5px] text-brand-danger font-medium block">
-                      {registerErrors.fullName.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="reg-email" className="text-xs font-semibold text-text-primary">
-                    Email Address
-                  </Label>
-                  <div className="relative">
-                    <Mail size={16} className="absolute left-3 top-3 text-text-muted" />
-                    <Input
-                      id="reg-email"
-                      type="email"
-                      placeholder="client@taxvault.in"
-                      className={`pl-9 text-sm border-surface-border ${registerErrors.email ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
-                      {...registerRegister('email')}
-                    />
-                  </div>
-                  {registerErrors.email && (
-                    <span className="text-[10.5px] text-brand-danger font-medium block">
-                      {registerErrors.email.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="phoneNumber" className="text-xs font-semibold text-text-primary">
-                    Phone Number
-                  </Label>
-                  <div className="relative">
-                    <Phone size={16} className="absolute left-3 top-3 text-text-muted" />
-                    <Input
-                      id="phoneNumber"
-                      placeholder="+919876543210"
-                      className={`pl-9 text-sm border-surface-border ${registerErrors.phoneNumber ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
-                      {...registerRegister('phoneNumber')}
-                    />
-                  </div>
-                  {registerErrors.phoneNumber && (
-                    <span className="text-[10.5px] text-brand-danger font-medium block">
-                      {registerErrors.phoneNumber.message}
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="reg-password" className="text-xs font-semibold text-text-primary">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Lock size={16} className="absolute left-3 top-3 text-text-muted" />
-                    <Input
-                      id="reg-password"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="new-password"
-                      placeholder="••••••••"
-                      className={`pl-9 pr-9 text-sm border-surface-border ${registerErrors.password ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
-                      {...registerRegister('password')}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-text-muted"
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                  {registerErrors.password && (
-                    <span className="text-[10.5px] text-brand-danger font-medium block">
-                      {registerErrors.password.message}
-                    </span>
-                  )}
-
-                  {/* Password strength visual meter */}
-                  {passwordVal.length > 0 && (
-                    <div className="pt-1.5 space-y-1">
-                      <div className="flex justify-between text-[10px] text-text-muted">
-                        <span>Password Strength</span>
-                        <span className="font-semibold">
-                          {pwStrength === 4 ? 'Strong' : pwStrength === 3 ? 'Medium' : 'Weak'}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-4 gap-1 h-1">
-                        <div className={`rounded ${pwStrength >= 1 ? 'bg-red-500' : 'bg-slate-100'}`} />
-                        <div className={`rounded ${pwStrength >= 2 ? 'bg-orange-400' : 'bg-slate-100'}`} />
-                        <div className={`rounded ${pwStrength >= 3 ? 'bg-amber-400' : 'bg-slate-100'}`} />
-                        <div className={`rounded ${pwStrength >= 4 ? 'bg-[#0F6E56]' : 'bg-slate-100'}`} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="confirmPassword" className="text-xs font-semibold text-text-primary">
-                    Confirm Password
-                  </Label>
-                  <div className="relative">
-                    <Lock size={16} className="absolute left-3 top-3 text-text-muted" />
-                    <Input
-                      id="confirmPassword"
-                      type={showPassword ? 'text' : 'password'}
-                      autoComplete="new-password"
-                      placeholder="••••••••"
-                      className={`pl-9 text-sm border-surface-border ${registerErrors.confirmPassword ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
-                      {...registerRegister('confirmPassword')}
-                    />
-                  </div>
-                  {registerErrors.confirmPassword && (
-                    <span className="text-[10.5px] text-brand-danger font-medium block">
-                      {registerErrors.confirmPassword.message}
-                    </span>
-                  )}
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={registerMutation.isPending}
-                  className="w-full bg-brand-navy hover:bg-[#153264] text-white py-2 rounded-lg font-medium text-sm transition-all h-10 active:scale-[0.98] flex items-center justify-center gap-2"
-                >
-                  {registerMutation.isPending ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <span>Register</span>
-                  )}
-                </Button>
-              </form>
-            )}
-
-            {/* ── FORGOT PASSWORD VIEW ── */}
-            {view === 'forgot' && (
-              <form onSubmit={handleForgotSubmit(onForgot)} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="forgot-email" className="text-xs font-semibold text-text-primary">
-                    Email Address
-                  </Label>
-                  <div className="relative">
-                    <Mail size={16} className="absolute left-3 top-3 text-text-muted" />
-                    <Input
-                      id="forgot-email"
-                      type="email"
-                      placeholder="client@taxvault.in"
-                      className={`pl-9 text-sm border-surface-border ${forgotErrors.email ? 'border-brand-danger focus-visible:ring-brand-danger' : ''}`}
-                      {...forgotRegister('email')}
-                    />
-                  </div>
-                  {forgotErrors.email && (
-                    <span className="text-[10.5px] text-brand-danger font-medium block">
-                      {forgotErrors.email.message}
-                    </span>
-                  )}
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={forgotPasswordMutation.isPending}
-                  className="w-full bg-brand-navy hover:bg-[#153264] text-white py-2 rounded-lg font-medium text-sm transition-all h-10 active:scale-[0.98] flex items-center justify-center gap-2"
-                >
-                  {forgotPasswordMutation.isPending ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <span>Send Reset Code</span>
-                  )}
-                </Button>
-              </form>
-            )}
-          </CardContent>
-        </Card>
+          {mode !== 'forgot' && (
+            <p className="mt-6 text-center text-sm text-slate-700">
+              {mode === 'login' ? "Don't have an account? " : 'Already registered? '}
+              <button
+                type="button"
+                onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+                className="font-medium text-brand-navy hover:underline"
+              >
+                {mode === 'login' ? 'Create one' : 'Sign in'}
+              </button>
+            </p>
+          )}
+        </motion.div>
       </div>
     </div>
   );
-};
-export default LoginPage;
+}

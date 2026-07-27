@@ -1,69 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import App from './App';
+import { queryClient } from './api/client';
+import { enableMocking } from './mocks/browser';
 import './index.css';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000,
-    },
-  },
-});
-
-async function enableMocking() {
-  // Skip MSW only when explicitly disabled (set VITE_MOCK=false for real backend deployments)
-  if (import.meta.env.VITE_MOCK === 'false') {
-    return;
-  }
-  const { worker } = await import('./mocks/browser');
-  return worker.start({
-    onUnhandledRequest: 'bypass',
-  });
-}
-
 enableMocking().then(() => {
-  // Register service worker on load
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          console.log('SW registered: ', registration.scope);
-        })
-        .catch((registrationError) => {
-          console.log('SW registration failed: ', registrationError);
-        });
-    });
-  }
-
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <App />
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              style: {
-                borderRadius: '8px',
-                fontFamily: 'Inter, sans-serif',
-              },
-              classNames: {
-                success: 'border-l-4 border-l-brand-success bg-white text-text-primary',
-                error: 'border-l-4 border-l-brand-danger bg-white text-text-primary',
-                info: 'border-l-4 border-l-brand-navy bg-white text-text-primary',
-              },
-            }}
-            richColors
-          />
+          <Toaster position="top-right" richColors closeButton />
         </BrowserRouter>
       </QueryClientProvider>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
+
+  // PWA service worker handles push notifications in production. In dev the
+  // MSW worker owns the '/' scope, so we only register sw.js in production.
+  if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        /* registration is best-effort */
+      });
+    });
+  }
 });

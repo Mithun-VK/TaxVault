@@ -1,72 +1,84 @@
-import { useMutation } from '@tanstack/react-query';
-import { apiClient } from './client';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { api, getErrorMessage, queryClient } from './client';
 import { useAuthStore } from '@/store/authStore';
+import type { AuthResponse, LoginRequest, RegisterRequest, User } from '@/types';
 
-export function useLogin() {
-  const setUser = useAuthStore((state) => state.setUser);
-  const setToken = useAuthStore((state) => state.setToken);
-
-  return useMutation({
-    mutationFn: async (credentials: any) => {
-      const response = await apiClient.post('/auth/login', credentials);
-      return response.data;
-    },
-    onSuccess: (data) => {
-      setUser(data.user);
-      setToken(data.access_token);
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
-    },
-  });
+async function fetchAndStoreProfile(setUser: (user: User) => void) {
+  try {
+    const { data } = await api.get<User>('/users/me');
+    setUser(data);
+    return data;
+  } catch {
+    if (import.meta.env.DEV) {
+      console.warn('[Auth] Could not fetch user profile after authentication');
+    }
+    return null;
+  }
 }
 
-export function useRegister() {
-  const setUser = useAuthStore((state) => state.setUser);
-  const setToken = useAuthStore((state) => state.setToken);
-
+export const useLogin = () => {
+  const setAuth = useAuthStore((s) => s.setAuth);
   return useMutation({
-    mutationFn: async (userData: any) => {
-      const response = await apiClient.post('/auth/register', userData);
-      return response.data;
+    mutationFn: (data: LoginRequest) =>
+      api.post<AuthResponse>('/auth/login', data).then((r) => r.data),
+    onSuccess: async (tokens) => {
+      setAuth(tokens.access_token, tokens.refresh_token);
+      const user = await fetchAndStoreProfile((u) => useAuthStore.getState().setUser(u));
+      toast.success(`Welcome back${user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}`);
     },
-    onSuccess: (data) => {
-      setUser(data.user);
-      setToken(data.access_token);
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
-    },
+    onError: (error) => toast.error(getErrorMessage(error) || 'Invalid email or password'),
   });
-}
+};
 
-export function useLogout() {
-  const logoutStore = useAuthStore((state) => state.logout);
-
+export const useRegister = () => {
+  const setAuth = useAuthStore((s) => s.setAuth);
   return useMutation({
-    mutationFn: async () => {
-      const response = await apiClient.post('/auth/logout');
-      return response.data;
+    mutationFn: (data: RegisterRequest) =>
+      api.post<AuthResponse>('/auth/register', data).then((r) => r.data),
+    onSuccess: async (tokens) => {
+      setAuth(tokens.access_token, tokens.refresh_token);
+      await fetchAndStoreProfile((u) => useAuthStore.getState().setUser(u));
+      toast.success('Account created successfully');
     },
-    onSettled: () => {
-      logoutStore();
-    },
+    onError: (error) =>
+      toast.error(getErrorMessage(error) || 'Could not create account. Try a different email.'),
   });
-}
+};
 
-export function useForgotPassword() {
-  return useMutation({
-    mutationFn: async (data: { email: string }) => {
-      const response = await apiClient.post('/auth/forgot-password', data);
-      return response.data;
-    },
+export const useCurrentUser = () =>
+  useQuery({
+    queryKey: ['me'],
+    queryFn: () => api.get<User>('/users/me').then((r) => r.data),
+    enabled: !!localStorage.getItem('access_token'),
+    staleTime: 5 * 60_000,
   });
-}
 
-export function useResetPassword() {
+export const useUpdateProfile = () => {
+  const setUser = useAuthStore((s) => s.setUser);
   return useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiClient.post('/auth/reset-password', data);
-      return response.data;
+    mutationFn: (data: Partial<Pick<User, 'full_name' | 'phone_number'>>) =>
+      api.patch<User>('/users/me', data).then((r) => r.data),
+    onSuccess: (user) => {
+      setUser(user);
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      toast.success('Profile updated');
     },
+    onError: (error) => toast.error(getErrorMessage(error) || 'Could not update profile'),
   });
-}
-export default useLogin;
+};
+
+export const useChangePassword = () =>
+  useMutation({
+    mutationFn: (data: { current_password: string; new_password: string }) =>
+      api.patch('/users/me/password', data).then((r) => r.data),
+    onSuccess: () => toast.success('Password changed'),
+    onError: (error) => toast.error(getErrorMessage(error) || 'Could not change password'),
+  });
+
+export const useForgotPassword = () =>
+  useMutation({
+    mutationFn: (data: { email: string }) =>
+      api.post('/auth/forgot-password', data).then((r) => r.data),
+    onSuccess: () => toast.success('If that email exists, a reset link is on its way'),
+  });

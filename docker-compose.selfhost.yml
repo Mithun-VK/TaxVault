@@ -1,0 +1,158 @@
+# Fully self-contained TaxVault stack — Postgres, Redis, API, Celery, and the
+# SPA behind nginx. Nothing here depends on Supabase, Upstash, or R2.
+#
+# The same file runs on the workstation today and on a rented server later;
+# only backend/.env.selfhost changes.
+#
+#   docker compose -f docker-compose.selfhost.yml --env-file backend/.env.selfhost up -d --build
+#
+# --env-file is required: compose interpolates ${POSTGRES_PASSWORD} and the
+# port variables below from it, in addition to handing it to the containers.
+name: taxvault-selfhost
+
+services:
+  # ── Data ───────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16
+    container_name: tv-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-taxvault}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in backend/.env.selfhost}
+      POSTGRES_DB: ${POSTGRES_DB:-taxvault}
+      # Keep the cluster in a subdirectory so the volume root stays clean.
+      PGDATA: /var/lib/postgresql/data/pgdata
+    # Loopback-only: reachable from psql/pgAdmin on this machine, never the LAN.
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-taxvault} -d ${POSTGRES_DB:-taxvault}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: tv-redis
+    restart: unless-stopped
+    # AOF on: a queued alert survives a host reboot. noeviction is mandatory for
+    # a Celery broker — silently dropping keys would drop tasks.
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --maxmemory
+      - 512mb
+      - --maxmemory-policy
+      - noeviction
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── Schema ─────────────────────────────────────────────────────────────────
+  # One-shot: runs alembic to completion, then exits. Everything else waits for
+  # it, so the API never serves against a stale schema. This is also the only
+  # service that builds the backend image; the rest reuse the tag.
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: taxvault-backend:latest
+    container_name: tv-migrate
+    restart: "no"
+    env_file:
+      - backend/.env.selfhost
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── Application ────────────────────────────────────────────────────────────
+  api:
+    image: taxvault-backend:latest
+    container_name: tv-api
+    restart: unless-stopped
+    env_file:
+      - backend/.env.selfhost
+    volumes:
+      - uploads:/app/uploads
+    # Loopback-only. Browsers reach the API through nginx on ${WEB_PORT};
+    # this mapping exists for curl and /docs while debugging.
+    ports:
+      - "127.0.0.1:${API_HOST_PORT:-8001}:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  worker:
+    image: taxvault-backend:latest
+    container_name: tv-worker
+    restart: unless-stopped
+    env_file:
+      - backend/.env.selfhost
+    volumes:
+      - uploads:/app/uploads
+    command: ["celery", "-A", "app.tasks.celery_app", "worker", "--loglevel=info", "--concurrency=4"]
+    depends_on:
+      api:
+        condition: service_started
+
+  beat:
+    image: taxvault-backend:latest
+    container_name: tv-beat
+    restart: unless-stopped
+    env_file:
+      - backend/.env.selfhost
+    # Schedule state goes to /tmp: /app is a read-only-by-convention image layer,
+    # and the file is a cache that beat rebuilds on start.
+    command:
+      - celery
+      - -A
+      - app.tasks.celery_app
+      - beat
+      - --loglevel=info
+      - --schedule=/tmp/celerybeat-schedule
+    depends_on:
+      api:
+        condition: service_started
+
+  # ── Edge ───────────────────────────────────────────────────────────────────
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/v1
+        VITE_ENABLE_MOCKS: "false"
+        VITE_APP_NAME: TaxVault
+        VITE_APP_VERSION: "3.0.0"
+    image: taxvault-web:latest
+    container_name: tv-web
+    restart: unless-stopped
+    # 0.0.0.0 by default so other devices on the LAN can reach it. Change to
+    # "127.0.0.1:${WEB_PORT:-8080}:80" to keep it on this machine only.
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  pgdata:
+  redisdata:
+  uploads:

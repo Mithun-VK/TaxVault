@@ -1,491 +1,331 @@
-﻿import React, { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import {
-  User as UserIcon,
-  Mail,
-  Phone,
-  Lock,
-  Bell,
   Smartphone,
-  Download,
+  Monitor,
   Trash2,
-  AlertOctagon,
-  Eye,
-  EyeOff,
-  Laptop,
+  Download,
+  Mail,
+  MessageSquare,
+  Bell,
+  type LucideIcon,
 } from 'lucide-react';
-
-import { useAuthStore } from '@/store/authStore';
-import { useLogout } from '@/api/auth';
-import { useObligations } from '@/api/obligations';
-import { usePayments } from '@/api/payments';
-import { useDocuments } from '@/api/documents';
-import { useAlertConfigs } from '@/api/alerts';
-
+import { cn } from '@/lib/utils';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ConfirmModal } from '@/components/ConfirmModal';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { ConfirmModal } from '@/components/shared/ConfirmModal';
+import { useAuthStore } from '@/store/authStore';
+import { useUpdateProfile, useChangePassword } from '@/api/auth';
+import type { AlertChannel } from '@/types';
 
-// Form validation schemas
+const profileSchema = z.object({
+  full_name: z.string().min(2, 'Enter your name'),
+  email: z.string().email('Enter a valid email'),
+  phone_number: z.string().min(10, 'Enter a valid phone number'),
+});
+
 const passwordSchema = z
   .object({
-    currentPassword: z.string().min(1, 'Current password is required.'),
-    newPassword: z
-      .string()
-      .min(8, 'New password must be at least 8 characters.')
-      .regex(/^(?=.*[A-Z])(?=.*[0-9])/, {
-        message: 'Password must contain at least one uppercase letter and one number.',
-      }),
-    confirmPassword: z.string(),
+    current_password: z.string().min(6, 'Required'),
+    new_password: z.string().min(8, 'Use at least 8 characters'),
+    confirm_password: z.string(),
   })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Passwords do not match.',
-    path: ['confirmPassword'],
+  .refine((d) => d.new_password === d.confirm_password, {
+    message: 'Passwords do not match',
+    path: ['confirm_password'],
   });
 
-type PasswordInputs = z.infer<typeof passwordSchema>;
+function passwordStrength(pw: string): { score: number; label: string; color: string } {
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const labels = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
+  const colors = ['#991B1B', '#92400E', '#D97706', '#0F6E56', '#14532D'];
+  return { score, label: labels[score], color: colors[score] };
+}
 
-export const ProfilePage: React.FC = () => {
+const CHANNELS: { value: AlertChannel; label: string; icon: LucideIcon }[] = [
+  { value: 'email', label: 'Email', icon: Mail },
+  { value: 'sms', label: 'SMS', icon: MessageSquare },
+  { value: 'push', label: 'Push', icon: Bell },
+];
+
+interface Device {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  lastActive: string;
+}
+
+export function Profile() {
   const navigate = useNavigate();
-  
-  // Stores and Mutations
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
-  const { mutate: performLogout } = useLogout();
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const updateProfile = useUpdateProfile();
+  const changePassword = useChangePassword();
 
-  // Fetch all databases to export data
-  const { data: obligations = [] } = useObligations();
-  const { data: payments = [] } = usePayments();
-  const { data: documents = [] } = useDocuments();
-  const { data: configs = [] } = useAlertConfigs();
-
-  // Edit states for personal info
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [fullName, setFullName] = useState(user?.fullName || '');
-  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
-
-  // Modal displays
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-
-  // Notification Preferences
-  const [prefEmail, setPrefEmail] = useState(true);
-  const [prefSMS, setPrefSMS] = useState(true);
-  const [prefPush, setPrefPush] = useState(false);
-
-  // Password visibility
-  const [showPwd, setShowPwd] = useState(false);
-
-  // Device list
-  const [devices, setDevices] = useState([
-    { id: 'dev-1', name: 'Apple iPhone 15 Pro (iOS 17)', icon: Smartphone },
-    { id: 'dev-2', name: 'CA Desktop Safari (macOS Sonoma)', icon: Laptop },
+  const [prefs, setPrefs] = useState<Record<AlertChannel, boolean>>({
+    email: true,
+    sms: false,
+    push: true,
+  });
+  const [devices, setDevices] = useState<Device[]>([
+    { id: 'dv1', name: 'Pixel 8 · Chrome', icon: Smartphone, lastActive: 'Active now' },
+    { id: 'dv2', name: 'MacBook Pro · Safari', icon: Monitor, lastActive: '2 days ago' },
   ]);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
-  // Form setup
-  const {
-    register: regPwd,
-    handleSubmit: handlePwdSubmit,
-    watch: watchPwd,
-    formState: { errors: pwdErrors },
-    reset: resetPwdForm,
-  } = useForm<PasswordInputs>({
-    resolver: zodResolver(passwordSchema),
+  const profileForm = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      full_name: user?.full_name ?? '',
+      email: user?.email ?? '',
+      phone_number: user?.phone_number ?? '',
+    },
   });
 
-  const newPasswordVal = watchPwd('newPassword', '');
-  const calculateStrength = (pwd: string) => {
-    let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^a-zA-Z0-9]/.test(pwd)) score++;
-    return score;
-  };
-  const pwdStrength = calculateStrength(newPasswordVal);
+  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { current_password: '', new_password: '', confirm_password: '' },
+  });
 
-  // Update Profile
-  const handleUpdateProfile = () => {
-    if (!fullName.trim()) {
-      toast.error('Name cannot be empty.');
-      return;
-    }
-    if (!/^\+91[6-9]\d{9}$/.test(phoneNumber)) {
-      toast.error('Phone must be in Indian format (+919876543210).');
-      return;
-    }
+  const newPassword = passwordForm.watch('new_password');
+  const strength = useMemo(() => passwordStrength(newPassword || ''), [newPassword]);
 
-    if (user) {
-      setUser({ ...user, fullName, phoneNumber });
-      setIsEditingProfile(false);
-      toast.success('Client profile updated.');
-    }
-  };
+  const saveProfile = profileForm.handleSubmit((values) =>
+    updateProfile.mutate({ full_name: values.full_name, phone_number: values.phone_number }),
+  );
 
-  // Change Password
-  const onChangePassword = (data: PasswordInputs) => {
-    toast.success('Password updated successfully. Secure key re-established.');
-    resetPwdForm();
-  };
-
-  // Test Notifications
-  const triggerTestNotification = (channel: 'email' | 'sms' | 'push') => {
-    toast.info(`Test ${channel.toUpperCase()} dispatch triggered. Outgoing queue verified.`);
-  };
-
-  // Remove Device Token
-  const handleRemoveDevice = (id: string) => {
-    setDevices((prev) => prev.filter((d) => d.id !== id));
-    toast.success('Device token revoked. Push endpoint unregistered.');
-  };
-
-  // Export Data as JSON
-  const handleExportData = () => {
-    const exportObj = {
-      exported_at: new Date().toISOString(),
-      user_profile: user,
-      obligations,
-      payments,
-      documents,
-      alert_configurations: configs,
-    };
-
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `TaxVault_ClientExport_${user?.fullName.replace(/\s+/g, '_') || 'Data'}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-
-    toast.success('Client ledger payload compiled and downloaded.');
-  };
-
-  // Delete Account
-  const confirmDeleteAccount = () => {
-    performLogout(undefined, {
-      onSuccess: () => {
-        setDeleteModalOpen(false);
-        toast.success('Client ledger and user account purged. Session closed.');
-        navigate('/login');
-      },
+  const savePassword = passwordForm.handleSubmit(async (values) => {
+    await changePassword.mutateAsync({
+      current_password: values.current_password,
+      new_password: values.new_password,
     });
+    passwordForm.reset();
+  });
+
+  const exportData = () => {
+    const blob = new Blob([JSON.stringify({ user, exported_at: new Date().toISOString() }, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'taxvault-export.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Data export downloaded');
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-      {/* â”€â”€ LEFT COLUMN: PERSONAL INFO CARD â”€â”€ */}
-      <div className="lg:col-span-1 space-y-6">
-        <Card className="bg-white border border-surface-border shadow-premium rounded-xl overflow-hidden">
-          <CardHeader className="bg-slate-50/50 border-b border-[#E2E6ED] p-5 flex flex-row items-center gap-3">
-            <UserIcon className="text-brand-navy shrink-0" size={20} />
-            <CardTitle className="text-sm font-semibold text-brand-navy">Personal Details</CardTitle>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Left: personal info */}
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Personal information</CardTitle>
           </CardHeader>
-          <CardContent className="p-5 space-y-4">
-            {/* Full Name */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-text-muted">Full Name</Label>
-              {isEditingProfile ? (
-                <Input
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="text-sm"
-                />
-              ) : (
-                <p className="text-sm font-medium text-text-primary">{user?.fullName}</p>
-              )}
-            </div>
-
-            {/* Email (Read Only) */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-text-muted">Registered Email</Label>
-              <div className="flex items-center gap-2 text-sm text-text-primary font-mono select-all">
-                <Mail size={14} className="text-text-muted" />
-                <span>{user?.email}</span>
-              </div>
-            </div>
-
-            {/* Phone Number */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-text-muted">Phone Number</Label>
-              {isEditingProfile ? (
-                <Input
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="text-sm font-mono"
-                />
-              ) : (
-                <div className="flex items-center gap-2 text-sm text-text-primary font-mono">
-                  <Phone size={14} className="text-text-muted" />
-                  <span>{user?.phoneNumber}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Profile Action triggers */}
-            <div className="pt-3 border-t border-[#E2E6ED] flex gap-2">
-              {isEditingProfile ? (
-                <>
-                  <Button
-                    onClick={() => {
-                      setFullName(user?.fullName || '');
-                      setPhoneNumber(user?.phoneNumber || '');
-                      setIsEditingProfile(false);
-                    }}
-                    variant="outline"
-                    className="text-xs h-8 px-3 hover:bg-[#F0F4FA]"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleUpdateProfile}
-                    className="bg-brand-navy text-white text-xs h-8 px-3 hover:bg-[#153264]"
-                  >
-                    Save
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  onClick={() => setIsEditingProfile(true)}
-                  variant="outline"
-                  className="text-xs h-8 px-3 hover:bg-[#F0F4FA] w-full"
-                >
-                  Edit Profile
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* â”€â”€ RIGHT COLUMN: SETTINGS PANELS â”€â”€ */}
-      <div className="lg:col-span-2 space-y-6">
-        {/* Change Password Card */}
-        <Card className="bg-white border border-surface-border shadow-premium rounded-xl">
-          <CardHeader className="border-b border-[#E2E6ED] p-5 flex flex-row items-center gap-3">
-            <Lock className="text-brand-navy shrink-0" size={20} />
-            <CardTitle className="text-sm font-semibold text-brand-navy">Change Password</CardTitle>
-          </CardHeader>
-          <CardContent className="p-5">
-            <form onSubmit={handlePwdSubmit(onChangePassword)} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-text-primary">Current Password</Label>
-                <Input
-                  type="password"
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                  className={`text-sm ${pwdErrors.currentPassword ? 'border-brand-danger' : ''}`}
-                  {...regPwd('currentPassword')}
-                />
-                {pwdErrors.currentPassword && (
-                  <span className="text-[10px] text-brand-danger font-medium">{pwdErrors.currentPassword.message}</span>
+          <CardContent>
+            <form onSubmit={saveProfile} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="full_name">Full name</Label>
+                <Input id="full_name" {...profileForm.register('full_name')} />
+                {profileForm.formState.errors.full_name && (
+                  <p className="text-xs text-brand-danger">
+                    {profileForm.formState.errors.full_name.message}
+                  </p>
                 )}
               </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-text-primary">New Password</Label>
-                <div className="relative">
-                  <Input
-                    type={showPwd ? 'text' : 'password'}
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                    className={`text-sm pr-9 ${pwdErrors.newPassword ? 'border-brand-danger' : ''}`}
-                    {...regPwd('newPassword')}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPwd(!showPwd)}
-                    className="absolute right-3 top-3 text-text-muted hover:text-text-primary focus:outline-none"
-                  >
-                    {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                {pwdErrors.newPassword && (
-                  <span className="text-[10px] text-brand-danger font-medium">{pwdErrors.newPassword.message}</span>
-                )}
-
-                {/* Password strength visual meter */}
-                {newPasswordVal.length > 0 && (
-                  <div className="pt-1.5 space-y-1">
-                    <div className="flex justify-between text-[10px] text-text-muted">
-                      <span>Password Strength</span>
-                      <span className="font-semibold">
-                        {pwdStrength === 4 ? 'Strong' : pwdStrength === 3 ? 'Medium' : 'Weak'}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-1 h-1">
-                      <div className={`rounded ${pwdStrength >= 1 ? 'bg-red-500' : 'bg-slate-100'}`} />
-                      <div className={`rounded ${pwdStrength >= 2 ? 'bg-orange-400' : 'bg-slate-100'}`} />
-                      <div className={`rounded ${pwdStrength >= 3 ? 'bg-amber-400' : 'bg-slate-100'}`} />
-                      <div className={`rounded ${pwdStrength >= 4 ? 'bg-[#0F6E56]' : 'bg-slate-100'}`} />
-                    </div>
-                  </div>
-                )}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" disabled {...profileForm.register('email')} />
               </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-text-primary">Confirm New Password</Label>
-                <Input
-                  type="password"
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                  className={`text-sm ${pwdErrors.confirmPassword ? 'border-brand-danger' : ''}`}
-                  {...regPwd('confirmPassword')}
-                />
-                {pwdErrors.confirmPassword && (
-                  <span className="text-[10px] text-brand-danger font-medium">{pwdErrors.confirmPassword.message}</span>
-                )}
+              <div className="space-y-2">
+                <Label htmlFor="phone_number">Phone</Label>
+                <Input id="phone_number" {...profileForm.register('phone_number')} />
               </div>
-
-              <Button type="submit" className="bg-brand-navy hover:bg-[#153264] text-white text-xs h-9 font-semibold">
-                Change Password
+              <Button type="submit" disabled={updateProfile.isPending}>
+                {updateProfile.isPending ? 'Saving…' : 'Save changes'}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        {/* Global Notifications preferences */}
-        <Card className="bg-white border border-surface-border shadow-premium rounded-xl">
-          <CardHeader className="border-b border-[#E2E6ED] p-5 flex flex-row items-center gap-3">
-            <Bell className="text-brand-navy shrink-0" size={20} />
-            <CardTitle className="text-sm font-semibold text-brand-navy font-sans">Notification Channels</CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle>Change password</CardTitle>
           </CardHeader>
-          <CardContent className="p-5 space-y-4">
-            <div className="space-y-3">
-              {/* Email channel */}
-              <div className="flex items-center justify-between border p-3 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label className="text-xs font-semibold text-text-primary">Email Notifications</Label>
-                  <p className="text-[10px] text-text-muted">Receive weekly digests and detailed challan statements.</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => triggerTestNotification('email')}
-                    className="text-[10px] font-semibold text-brand-navy hover:underline focus-visible:outline-none"
-                  >
-                    Test Email
-                  </button>
-                  <Checkbox checked={prefEmail} onCheckedChange={(val: boolean | "indeterminate") => setPrefEmail(!!val)} className="w-4 h-4 border-[#E2E6ED]" />
-                </div>
+          <CardContent>
+            <form onSubmit={savePassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="current_password">Current password</Label>
+                <Input id="current_password" type="password" {...passwordForm.register('current_password')} />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="new_password">New password</Label>
+                <Input id="new_password" type="password" {...passwordForm.register('new_password')} />
+                {newPassword && (
+                  <div className="space-y-1">
+                    <div className="flex gap-1">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="h-1.5 flex-1 rounded-full transition-colors"
+                          style={{
+                            backgroundColor: i < strength.score ? strength.color : '#E2E6ED',
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs" style={{ color: strength.color }}>
+                      {strength.label}
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm_password">Confirm new password</Label>
+                <Input id="confirm_password" type="password" {...passwordForm.register('confirm_password')} />
+                {passwordForm.formState.errors.confirm_password && (
+                  <p className="text-xs text-brand-danger">
+                    {passwordForm.formState.errors.confirm_password.message}
+                  </p>
+                )}
+              </div>
+              <Button type="submit" disabled={changePassword.isPending}>
+                {changePassword.isPending ? 'Updating…' : 'Update password'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
 
-              {/* SMS channel */}
-              <div className="flex items-center justify-between border p-3 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label className="text-xs font-semibold text-text-primary">SMS Warnings</Label>
-                  <p className="text-[10px] text-text-muted">Alert priority reminders to registered mobile.</p>
+      {/* Right: settings */}
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Notification preferences</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {CHANNELS.map(({ value, label, icon: Icon }) => (
+              <div
+                key={value}
+                className="flex items-center justify-between rounded-lg border border-surface-border px-3 py-2.5"
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="h-4 w-4 text-slate-600" />
+                  <span className="text-sm font-medium text-slate-700">{label}</span>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <button
-                    onClick={() => triggerTestNotification('sms')}
-                    className="text-[10px] font-semibold text-brand-navy hover:underline focus-visible:outline-none"
+                    type="button"
+                    onClick={() => toast.success(`Test ${label} alert sent`)}
+                    className="text-xs font-medium text-brand-navy hover:underline"
                   >
-                    Test SMS
+                    Test
                   </button>
-                  <Checkbox checked={prefSMS} onCheckedChange={(val: boolean | "indeterminate") => setPrefSMS(!!val)} className="w-4 h-4 border-[#E2E6ED]" />
+                  <Switch
+                    checked={prefs[value]}
+                    onCheckedChange={(c) => setPrefs((p) => ({ ...p, [value]: c }))}
+                  />
                 </div>
               </div>
-
-              {/* Push channel */}
-              <div className="flex items-center justify-between border p-3 rounded-lg">
-                <div className="space-y-0.5">
-                  <Label className="text-xs font-semibold text-text-primary">Push Alerts</Label>
-                  <p className="text-[10px] text-text-muted">Immediate screen notifications when logs sync.</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => triggerTestNotification('push')}
-                    className="text-[10px] font-semibold text-brand-navy hover:underline focus-visible:outline-none"
-                  >
-                    Test Push
-                  </button>
-                  <Checkbox checked={prefPush} onCheckedChange={(val: boolean | "indeterminate") => setPrefPush(!!val)} className="w-4 h-4 border-[#E2E6ED]" />
-                </div>
-              </div>
-            </div>
+            ))}
           </CardContent>
         </Card>
 
-        {/* Registered Device Tokens */}
-        <Card className="bg-white border border-surface-border shadow-premium rounded-xl">
-          <CardHeader className="border-b border-[#E2E6ED] p-5 flex flex-row items-center gap-3">
-            <Smartphone className="text-brand-navy shrink-0" size={20} />
-            <CardTitle className="text-sm font-semibold text-brand-navy font-sans">Registered Push Devices</CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle>Push devices</CardTitle>
           </CardHeader>
-          <CardContent className="p-5">
+          <CardContent className="space-y-2">
             {devices.length === 0 ? (
-              <p className="text-center text-xs text-text-muted py-6">No devices registered for push sync.</p>
+              <p className="py-2 text-sm text-slate-600">No registered devices.</p>
             ) : (
-              <div className="space-y-3">
-                {devices.map((dev) => (
-                  <div key={dev.id} className="flex items-center justify-between border p-3 rounded-lg hover:bg-slate-50/50">
+              devices.map((device) => {
+                const Icon = device.icon;
+                return (
+                  <div
+                    key={device.id}
+                    className="flex items-center justify-between rounded-lg border border-surface-border px-3 py-2.5"
+                  >
                     <div className="flex items-center gap-3">
-                      <dev.icon size={18} className="text-text-muted shrink-0" />
-                      <span className="text-xs text-text-primary font-medium">{dev.name}</span>
+                      <Icon className="h-4 w-4 text-slate-600" />
+                      <div>
+                        <p className="text-sm font-medium text-slate-700">{device.name}</p>
+                        <p className="text-xs text-slate-600">{device.lastActive}</p>
+                      </div>
                     </div>
                     <button
-                      onClick={() => handleRemoveDevice(dev.id)}
-                      className="text-text-muted hover:text-[#991B1B] p-1.5 rounded hover:bg-red-50 border border-transparent transition-all"
-                      aria-label="Revoke Token"
+                      type="button"
+                      onClick={() => {
+                        setDevices((d) => d.filter((x) => x.id !== device.id));
+                        toast.success('Device removed');
+                      }}
+                      aria-label="Remove device"
+                      className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 hover:text-brand-danger"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                ))}
-              </div>
+                );
+              })
             )}
           </CardContent>
         </Card>
 
-        {/* Danger Zone Card */}
-        <Card className="border-[#FECACA] bg-[#FEF2F2]/30 shadow-premium rounded-xl">
-          <CardHeader className="bg-[#FEF2F2] border-b border-[#FECACA] p-5 flex flex-row items-center gap-3">
-            <AlertOctagon className="text-[#991B1B] shrink-0" size={20} />
-            <CardTitle className="text-sm font-semibold text-[#991B1B] font-sans">Danger Zone</CardTitle>
+        <Card className="border-red-200">
+          <CardHeader>
+            <CardTitle className="text-brand-danger">Danger zone</CardTitle>
           </CardHeader>
-          <CardContent className="p-5 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <h4 className="text-xs font-semibold text-[#991B1B] font-sans">Export or Purge Client Ledger</h4>
-              <p className="text-[10px] text-text-muted leading-relaxed">
-                Download a complete secure audit JSON of your files, logs, and payments, or request to permanently delete this secure client vault database.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                onClick={handleExportData}
-                variant="outline"
-                className="text-xs font-semibold h-9 border-[#E2E6ED] bg-white hover:bg-[#F0F4FA]"
-              >
-                <Download size={13} className="mr-1.5" />
-                <span>Export Ledger</span>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-700">Export your data</p>
+                <p className="text-xs text-slate-600">Download a copy of your account data.</p>
+              </div>
+              <Button variant="outline" size="sm" onClick={exportData}>
+                <Download className="h-4 w-4" /> Export
               </Button>
-              <Button
-                onClick={() => setDeleteModalOpen(true)}
-                className="bg-[#991B1B] hover:bg-[#801414] text-white text-xs h-9 font-semibold"
-              >
-                Delete Account
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-brand-danger">Delete account</p>
+                <p className="text-xs text-slate-600">Permanently remove your account and data.</p>
+              </div>
+              <Button variant="destructive" size="sm" onClick={() => setDeleteOpen(true)}>
+                <Trash2 className="h-4 w-4" /> Delete
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Delete account typing confirmation modal */}
       <ConfirmModal
-        open={deleteModalOpen}
-        title="Permanently Delete Secure Vault"
-        message="Warning: This action is irreversible. All tax obligations, payment ledgers, transaction records, and uploaded documents in your vault will be permanently purged."
-        confirmLabel="Purge Ledger"
-        onConfirm={confirmDeleteAccount}
-        onCancel={() => setDeleteModalOpen(false)}
-        dangerous={true}
-        confirmPhrase="DELETE ACCOUNT"
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Delete your account?"
+        description="This action is irreversible. All your assets, documents and records will be erased."
+        confirmLabel="Delete account"
+        destructive
+        confirmText="DELETE"
+        onConfirm={() => {
+          toast.success('Account deleted');
+          logout();
+          navigate('/login');
+        }}
       />
     </div>
   );
-};
-export default ProfilePage;
-
+}

@@ -1,0 +1,40 @@
+# Production stack: API + Celery worker + Celery beat.
+# Uses managed Postgres (Supabase) and Redis (Upstash) via env — no local DB here.
+# Usage: docker compose -f docker-compose.prod.yml --env-file backend/.env.prod up -d
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: taxvault-backend:latest
+    restart: unless-stopped
+    env_file:
+      - path: backend/.env.prod
+        required: false
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    image: taxvault-backend:latest
+    restart: unless-stopped
+    env_file:
+      - path: backend/.env.prod
+        required: false
+    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4
+    depends_on:
+      - api
+
+  beat:
+    image: taxvault-backend:latest
+    restart: unless-stopped
+    env_file:
+      - path: backend/.env.prod
+        required: false
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+    depends_on:
+      - api

@@ -1,74 +1,65 @@
-export type TaxType = 'income_tax' | 'land_tax' | 'advance_tax' | 'gst' | 'professional_tax' | 'vehicle_tax' | 'other';
+export * from './asset';
+export * from './individual';
+export * from './insurance';
+export * from './tax';
+export * from './bill';
+export * from './payment';
+export * from './document';
+export * from './alert';
+export * from './dashboard';
+export * from './report';
 
-export type ObligationStatus = 'pending' | 'overdue' | 'paid' | 'exempt';
+import type { PayableEntityType } from './payment';
 
-export type RecurrenceRule = 'NONE' | 'ANNUAL' | 'QUARTERLY' | 'MONTHLY';
-
-export type AlertChannel = 'email' | 'sms' | 'push';
-
-export type DocumentCategory = 'income_tax' | 'property' | 'gst' | 'vehicle' | 'other';
-
-export interface Obligation {
-  id: string;
-  tax_type: TaxType;
-  description: string;
-  assessment_year: string;
-  jurisdiction?: string;
-  total_amount: number;
-  due_date: string;
-  recurrence_rule: RecurrenceRule;
-  notes?: string;
-  status: ObligationStatus;
-  is_archived: boolean;
-  alert_configured?: boolean;
-}
-
-export interface Payment {
-  id: string;
-  obligation_id: string;
-  amount_paid: number;
-  payment_date: string;
-  reference_number?: string;
-  notes?: string;
-  receipt_url?: string;
-  receipt_filename?: string;
-}
-
-export interface Document {
-  id: string;
-  label: string;
-  category: DocumentCategory;
-  financial_year?: string;
-  tags: string[];
-  file_size_kb: number;
-  upload_date: string;
-  file_type: 'pdf' | 'image' | 'doc';
-  download_url: string;
-  is_attachment: boolean;
-  attached_to_id?: string;
-  attached_to_name?: string;
-}
-
-export interface AlertConfig {
-  id: string;
-  obligation_id: string;
-  channels: AlertChannel[];
-  thresholds: number[]; // e.g. [30, 15, 7, 3, 1]
-  is_active: boolean;
-}
-
-export interface AlertLog {
-  id: string;
-  obligation_id: string;
-  channel: AlertChannel;
-  timestamp: string;
-  status: 'sent' | 'failed';
-  message: string;
-}
+export type UserRole = 'admin' | 'user';
 
 export interface User {
   id: string;
   email: string;
-  fullName: string;
-  phoneNumber: string;
+  full_name: string | null;
+  phone_number: string | null;
+  device_tokens: string[];
+  is_active: boolean;
+  role: UserRole;
+  created_at: string;
+}
+
+export interface AuthTokens {
+  access_token: string;
+  refresh_token: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  full_name: string;
+  email: string;
+  phone_number: string;
+  password: string;
+}
+
+/** Login/register only return tokens — the profile is fetched separately via /users/me. */
+export interface AuthResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+}
+
+/** A unified payable obligation used by the dashboard calendar and deadline lists. */
+export interface Payable {
+  id: string;
+  entity_type: PayableEntityType;
+  entity_id: string;
+  name: string;
+  amount: number;
+  due_date: string;
+  status: string;
+}
+
+export interface Paginated<T> {
+  items: T[];
+  total: number;
 }

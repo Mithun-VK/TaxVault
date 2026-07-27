@@ -1,0 +1,41 @@
+# ── Web framework ────────────────────────────────────────────
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+gunicorn==23.0.0
+python-multipart==0.0.20
+
+# ── Database ─────────────────────────────────────────────────
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# ── Validation / settings ────────────────────────────────────
+pydantic[email]==2.10.4
+pydantic-settings==2.7.0
+
+# ── Auth / security ──────────────────────────────────────────
+python-jose[cryptography]==3.3.0
+bcrypt==5.0.0
+slowapi==0.1.9
+limits==3.12.0
+
+# ── Async + cloud clients ────────────────────────────────────
+boto3==1.35.91
+httpx==0.28.1
+requests==2.32.3
+
+# ── Background jobs ──────────────────────────────────────────
+celery[redis]==5.4.0
+redis==5.2.1
+
+# ── Notifications ────────────────────────────────────────────
+firebase-admin==6.6.0
+jinja2==3.1.5
+
+# ── Observability ────────────────────────────────────────────
+sentry-sdk[fastapi]==2.19.2
+structlog==24.4.0
+python-json-logger==2.0.7
+
+# ── Utilities ────────────────────────────────────────────────
+python-dateutil==2.9.0.post0

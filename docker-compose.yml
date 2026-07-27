@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: taxvault-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taxvault
+      POSTGRES_PASSWORD: taxvault
+      POSTGRES_DB: taxvault
+    ports:
+      - "5432:5432"
+    volumes:
+      - taxvault_pgdata:/var/lib/postgresql/data
+      - ./scripts/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taxvault -d taxvault"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  taxvault_pgdata:

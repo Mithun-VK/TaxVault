@@ -1,36 +1,33 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-
-import { cn } from "@/lib/utils"
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
   {
     variants: {
       variant: {
-        default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
+        default: 'border-transparent bg-brand-navy text-white',
+        pending: 'bg-status-pending-bg text-status-pending border-status-pending-border',
+        overdue: 'bg-status-overdue-bg text-status-overdue border-status-overdue-border',
+        paid: 'bg-status-paid-bg text-status-paid border-status-paid-border',
+        active: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+        exempt: 'bg-slate-50 text-slate-600 border-slate-200',
+        lapsed: 'bg-orange-50 text-orange-700 border-orange-200',
+        warning: 'bg-status-warning-bg text-status-warning border-status-warning-border',
+        outline: 'border-surface-border text-slate-600',
       },
     },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+    defaultVariants: { variant: 'default' },
+  },
+);
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
-  return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
-  )
+  return <span className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
-export { Badge, badgeVariants }
+export { Badge, badgeVariants };

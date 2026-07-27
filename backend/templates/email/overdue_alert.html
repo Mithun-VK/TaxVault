@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Overdue Payment Alert</title></head>
+<body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px;">
+  <div style="max-width:600px;margin:auto;background:#fff;border-radius:8px;padding:32px;">
+    <h2 style="color:#dc2626;">⚠ Overdue Payment Alert</h2>
+    <p>Hi <strong>{{ user_name }}</strong>,</p>
+    <p>Your payment for <strong>{{ entity_name }}</strong> is <strong>overdue</strong>.</p>
+    <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+      <tr><td style="padding:8px;background:#fff1f1;font-weight:bold;">Item</td><td style="padding:8px;">{{ entity_name }}</td></tr>
+      <tr><td style="padding:8px;background:#fff1f1;font-weight:bold;">Amount</td><td style="padding:8px;">₹{{ amount }}</td></tr>
+      <tr><td style="padding:8px;background:#fff1f1;font-weight:bold;">Was Due</td><td style="padding:8px;">{{ due_date }}</td></tr>
+    </table>
+    <p style="color:#dc2626;">Please pay immediately to avoid penalties and service disruptions.</p>
+    <p style="color:#6b7280;font-size:12px;">TaxVault — Your Financial Assistant</p>
+  </div>
+</body>
+</html>
