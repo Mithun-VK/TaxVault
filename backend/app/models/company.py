@@ -44,8 +44,15 @@ class CompanyStatus(str, enum.Enum):
     dissolved = "dissolved"
 
 
+class ExporterType(str, enum.Enum):
+    merchant = "merchant"  # Buys from manufacturers and exports
+    manufacturer = "manufacturer"  # Exports its own production
+    both = "both"
+
+
 COMPANY_TYPES: tuple[str, ...] = tuple(t.value for t in CompanyType)
 COMPANY_STATUSES: tuple[str, ...] = tuple(s.value for s in CompanyStatus)
+EXPORTER_TYPES: tuple[str, ...] = tuple(e.value for e in ExporterType)
 
 
 class Company(Base):
@@ -96,6 +103,24 @@ class Company(Base):
     # First two digits of the GSTIN; derived by the service, never sent by the client.
     gstin_state_code: Mapped[str | None] = mapped_column(String(2))
     income_tax_ward: Mapped[str | None] = mapped_column(String(200))
+
+    # ── Export & trade registrations ─────────────────────────────────────────
+    # Import Export Code. Since 2017 the IEC is the entity's PAN, but it is
+    # kept separate: a company can hold a PAN long before it starts exporting.
+    iec_code: Mapped[str | None] = mapped_column(String(10))
+    # merchant | manufacturer | both — decides which export incentives and
+    # which AEPC/Textile Committee registrations actually apply.
+    exporter_type: Mapped[str | None] = mapped_column(String(20))
+    # Apparel Export Promotion Council registration.
+    aepc_code: Mapped[str | None] = mapped_column(String(50))
+    textile_committee_code: Mapped[str | None] = mapped_column(String(50))
+
+    # ── Statutory registrations ──────────────────────────────────────────────
+    # Udyam (MSME) registration, e.g. UDYAM-TN-01-0012345.
+    msme_number: Mapped[str | None] = mapped_column(String(30))
+    esi_number: Mapped[str | None] = mapped_column(String(30))
+    epf_number: Mapped[str | None] = mapped_column(String(30))
+    professional_tax_number: Mapped[str | None] = mapped_column(String(30))
 
     # ── International (JAFZA / Dubai operations) ─────────────────────────────
     foreign_registration_number: Mapped[str | None] = mapped_column(String(100))
@@ -174,6 +199,12 @@ class Company(Base):
             "status IN (" + ", ".join(f"'{s}'" for s in COMPANY_STATUSES) + ")",
             name="ck_company_status",
         ),
+        CheckConstraint(
+            "exporter_type IS NULL OR exporter_type IN ("
+            + ", ".join(f"'{e}'" for e in EXPORTER_TYPES)
+            + ")",
+            name="ck_company_exporter_type",
+        ),
         Index(
             "uq_company_cin",
             "user_id",
@@ -187,5 +218,12 @@ class Company(Base):
             "gstin",
             unique=True,
             postgresql_where=text("gstin IS NOT NULL"),
+        ),
+        Index(
+            "uq_company_iec",
+            "user_id",
+            "iec_code",
+            unique=True,
+            postgresql_where=text("iec_code IS NOT NULL"),
         ),
     )

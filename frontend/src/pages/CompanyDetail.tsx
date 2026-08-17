@@ -4,6 +4,8 @@ import {
   AlertTriangle,
   Banknote,
   Building2,
+  Check,
+  Copy,
   Download,
   Eye,
   EyeOff,
@@ -71,10 +73,12 @@ import {
   BANK_NAME_SUGGESTIONS,
   COMPANY_DOCUMENT_CATEGORIES,
   COMPANY_DOC_GROUP_LABELS,
+  COMPANY_KEY_NUMBERS,
   COMPANY_STATUSES,
   COMPANY_TYPES,
   COMPANY_TYPE_COLOR,
   DIRECTOR_DESIGNATIONS,
+  EXPORTER_TYPES,
   FINANCIAL_YEAR_ENDS,
   MAX_UPLOAD_SIZE,
   gstStateName,
@@ -213,6 +217,14 @@ interface CompanyFields {
   tan_number: string;
   gstin: string;
   income_tax_ward: string;
+  iec_code: string;
+  exporter_type: string;
+  aepc_code: string;
+  textile_committee_code: string;
+  msme_number: string;
+  esi_number: string;
+  epf_number: string;
+  professional_tax_number: string;
   foreign_registration_number: string;
   foreign_jurisdiction: string;
   foreign_registration_date: string;
@@ -246,6 +258,14 @@ function toFields(c?: Company): CompanyFields {
     tan_number: c?.tan_number ?? '',
     gstin: c?.gstin ?? '',
     income_tax_ward: c?.income_tax_ward ?? '',
+    iec_code: c?.iec_code ?? '',
+    exporter_type: c?.exporter_type ?? '',
+    aepc_code: c?.aepc_code ?? '',
+    textile_committee_code: c?.textile_committee_code ?? '',
+    msme_number: c?.msme_number ?? '',
+    esi_number: c?.esi_number ?? '',
+    epf_number: c?.epf_number ?? '',
+    professional_tax_number: c?.professional_tax_number ?? '',
     foreign_registration_number: c?.foreign_registration_number ?? '',
     foreign_jurisdiction: c?.foreign_jurisdiction ?? '',
     foreign_registration_date: c?.foreign_registration_date
@@ -288,6 +308,15 @@ function cleanPayload(f: CompanyFields): CompanyCreate {
     tan_number: upper(f.tan_number),
     gstin: upper(f.gstin),
     income_tax_ward: str(f.income_tax_ward),
+    iec_code: upper(f.iec_code),
+    // "" would fail the enum check; undefined means "not an exporter".
+    exporter_type: str(f.exporter_type),
+    aepc_code: str(f.aepc_code),
+    textile_committee_code: str(f.textile_committee_code),
+    msme_number: upper(f.msme_number),
+    esi_number: str(f.esi_number),
+    epf_number: str(f.epf_number),
+    professional_tax_number: str(f.professional_tax_number),
     foreign_registration_number: str(f.foreign_registration_number),
     foreign_jurisdiction: str(f.foreign_jurisdiction),
     foreign_registration_date: f.foreign_registration_date || undefined,
@@ -516,6 +545,99 @@ function CompanyForm({
         </div>
       </Section>
 
+      <Section title="Export & trade registrations">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field
+            label="IE Code"
+            hint={
+              <p className="text-xs text-slate-600">
+                Import Export Code — since 2017 this is the entity's PAN.
+              </p>
+            }
+          >
+            <Input
+              value={fields.iec_code}
+              placeholder="AABCC1234D"
+              onChange={(e) => set('iec_code', e.target.value)}
+            />
+          </Field>
+          <Field label="Exporter type">
+            <Select
+              value={fields.exporter_type || 'none'}
+              onValueChange={(v) => set('exporter_type', v === 'none' ? '' : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Not an exporter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Not an exporter</SelectItem>
+                {EXPORTER_TYPES.map((o) => (
+                  <SelectItem key={o.value} value={o.value}>
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="AEPC code">
+            <Input
+              value={fields.aepc_code}
+              placeholder="Apparel Export Promotion Council"
+              onChange={(e) => set('aepc_code', e.target.value)}
+            />
+          </Field>
+          <Field label="Textile Committee code">
+            <Input
+              value={fields.textile_committee_code}
+              onChange={(e) => set('textile_committee_code', e.target.value)}
+            />
+          </Field>
+        </div>
+      </Section>
+
+      <Section title="Statutory registrations">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field
+            label="MSME / Udyam number"
+            hint={
+              <p className="text-xs text-slate-600">
+                Udyam format UDYAM-TN-01-0012345; legacy UAM numbers accepted as-is.
+              </p>
+            }
+          >
+            <Input
+              value={fields.msme_number}
+              placeholder="UDYAM-TN-01-0012345"
+              onChange={(e) => set('msme_number', e.target.value)}
+            />
+          </Field>
+          <Field label="EPF number">
+            <Input
+              value={fields.epf_number}
+              placeholder="Establishment code"
+              onChange={(e) => set('epf_number', e.target.value)}
+            />
+          </Field>
+          <Field label="ESI number">
+            <Input
+              value={fields.esi_number}
+              placeholder="17-digit employer code"
+              onChange={(e) => set('esi_number', e.target.value)}
+            />
+          </Field>
+          <Field label="Professional tax number">
+            <Input
+              value={fields.professional_tax_number}
+              onChange={(e) => set('professional_tax_number', e.target.value)}
+            />
+          </Field>
+        </div>
+        <p className="mt-3 text-xs text-slate-600">
+          EPF, ESI and professional tax numbers switch on their monthly rows in the Compliance
+          tab — a company with no EPF code is not asked for an EPF return.
+        </p>
+      </Section>
+
       {showForeign && (
         <Section title="Foreign entity">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -684,8 +806,77 @@ function CompanyLogo({
 
 // ── Hero ─────────────────────────────────────────────────────────────────────
 
+/**
+ * The registration numbers, front and centre on the company page.
+ *
+ * These are what someone is actually asked for on a call — GSTIN, IEC, EPF —
+ * so they sit in the hero rather than behind the Overview tab. Each is
+ * click-to-copy, because the next thing anyone does with a number is paste it.
+ */
+function KeyNumbers({ company }: { company: Company }) {
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const entries = COMPANY_KEY_NUMBERS.map((spec) => ({
+    ...spec,
+    value: (company as unknown as Record<string, string | undefined>)[spec.key],
+  })).filter((e) => e.always || !!e.value);
+
+  const copy = async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      setTimeout(() => setCopied((c) => (c === label ? null : c)), 1500);
+    } catch {
+      toast.error('Could not copy to clipboard');
+    }
+  };
+
+  return (
+    <div className="mt-5 border-t border-surface-border pt-5">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-600">
+        Registration numbers
+      </p>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
+        {entries.map((entry) => (
+          <div key={entry.key} className="min-w-0">
+            <p className="text-xs text-slate-600">{entry.label}</p>
+            {entry.value ? (
+              <button
+                type="button"
+                onClick={() => copy(entry.label, entry.value as string)}
+                title={`Copy ${entry.label}`}
+                className="group flex w-full items-center gap-1.5 text-left"
+              >
+                <span className="min-w-0 break-all font-mono text-sm font-medium text-slate-800 group-hover:text-brand-navy">
+                  {entry.value}
+                </span>
+                {copied === entry.label ? (
+                  <Check className="h-3.5 w-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
+                ) : (
+                  <Copy
+                    className="h-3.5 w-3.5 shrink-0 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100"
+                    aria-hidden="true"
+                  />
+                )}
+              </button>
+            ) : (
+              <p className="mt-0.5 text-sm font-medium text-slate-500">—</p>
+            )}
+            {entry.key === 'gstin' && gstStateName(company.gstin_state_code) && (
+              <p className="text-[11px] text-slate-600">
+                {company.gstin_state_code} → {gstStateName(company.gstin_state_code)}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CompanyHero({ company }: { company: Company }) {
   const accent = COMPANY_TYPE_COLOR[company.company_type] ?? COMPANY_TYPE_COLOR.other;
+  const exporter = EXPORTER_TYPES.find((e) => e.value === company.exporter_type)?.label;
   const rows = [
     { label: 'Company type', value: typeLabel(company.company_type) },
     { label: 'Industry', value: company.industry ?? '—' },
@@ -693,17 +884,7 @@ function CompanyHero({ company }: { company: Company }) {
       label: 'Incorporated',
       value: company.incorporation_date ? formatDate(company.incorporation_date) : '—',
     },
-    { label: 'CIN', value: company.cin ?? '—' },
-    {
-      label: 'GSTIN',
-      value: company.gstin
-        ? `${company.gstin}${
-            gstStateName(company.gstin_state_code) ? ` · ${gstStateName(company.gstin_state_code)}` : ''
-          }`
-        : '—',
-    },
-    { label: 'PAN', value: company.pan_number ?? '—' },
-    { label: 'TAN', value: company.tan_number ?? '—' },
+    { label: 'Exporter type', value: exporter ?? '—' },
     { label: 'Phone', value: company.phone_number ?? '—' },
     { label: 'Email', value: company.email ?? '—' },
   ];
@@ -756,6 +937,8 @@ function CompanyHero({ company }: { company: Company }) {
           </div>
         ))}
       </div>
+
+      <KeyNumbers company={company} />
 
       {company.notes && (
         <p className="mt-4 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
@@ -1325,6 +1508,18 @@ function DirectorsTab({ company, readOnly }: { company: Company; readOnly: boole
   const individuals = individualsData?.items ?? [];
   const selected = individuals.find((i) => i.id === draft.individual_id);
 
+  // Allocated shareholding across everyone on record, plus whatever is being
+  // typed — a stake that pushes the company over 100% should be obvious.
+  const shareTotal = useMemo(() => {
+    const existing = directors.reduce((sum, d) => sum + (d.share_percentage ?? 0), 0);
+    return Math.round((existing + (draft.share_percentage ?? 0)) * 100) / 100;
+  }, [directors, draft.share_percentage]);
+  const allocated = useMemo(
+    () =>
+      Math.round(directors.reduce((sum, d) => sum + (d.share_percentage ?? 0), 0) * 100) / 100,
+    [directors],
+  );
+
   const save = (next: Director[]) => update.mutateAsync({ id: company.id, directors: next });
 
   const add = async () => {
@@ -1335,9 +1530,26 @@ function DirectorsTab({ company, readOnly }: { company: Company; readOnly: boole
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-700">
-        {company.active_director_count} active of {directors.length} on record
-      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-sm text-slate-700">
+          {company.active_director_count} active of {directors.length} on record
+        </p>
+        {allocated > 0 && (
+          <span
+            className={cn(
+              'rounded-md px-2 py-0.5 text-xs font-medium',
+              allocated > 100
+                ? 'bg-red-50 text-brand-danger'
+                : allocated === 100
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-slate-100 text-slate-600',
+            )}
+          >
+            {allocated}% shareholding allocated
+            {allocated < 100 ? ` · ${Math.round((100 - allocated) * 100) / 100}% unallocated` : ''}
+          </span>
+        )}
+      </div>
 
       {directors.length === 0 ? (
         <EmptyState
@@ -1362,6 +1574,22 @@ function DirectorsTab({ company, readOnly }: { company: Company; readOnly: boole
                         {d.designation}
                       </Badge>
                       {d.din && <p className="mt-1 text-xs text-slate-600">DIN {d.din}</p>}
+                      {d.dsc_number && (
+                        <p className="text-xs text-slate-600">
+                          DSC {d.dsc_number}
+                          {d.dsc_expiry && (
+                            <span
+                              className={cn(
+                                'ml-1 rounded px-1 py-0.5 text-[10px] font-medium',
+                                expiryTone(daysUntil(d.dsc_expiry)),
+                              )}
+                            >
+                              {daysUntil(d.dsc_expiry) < 0 ? 'expired' : 'exp'}{' '}
+                              {formatDate(d.dsc_expiry)}
+                            </span>
+                          )}
+                        </p>
+                      )}
                       {d.appointed_date && (
                         <p className="text-xs text-slate-600">
                           Appointed {formatDate(d.appointed_date)}
@@ -1390,15 +1618,22 @@ function DirectorsTab({ company, readOnly }: { company: Company; readOnly: boole
                   )}
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-surface-border pt-3">
-                  <span
-                    className={cn(
-                      'rounded-md px-1.5 py-0.5 text-[12px] font-medium',
-                      d.is_active
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-slate-100 text-slate-600',
+                  <span className="flex items-center gap-1.5">
+                    <span
+                      className={cn(
+                        'rounded-md px-1.5 py-0.5 text-[12px] font-medium',
+                        d.is_active
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-slate-100 text-slate-600',
+                      )}
+                    >
+                      {d.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                    {d.share_percentage != null && (
+                      <span className="rounded-md bg-brand-navy-muted px-1.5 py-0.5 text-[12px] font-medium text-brand-navy">
+                        {d.share_percentage}% share
+                      </span>
                     )}
-                  >
-                    {d.is_active ? 'Active' : 'Inactive'}
                   </span>
                   {!readOnly && (
                     <button
@@ -1460,6 +1695,44 @@ function DirectorsTab({ company, readOnly }: { company: Company; readOnly: boole
                 type="date"
                 value={draft.appointed_date ?? ''}
                 onChange={(e) => setDraft({ ...draft, appointed_date: e.target.value })}
+              />
+            </Field>
+            <Field label="DSC number">
+              <Input
+                value={draft.dsc_number ?? ''}
+                placeholder="Digital Signature Certificate"
+                onChange={(e) => setDraft({ ...draft, dsc_number: e.target.value })}
+              />
+            </Field>
+            <Field label="DSC expiry">
+              <Input
+                type="date"
+                value={draft.dsc_expiry ?? ''}
+                onChange={(e) => setDraft({ ...draft, dsc_expiry: e.target.value })}
+              />
+            </Field>
+            <Field
+              label="Share %"
+              hint={
+                shareTotal > 100 ? (
+                  <p className="text-xs font-medium text-brand-danger">
+                    Shareholding totals {shareTotal}% — over 100%
+                  </p>
+                ) : undefined
+              }
+            >
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                step="0.01"
+                value={draft.share_percentage ?? ''}
+                onChange={(e) =>
+                  setDraft({
+                    ...draft,
+                    share_percentage: e.target.value === '' ? undefined : Number(e.target.value),
+                  })
+                }
               />
             </Field>
             {individuals.length > 0 && (

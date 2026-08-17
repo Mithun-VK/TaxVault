@@ -425,6 +425,34 @@ export const COMPANY_FILING_CATEGORIES = [
   'tds_certificate',
 ] as const;
 
+export const EXPORTER_TYPES: Option[] = [
+  { value: 'merchant', label: 'Merchant Exporter' },
+  { value: 'manufacturer', label: 'Manufacturer Exporter' },
+  { value: 'both', label: 'Merchant & Manufacturer' },
+];
+
+/**
+ * The identifiers shown in the hero strip at the top of a company page —
+ * the numbers people actually get asked for on a call, in the order they
+ * tend to be asked. `always` entries show a dash when unset; the rest only
+ * appear once the company has one.
+ */
+export const COMPANY_KEY_NUMBERS: { key: string; label: string; always?: boolean }[] = [
+  { key: 'cin', label: 'CIN', always: true },
+  { key: 'llpin', label: 'LLPIN' },
+  { key: 'pan_number', label: 'PAN', always: true },
+  { key: 'tan_number', label: 'TAN', always: true },
+  { key: 'gstin', label: 'GSTIN', always: true },
+  { key: 'iec_code', label: 'IE Code' },
+  { key: 'msme_number', label: 'MSME / Udyam' },
+  { key: 'aepc_code', label: 'AEPC Code' },
+  { key: 'textile_committee_code', label: 'Textile Committee' },
+  { key: 'epf_number', label: 'EPF No.' },
+  { key: 'esi_number', label: 'ESI No.' },
+  { key: 'professional_tax_number', label: 'Professional Tax No.' },
+  { key: 'foreign_registration_number', label: 'Foreign Reg. No.' },
+];
+
 export const DIRECTOR_DESIGNATIONS = [
   'Director',
   'Managing Director',
@@ -500,15 +528,19 @@ export interface ComplianceRule {
   fyOffsetMonths?: number;
   /** Document category that satisfies this filing. */
   category?: string;
-  /** Only applies when the company is registered for this. */
-  requires?: 'gstin' | 'tan';
+  /** Only applies when the company holds this registration. */
+  requires?: 'gstin' | 'tan' | 'epf' | 'esi' | 'pt';
 }
 
 export const COMPLIANCE_RULES: ComplianceRule[] = [
-  { id: 'gst_monthly', label: 'GST Return (GSTR-3B)', frequency: 'monthly', day: 11, requires: 'gstin' },
+  // GST is filed monthly, not annually: GSTR-1 (outward supplies) by the 11th
+  // and GSTR-3B (summary + payment) by the 20th of the following month.
+  { id: 'gstr1', label: 'GSTR-1 (Outward Supplies)', frequency: 'monthly', day: 11, requires: 'gstin' },
+  { id: 'gstr3b', label: 'GSTR-3B (Summary & Payment)', frequency: 'monthly', day: 20, requires: 'gstin' },
   { id: 'tds_payable', label: 'TDS Payable', frequency: 'monthly', day: 7, requires: 'tan' },
-  { id: 'epf_return', label: 'EPF Return', frequency: 'monthly', day: 14, category: 'epf_certificate' },
-  { id: 'esi_return', label: 'ESI Return', frequency: 'monthly', day: 15, category: 'esi_certificate' },
+  { id: 'epf_return', label: 'EPF Return', frequency: 'monthly', day: 14, category: 'epf_certificate', requires: 'epf' },
+  { id: 'esi_return', label: 'ESI Return', frequency: 'monthly', day: 15, category: 'esi_certificate', requires: 'esi' },
+  { id: 'pt_return', label: 'Professional Tax', frequency: 'monthly', day: 15, category: 'pt_certificate', requires: 'pt' },
   { id: 'tds_quarterly', label: 'TDS Return (Quarterly)', frequency: 'quarterly', day: 31, category: 'tds_certificate', requires: 'tan' },
   // Annual due dates hang off the company's own FY end, so a Sept-30 year
   // (JAFZA) shifts the whole set. Offsets reproduce the Indian statutory
@@ -517,7 +549,6 @@ export const COMPLIANCE_RULES: ComplianceRule[] = [
   { id: 'itr', label: 'Company Income Tax Return', frequency: 'annual', day: 30, fyOffsetMonths: 6, category: 'itr' },
   { id: 'roc_annual', label: 'ROC Annual Return', frequency: 'annual', day: 12, fyOffsetMonths: 7, category: 'annual_return' },
   { id: 'financials', label: 'Audited Financial Statements', frequency: 'annual', day: 30, fyOffsetMonths: 7, category: 'financial_stmt' },
-  { id: 'gstr9', label: 'GST Annual Return (GSTR-9)', frequency: 'annual', day: 31, fyOffsetMonths: 9, category: 'gst_return', requires: 'gstin' },
 ];
 
 /** Company type → accent colour for the card's left border (mirrors the asset tiers). */

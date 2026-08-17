@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
-from app.models.company import COMPANY_STATUSES, COMPANY_TYPES
+from app.models.company import COMPANY_STATUSES, COMPANY_TYPES, EXPORTER_TYPES
 from app.models.company_document import COMPANY_DOCUMENT_CATEGORIES
 
 # ── Format rules for the Indian statutory identifiers ────────────────────────
@@ -17,6 +17,12 @@ TAN_RE = re.compile(r"^[A-Z]{4}[0-9]{5}[A-Z]$")  # CHEN12345A
 GSTIN_RE = re.compile(r"^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$")  # 33AABCC1234D1Z5
 IFSC_RE = re.compile(r"^[A-Z]{4}0[A-Z0-9]{6}$")  # ABCD0123456
 DIN_RE = re.compile(r"^\d{8}$")
+# Post-2017 the IEC is the entity's PAN, but older 10-character alphanumeric
+# codes are still in circulation, so both shapes are accepted.
+IEC_RE = re.compile(r"^[A-Z0-9]{10}$")
+# Udyam registration, e.g. UDYAM-TN-01-0012345. Older EM-II/UAM numbers are
+# free-form, so only the Udyam shape is enforced when it looks like one.
+UDYAM_RE = re.compile(r"^UDYAM-[A-Z]{2}-\d{2}-\d{7}$")
 FY_END_RE = re.compile(r"^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$")  # MM-DD
 
 
@@ -66,6 +72,12 @@ class Director(BaseModel):
     individual_id: uuid.UUID | None = None
     name: str
     din: str | None = None  # Director Identification Number
+    # Digital Signature Certificate — needed to sign MCA/GST/IT filings, and
+    # it expires, so the number is worth holding next to the DIN.
+    dsc_number: str | None = None
+    dsc_expiry: date | None = None
+    # Shareholding / partnership stake, as a percentage.
+    share_percentage: float | None = None
     designation: str = "Director"
     appointed_date: date | None = None
     is_active: bool = True
@@ -76,6 +88,18 @@ class Director(BaseModel):
         v = (v or "").strip() or None
         if v and not DIN_RE.match(v):
             raise ValueError("DIN must be 8 digits")
+        return v
+
+    @field_validator("dsc_number")
+    @classmethod
+    def validate_dsc(cls, v: str | None) -> str | None:
+        return (v or "").strip() or None
+
+    @field_validator("share_percentage")
+    @classmethod
+    def validate_share(cls, v: float | None) -> float | None:
+        if v is not None and not (0 <= v <= 100):
+            raise ValueError("Share percentage must be between 0 and 100")
         return v
 
 
@@ -137,6 +161,29 @@ class CompanyBase(BaseModel):
             raise ValueError(f"status must be one of: {', '.join(COMPANY_STATUSES)}")
         return v
 
+    @field_validator("iec_code", check_fields=False)
+    @classmethod
+    def validate_iec(cls, v: str | None) -> str | None:
+        return _checked(IEC_RE, v, "IEC must be 10 characters, e.g. AABCC1234D")
+
+    @field_validator("exporter_type", check_fields=False)
+    @classmethod
+    def validate_exporter_type(cls, v: str | None) -> str | None:
+        v = (v or "").strip() or None
+        if v is not None and v not in EXPORTER_TYPES:
+            raise ValueError(f"exporter_type must be one of: {', '.join(EXPORTER_TYPES)}")
+        return v
+
+    @field_validator("msme_number", check_fields=False)
+    @classmethod
+    def validate_msme(cls, v: str | None) -> str | None:
+        v = _upper_or_none(v)
+        # Only Udyam-looking numbers are format-checked; legacy UAM/EM-II
+        # numbers vary too much to pin down.
+        if v and v.startswith("UDYAM") and not UDYAM_RE.match(v):
+            raise ValueError("Udyam number must be in format UDYAM-TN-01-0012345")
+        return v
+
     @field_validator("financial_year_end", check_fields=False)
     @classmethod
     def validate_fy_end(cls, v: str | None) -> str | None:
@@ -161,6 +208,14 @@ class CompanyCreate(CompanyBase):
     tan_number: str | None = None
     gstin: str | None = None
     income_tax_ward: str | None = None
+    iec_code: str | None = None
+    exporter_type: str | None = None
+    aepc_code: str | None = None
+    textile_committee_code: str | None = None
+    msme_number: str | None = None
+    esi_number: str | None = None
+    epf_number: str | None = None
+    professional_tax_number: str | None = None
     foreign_registration_number: str | None = None
     foreign_jurisdiction: str | None = None
     foreign_registration_date: date | None = None
@@ -196,6 +251,14 @@ class CompanyUpdate(CompanyBase):
     tan_number: str | None = None
     gstin: str | None = None
     income_tax_ward: str | None = None
+    iec_code: str | None = None
+    exporter_type: str | None = None
+    aepc_code: str | None = None
+    textile_committee_code: str | None = None
+    msme_number: str | None = None
+    esi_number: str | None = None
+    epf_number: str | None = None
+    professional_tax_number: str | None = None
     foreign_registration_number: str | None = None
     foreign_jurisdiction: str | None = None
     foreign_registration_date: date | None = None
@@ -237,6 +300,14 @@ class CompanyResponse(BaseModel):
     gstin: str | None = None
     gstin_state_code: str | None = None
     income_tax_ward: str | None = None
+    iec_code: str | None = None
+    exporter_type: str | None = None
+    aepc_code: str | None = None
+    textile_committee_code: str | None = None
+    msme_number: str | None = None
+    esi_number: str | None = None
+    epf_number: str | None = None
+    professional_tax_number: str | None = None
     foreign_registration_number: str | None = None
     foreign_jurisdiction: str | None = None
     foreign_registration_date: date | None = None

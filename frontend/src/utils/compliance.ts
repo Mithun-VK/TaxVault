@@ -192,9 +192,16 @@ export function buildComplianceRows({
 
   // 1. Statutory calendar.
   for (const rule of COMPLIANCE_RULES) {
-    // Skip what the company isn't registered for — no GSTIN, no GST return.
-    if (rule.requires === 'gstin' && !company.gstin) continue;
-    if (rule.requires === 'tan' && !company.tan_number) continue;
+    // Skip what the company isn't registered for — no GSTIN, no GST return;
+    // no EPF code, no EPF return. Keeps the table to real obligations.
+    const held: Record<string, string | undefined> = {
+      gstin: company.gstin,
+      tan: company.tan_number,
+      epf: company.epf_number,
+      esi: company.esi_number,
+      pt: company.professional_tax_number,
+    };
+    if (rule.requires && !held[rule.requires]) continue;
 
     const annual = rule.frequency === 'annual';
     const due = annual

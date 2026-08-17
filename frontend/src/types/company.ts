@@ -14,6 +14,11 @@ export interface Director {
   name: string;
   /** Director Identification Number — 8 digits. */
   din?: string;
+  /** Digital Signature Certificate used to sign MCA/GST/IT filings. */
+  dsc_number?: string;
+  dsc_expiry?: string;
+  /** Shareholding / partnership stake, 0–100. */
+  share_percentage?: number;
   designation: string;
   appointed_date?: string;
   is_active: boolean;
@@ -46,6 +51,17 @@ export interface Company {
   gstin?: string;
   gstin_state_code?: string;
   income_tax_ward?: string;
+  /** Import Export Code. */
+  iec_code?: string;
+  /** merchant | manufacturer | both */
+  exporter_type?: string;
+  aepc_code?: string;
+  textile_committee_code?: string;
+  /** Udyam (MSME) registration number. */
+  msme_number?: string;
+  esi_number?: string;
+  epf_number?: string;
+  professional_tax_number?: string;
   foreign_registration_number?: string;
   foreign_jurisdiction?: string;
   foreign_registration_date?: string;
@@ -112,6 +128,17 @@ export type CompanyCreate = {
   tan_number?: string;
   gstin?: string;
   income_tax_ward?: string;
+  /** Import Export Code. */
+  iec_code?: string;
+  /** merchant | manufacturer | both */
+  exporter_type?: string;
+  aepc_code?: string;
+  textile_committee_code?: string;
+  /** Udyam (MSME) registration number. */
+  msme_number?: string;
+  esi_number?: string;
+  epf_number?: string;
+  professional_tax_number?: string;
   foreign_registration_number?: string;
   foreign_jurisdiction?: string;
   foreign_registration_date?: string;

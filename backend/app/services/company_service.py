@@ -174,6 +174,14 @@ def _enrich(
         "gstin": company.gstin,
         "gstin_state_code": company.gstin_state_code,
         "income_tax_ward": company.income_tax_ward,
+        "iec_code": company.iec_code,
+        "exporter_type": company.exporter_type,
+        "aepc_code": company.aepc_code,
+        "textile_committee_code": company.textile_committee_code,
+        "msme_number": company.msme_number,
+        "esi_number": company.esi_number,
+        "epf_number": company.epf_number,
+        "professional_tax_number": company.professional_tax_number,
         "foreign_registration_number": company.foreign_registration_number,
         "foreign_jurisdiction": company.foreign_jurisdiction,
         "foreign_registration_date": company.foreign_registration_date,
@@ -267,6 +275,7 @@ async def _assert_unique(
 async def create_company(db: AsyncSession, user_id: uuid.UUID, data: CompanyCreate) -> dict:
     await _assert_unique(db, user_id, "cin", data.cin, "CIN")
     await _assert_unique(db, user_id, "gstin", data.gstin, "GSTIN")
+    await _assert_unique(db, user_id, "iec_code", data.iec_code, "IEC")
 
     payload = data.model_dump(
         exclude={"other_registrations", "bank_accounts", "directors"}
@@ -297,6 +306,8 @@ async def update_company(
         await _assert_unique(db, user_id, "cin", data.cin, "CIN", exclude_id=id)
     if data.gstin and data.gstin != company.gstin:
         await _assert_unique(db, user_id, "gstin", data.gstin, "GSTIN", exclude_id=id)
+    if data.iec_code and data.iec_code != company.iec_code:
+        await _assert_unique(db, user_id, "iec_code", data.iec_code, "IEC", exclude_id=id)
 
     # The state code is derived, so it follows the GSTIN rather than the client.
     if "gstin" in update_data:
