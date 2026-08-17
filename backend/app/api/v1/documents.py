@@ -5,9 +5,15 @@ from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.dependencies import get_current_user, get_db, require_admin
+from app.core.dependencies import get_db, get_vault_owner_id, require
 from app.core.exceptions import AppException, NotFoundError
-from app.models.user import User
+from app.core.permissions import (
+    DOCUMENTS_BROWSE,
+    DOCUMENTS_CREATE,
+    DOCUMENTS_DELETE,
+    DOCUMENTS_EDIT,
+    DOCUMENTS_VIEW,
+)
 from app.schemas.document import (
     DocumentCreate,
     DocumentDownloadResponse,
@@ -33,18 +39,16 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 async def put_blob(
     storage_key: str,
     request: Request,
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
     if settings.r2_configured:
         raise NotFoundError("Not found")
 
-    # Confine writes to the authenticated user's own prefix. The storage key
-    # layout is {user_id}/... (see document_service._build_storage_key), so a
-    # valid key must begin with this user's id. This blocks anonymous writes
-    # (no auth → no user) and cross-user writes (wrong prefix).
-    if storage_key != str(current_user.id) and not storage_key.startswith(
-        f"{current_user.id}/"
-    ):
+    # Confine writes to the vault's own prefix. The storage key layout is
+    # {vault_owner_id}/... (see document_service._build_storage_key), so a valid
+    # key must begin with this vault's id. This blocks anonymous writes (no auth
+    # → no vault) and writes aimed at another deployment's prefix.
+    if storage_key != str(vault_id) and not storage_key.startswith(f"{vault_id}/"):
         raise AppException(status_code=403, detail="Forbidden storage key.")
 
     max_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
@@ -102,37 +106,51 @@ async def get_blob(storage_key: str):
     "/upload-url",
     response_model=UploadUrlResponse,
     summary="Get a presigned upload URL",
-    dependencies=[Depends(require_admin)],
+    dependencies=[Depends(require(DOCUMENTS_CREATE))],
 )
 async def get_upload_url(
     payload: UploadUrlRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    return await document_service.generate_upload_url(db, current_user.id, payload)
+    return await document_service.generate_upload_url(db, vault_id, payload)
 
 
-@router.post("/", response_model=DocumentOut, status_code=201, dependencies=[Depends(require_admin)])
+@router.post(
+    "/",
+    response_model=DocumentOut,
+    status_code=201,
+    dependencies=[Depends(require(DOCUMENTS_CREATE))],
+)
 async def create_document(
     payload: DocumentCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    return await document_service.create_document(db, current_user.id, payload)
+    return await document_service.create_document(db, vault_id, payload)
 
 
-@router.get("/search", response_model=DocumentListResponse)
+# Free-text search spans the whole library, so it needs the browse permission —
+# unlike the filtered list below, which the payments ledger relies on to resolve
+# receipts for every role.
+@router.get(
+    "/search",
+    response_model=DocumentListResponse,
+    dependencies=[Depends(require(DOCUMENTS_BROWSE))],
+)
 async def search_documents(
     q: str = Query(...),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    return await document_service.search_documents(db, current_user.id, q, skip, limit)
+    return await document_service.search_documents(db, vault_id, q, skip, limit)
 
 
-@router.get("/", response_model=DocumentListResponse)
+@router.get(
+    "/", response_model=DocumentListResponse, dependencies=[Depends(require(DOCUMENTS_VIEW))]
+)
 async def list_documents(
     category: str | None = Query(None),
     entity_type: str | None = Query(None),
@@ -140,38 +158,44 @@ async def list_documents(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
     return await document_service.list_documents(
-        db, current_user.id, category, entity_type, entity_id, skip, limit
+        db, vault_id, category, entity_type, entity_id, skip, limit
     )
 
 
-@router.get("/{document_id}/download", response_model=DocumentDownloadResponse)
+@router.get(
+    "/{document_id}/download",
+    response_model=DocumentDownloadResponse,
+    dependencies=[Depends(require(DOCUMENTS_VIEW))],
+)
 async def get_download_url(
     document_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    url = await document_service.get_download_url(db, current_user.id, document_id)
+    url = await document_service.get_download_url(db, vault_id, document_id)
     return DocumentDownloadResponse(download_url=url)
 
 
-@router.patch("/{document_id}", response_model=DocumentOut, dependencies=[Depends(require_admin)])
+@router.patch(
+    "/{document_id}", response_model=DocumentOut, dependencies=[Depends(require(DOCUMENTS_EDIT))]
+)
 async def update_document(
     document_id: uuid.UUID,
     payload: DocumentUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    return await document_service.update_document(db, current_user.id, document_id, payload)
+    return await document_service.update_document(db, vault_id, document_id, payload)
 
 
-@router.delete("/{document_id}", status_code=200, dependencies=[Depends(require_admin)])
+@router.delete("/{document_id}", status_code=200, dependencies=[Depends(require(DOCUMENTS_DELETE))])
 async def delete_document(
     document_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    await document_service.soft_delete_document(db, current_user.id, document_id)
+    await document_service.soft_delete_document(db, vault_id, document_id)
     return {"detail": "Document deleted successfully"}

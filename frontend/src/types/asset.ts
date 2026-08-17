@@ -135,6 +135,8 @@ export interface Asset extends PropertyMetadata {
   notes: string;
   status: AssetStatus;
   individual_id?: string | null;
+  /** Set when the property is held by a company rather than a person. */
+  company_id?: string | null;
   metadata: AssetMetadata;
   created_at: string;
   updated_at: string;
@@ -149,6 +151,7 @@ export interface AssetCreate extends PropertyMetadata {
   current_value?: number;
   notes?: string;
   individual_id?: string | null;
+  company_id?: string | null;
   metadata?: AssetMetadata;
 }
 

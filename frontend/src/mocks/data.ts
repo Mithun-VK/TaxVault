@@ -83,7 +83,8 @@ export const mockUser: User = {
   phone_number: '+91 98401 23456',
   device_tokens: [],
   is_active: true,
-  role: 'admin',
+  // Mock mode signs you in as the vault owner so every surface is reachable.
+  role: 'super_admin',
   created_at: '2023-04-12T09:00:00.000Z',
 };
 

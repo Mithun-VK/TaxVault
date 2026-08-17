@@ -51,13 +51,27 @@ class TestCreateInsurance:
             )
             assert resp.status_code == 201, f"Failed for frequency={freq}"
 
-    async def test_invalid_insurance_type_returns_422(
+    async def test_custom_insurance_type_is_accepted(
+        self, client: AsyncClient, user_a: dict
+    ):
+        """insurance_type is a user-extensible category (see schemas/insurance.py)
+        — any non-empty string up to 50 chars is valid, not just the built-in
+        list."""
+        resp = await client.post(
+            "/api/v1/insurance/",
+            headers=auth(user_a),
+            json={**_POLICY, "insurance_type": "dental"},
+        )
+        assert resp.status_code == 201
+        assert resp.json()["insurance_type"] == "dental"
+
+    async def test_empty_insurance_type_returns_422(
         self, client: AsyncClient, user_a: dict
     ):
         resp = await client.post(
             "/api/v1/insurance/",
             headers=auth(user_a),
-            json={**_POLICY, "insurance_type": "dental"},
+            json={**_POLICY, "insurance_type": ""},
         )
         assert resp.status_code == 422
 
@@ -111,12 +125,12 @@ class TestListInsurance:
         resp = await client.get("/api/v1/insurance/", headers=auth(user_b))
         assert resp.json()["total"] == 0
 
-    async def test_isolation(
+    async def test_admin_sees_the_shared_vault(
         self, client: AsyncClient, user_a: dict, user_b: dict, insurance: dict
     ):
         resp = await client.get("/api/v1/insurance/", headers=auth(user_b))
         ids = [i["id"] for i in resp.json()["items"]]
-        assert insurance["id"] not in ids
+        assert insurance["id"] in ids
 
     async def test_filter_by_insurance_type(
         self, client: AsyncClient, user_a: dict, insurance: dict
@@ -143,13 +157,13 @@ class TestGetInsurance:
         resp = await client.get(f"/api/v1/insurance/{uuid.uuid4()}", headers=auth(user_a))
         assert resp.status_code == 404
 
-    async def test_idor_returns_404(
+    async def test_admin_can_read_shared_policy(
         self, client: AsyncClient, user_a: dict, user_b: dict, insurance: dict
     ):
         resp = await client.get(
             f"/api/v1/insurance/{insurance['id']}", headers=auth(user_b)
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200
 
     async def test_invalid_uuid_returns_422(self, client: AsyncClient, user_a: dict):
         resp = await client.get("/api/v1/insurance/not-a-uuid", headers=auth(user_a))
@@ -200,15 +214,15 @@ class TestUpdateInsurance:
         )
         assert resp.status_code == 422
 
-    async def test_idor_update_returns_404(
+    async def test_admin_cannot_update(
         self, client: AsyncClient, user_a: dict, user_b: dict, insurance: dict
     ):
         resp = await client.patch(
             f"/api/v1/insurance/{insurance['id']}",
             headers=auth(user_b),
-            json={"nominee_name": "Hacked"},
+            json={"nominee_name": "Changed"},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403
 
 
 class TestPayPremium:
@@ -266,7 +280,7 @@ class TestPayPremium:
         entity_ids = [p["entity_id"] for p in payments.json()["items"]]
         assert pol_id in entity_ids
 
-    async def test_idor_pay_premium_returns_404(
+    async def test_admin_can_pay_a_premium(
         self, client: AsyncClient, user_a: dict, user_b: dict, insurance: dict
     ):
         resp = await client.post(
@@ -274,7 +288,7 @@ class TestPayPremium:
             headers=auth(user_b),
             json={"amount_paid": "12000.00", "payment_date": "2027-01-01"},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200
 
 
 class TestDeleteInsurance:
@@ -292,10 +306,10 @@ class TestDeleteInsurance:
         get = await client.get(f"/api/v1/insurance/{pol_id}", headers=auth(user_a))
         assert get.status_code == 404
 
-    async def test_idor_delete_returns_404(
+    async def test_admin_cannot_archive(
         self, client: AsyncClient, user_a: dict, user_b: dict, insurance: dict
     ):
         resp = await client.delete(
             f"/api/v1/insurance/{insurance['id']}", headers=auth(user_b)
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403

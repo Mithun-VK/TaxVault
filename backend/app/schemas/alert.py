@@ -25,6 +25,39 @@ class AlertConfigUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class AlertConfigBulkUpdate(AlertConfigUpdate):
+    """Apply one setting to every rule at once.
+
+    The reminder schedule and channels are a household-wide preference, not a
+    per-bill one — editing them individually across dozens of payables was the
+    main friction in the old settings page. `entity_type` narrows the sweep to
+    one kind of payable; omit it for all.
+    """
+
+    entity_type: str | None = None
+
+
+class AlertBulkUpdateResult(BaseModel):
+    updated: int
+
+
+class WhatsAppStatus(BaseModel):
+    """What the settings page needs to explain the delivery setup, without
+    ever returning the auth token."""
+
+    configured: bool
+    # Masked (+91••••3210) — enough to confirm the right number, useless if leaked.
+    recipient: str | None
+    sender: str | None
+    # Set when `configured` is false: which env vars are still missing.
+    missing: list[str] = []
+
+
+class WhatsAppTestResult(BaseModel):
+    sent: bool
+    detail: str
+
+
 class AlertLogOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

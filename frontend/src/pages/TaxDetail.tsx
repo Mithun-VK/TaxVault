@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, Pencil, FileText, Download, Link2, Receipt } from 'lucide-react';
+import { ArrowLeft, Zap, FileText, Download, Link2, Receipt } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,8 @@ import { PaymentRow } from '@/components/payments/PaymentRow';
 import { useTax } from '@/api/taxes';
 import { useEntityPayments } from '@/api/payments';
 import { useEntityDocuments, useDownloadUrl, triggerDownload } from '@/api/documents';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { PayableActions } from '@/components/shared/PayableActions';
+import { useDeleteTax } from '@/api/taxes';
 import { TAX_TYPES } from '@/utils/constants';
 import { formatINR, getStatusLabel, getTaxTypeColor } from '@/utils/formatters';
 import { formatDate } from '@/utils/dates';
@@ -25,7 +26,7 @@ import { formatDate } from '@/utils/dates';
 export function TaxDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isAdmin = useIsAdmin();
+  const deleteTax = useDeleteTax();
   const { data: tax, isLoading } = useTax(id);
   const { data: payments = [] } = useEntityPayments(id);
   const { data: docs = [] } = useEntityDocuments(id);
@@ -120,11 +121,16 @@ export function TaxDetail() {
           <div className="flex flex-col items-end gap-3">
             {!settled && <CountdownChip date={tax.due_date} />}
             <div className="flex items-center gap-2">
-              {isAdmin && (
-                <Button variant="outline" onClick={() => navigate(`/taxes/${tax.id}/edit`)}>
-                  <Pencil className="h-4 w-4" /> Edit
-                </Button>
-              )}
+              <PayableActions
+                entityType="tax"
+                entityId={tax.id}
+                entityName={tax.name || tax.description}
+                editPath={`/taxes/${tax.id}/edit`}
+                onDelete={() =>
+                  deleteTax.mutate(tax.id, { onSuccess: () => navigate('/taxes') })
+                }
+                deleting={deleteTax.isPending}
+              />
               {!settled && (
                 <Button variant="teal" onClick={() => setPayOpen(true)}>
                   <Zap className="h-4 w-4" /> Record payment

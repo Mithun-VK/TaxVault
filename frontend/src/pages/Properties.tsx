@@ -29,7 +29,7 @@ import { useTaxes } from '@/api/taxes';
 import { useDocuments, useDownloadUrl, triggerDownload } from '@/api/documents';
 import { useEntityPayments } from '@/api/payments';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCan } from '@/hooks/usePermissions';
 import { generatePropertiesReport, generateGoldReport } from '@/utils/reports';
 import { formatINR, getAssetOwner, getInitials, getAssetValue } from '@/utils/formatters';
 import { getPropertyDetailRows } from '@/utils/propertyFields';
@@ -118,7 +118,10 @@ export function Properties() {
   const updateAsset = useUpdateAsset();
   const archiveAsset = useArchiveAsset();
   const downloadUrl = useDownloadUrl();
-  const isAdmin = useIsAdmin();
+  const canCreate = useCan('properties.create');
+  const canEdit = useCan('properties.edit');
+  const canAddCategory = useCan('gold_categories.create');
+  const canDeleteCategory = useCan('gold_categories.delete');
 
   // entity_id -> linked tax / document counts, for the Tier 1 badges.
   const taxByAsset = useMemo(() => {
@@ -259,7 +262,7 @@ export function Properties() {
             disabled={allAssets.length === 0}
           />
           {/* Gold manages its own actions (Add category / Add gold) inside the vault. */}
-          {isAdmin && !isGold && (
+          {canCreate && !isGold && (
             <Button onClick={openCreate}>
               <Plus className="h-4 w-4" /> Add {scopedType ? TYPE_PLURAL[scopedType].toLowerCase() : 'property'}
             </Button>
@@ -361,7 +364,10 @@ export function Properties() {
         <GoldVault
           assets={visible}
           isLoading={isLoading}
-          isAdmin={isAdmin}
+          canAddGold={canCreate}
+          canEditGold={canEdit}
+          canAddCategory={canAddCategory}
+          canDeleteCategory={canDeleteCategory}
           onView={handleView}
           onEdit={openEdit}
           onAddGold={openCreateGold}
@@ -585,7 +591,9 @@ function PropertyDetailPanel({
 }: PanelProps) {
   const { data: payments = [] } = useEntityPayments(asset.id);
   const owner = getAssetOwner(asset);
-  const isAdmin = useIsAdmin();
+  const canEditProperty = useCan('properties.edit');
+  const canAddTax = useCan('taxes.create');
+  const canAddDocument = useCan('documents.create');
 
   // Property Details in the canonical order (Owner Name first).
   const shownMeta = getPropertyDetailRows(asset, owner);
@@ -609,7 +617,7 @@ function PropertyDetailPanel({
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-600">
             Property Details
           </span>
-          {isAdmin && (
+          {canEditProperty && (
             <button
               onClick={onEdit}
               className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-brand-navy hover:bg-brand-navy-muted"
@@ -662,7 +670,7 @@ function PropertyDetailPanel({
             })}
           </ul>
         )}
-        {isAdmin && (
+        {canAddTax && (
           <button
             onClick={onAddTax}
             className="mt-2 flex items-center gap-1 text-xs font-medium text-brand-navy hover:underline"
@@ -698,7 +706,7 @@ function PropertyDetailPanel({
             ))}
           </ul>
         )}
-        {isAdmin && (
+        {canAddDocument && (
           <button
             onClick={onAddDocument}
             className="mt-2 flex items-center gap-1 text-xs font-medium text-brand-navy hover:underline"

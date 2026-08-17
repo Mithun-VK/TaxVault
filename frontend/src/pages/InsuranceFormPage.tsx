@@ -2,7 +2,13 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { FormPageShell } from '@/components/shared/FormPageShell';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PolicyForm } from '@/components/insurance/PolicyForm';
-import { useInsurancePolicy, useCreateInsurance, useUpdateInsurance } from '@/api/insurance';
+import {
+  useInsurancePolicy,
+  useCreateInsurance,
+  useUpdateInsurance,
+  toBackendInsurancePayload,
+} from '@/api/insurance';
+import { usePayableChange } from '@/hooks/usePayableChange';
 import type { InsuranceCreate, InsuranceType } from '@/types';
 
 const FORM_ID = 'policy-form-page';
@@ -17,11 +23,18 @@ export function InsuranceFormPage() {
   const { data: policy, isLoading } = useInsurancePolicy(id);
   const createInsurance = useCreateInsurance();
   const updateInsurance = useUpdateInsurance();
-  const submitting = createInsurance.isPending || updateInsurance.isPending;
+  // Members add policies outright; changing one goes through approval.
+  const change = usePayableChange('insurance');
+  const viaApproval = editing && change.editMode === 'request';
+  const submitting = createInsurance.isPending || updateInsurance.isPending || change.submitting;
 
   const handleSubmit = async (data: InsuranceCreate) => {
     if (editing && policy) {
-      await updateInsurance.mutateAsync({ id: policy.id, data });
+      if (viaApproval) {
+        await change.requestUpdate(policy.id, toBackendInsurancePayload(data), policy);
+      } else {
+        await updateInsurance.mutateAsync({ id: policy.id, data });
+      }
       navigate(`/insurance/${policy.id}`);
     } else {
       const created = await createInsurance.mutateAsync(data);
@@ -40,10 +53,16 @@ export function InsuranceFormPage() {
         { label: editing ? (policy?.provider ?? 'Edit') : 'Add policy' },
       ]}
       title={editing ? 'Edit policy' : 'Add insurance policy'}
-      description={editing ? policy?.provider : 'Register an insurance policy'}
+      description={
+        viaApproval
+          ? 'Your changes go to an admin for approval before they take effect'
+          : editing
+            ? policy?.provider
+            : 'Register an insurance policy'
+      }
       formId={FORM_ID}
       submitting={submitting}
-      submitLabel={editing ? 'Save changes' : 'Create policy'}
+      submitLabel={viaApproval ? 'Send for approval' : editing ? 'Save changes' : 'Create policy'}
       onCancel={() => navigate(-1)}
     >
       <PolicyForm

@@ -7,7 +7,7 @@ GET  /alerts/configs/{id}     → single config
 PATCH /alerts/configs/{id}    → update days_before / channels / is_active
 GET  /alerts/logs             → paginated list (empty initially)
 
-AlertChannel: email | sms | push
+AlertChannel: whatsapp | email | sms | push (WhatsApp via Twilio is the working channel)
 """
 import uuid
 
@@ -89,12 +89,14 @@ class TestListAlertConfigs:
         for item in resp.json()["items"]:
             assert item["entity_type"] == "tax"
 
-    async def test_isolation(
+    async def test_admin_sees_the_same_configs(
         self, client: AsyncClient, user_a: dict, user_b: dict, tax: dict
     ):
-        """user_b sees 0 configs even after user_a creates a tax."""
-        resp = await client.get("/api/v1/alerts/configs", headers=auth(user_b))
-        assert resp.json()["total"] == 0
+        """Alert rules belong to the vault, so every role reads the same set."""
+        resp_a = await client.get("/api/v1/alerts/configs", headers=auth(user_a))
+        resp_b = await client.get("/api/v1/alerts/configs", headers=auth(user_b))
+        assert resp_b.status_code == 200
+        assert resp_b.json()["total"] == resp_a.json()["total"]
 
     async def test_requires_auth(self, client: AsyncClient):
         resp = await client.get("/api/v1/alerts/configs")
@@ -120,14 +122,14 @@ class TestGetAlertConfig:
         )
         assert resp.status_code == 404
 
-    async def test_idor_returns_404(
+    async def test_admin_can_read_config(
         self, client: AsyncClient, user_a: dict, user_b: dict
     ):
         config = await _get_first_config(client, user_a)
         resp = await client.get(
             f"/api/v1/alerts/configs/{config['id']}", headers=auth(user_b)
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200
 
     async def test_invalid_uuid_returns_422(self, client: AsyncClient, user_a: dict):
         resp = await client.get("/api/v1/alerts/configs/not-a-uuid", headers=auth(user_a))
@@ -193,16 +195,17 @@ class TestUpdateAlertConfig:
         )
         assert resp.status_code == 422
 
-    async def test_idor_update_returns_404(
+    async def test_admin_cannot_change_alert_rules(
         self, client: AsyncClient, user_a: dict, user_b: dict
     ):
+        """Alert rules are super-admin territory — admins only read them."""
         config = await _get_first_config(client, user_a)
         resp = await client.patch(
             f"/api/v1/alerts/configs/{config['id']}",
             headers=auth(user_b),
             json={"is_active": False},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403
 
 
 class TestListAlertLogs:

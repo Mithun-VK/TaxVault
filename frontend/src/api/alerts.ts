@@ -4,7 +4,14 @@ import { toast } from 'sonner';
 import { api, getErrorMessage, queryClient } from './client';
 import { useEntityInfoMap } from './entityInfo';
 import { getEntityTypeLabel } from '@/utils/formatters';
-import type { AlertConfig, AlertConfigUpdate, AlertLog } from '@/types';
+import type {
+  AlertBulkUpdate,
+  AlertConfig,
+  AlertConfigUpdate,
+  AlertLog,
+  WhatsAppStatus,
+  WhatsAppTestResult,
+} from '@/types';
 
 interface BackendConfig {
   id: string;
@@ -110,4 +117,49 @@ export const useUpdateAlertConfig = () =>
       queryClient.invalidateQueries({ queryKey: ['alerts', 'configs'] });
     },
     onError: (error) => toast.error(getErrorMessage(error) || 'Could not update alert settings'),
+  });
+
+/**
+ * Apply one setting to every rule at once. The reminder schedule and channels
+ * are a household-wide preference, so the settings page edits them here rather
+ * than looping a request per payable.
+ */
+export const useBulkUpdateAlertConfigs = () =>
+  useMutation({
+    mutationFn: ({ enabled, ...rest }: AlertBulkUpdate) =>
+      api
+        .patch<{ updated: number }>('/alerts/configs', {
+          ...rest,
+          ...(enabled === undefined ? {} : { is_active: enabled }),
+        })
+        .then((r) => r.data),
+    onSuccess: ({ updated }) => {
+      queryClient.invalidateQueries({ queryKey: ['alerts', 'configs'] });
+      toast.success(updated === 0 ? 'Nothing to update' : `Updated ${updated} reminder rules`);
+    },
+    onError: (error) => toast.error(getErrorMessage(error) || 'Could not update alert settings'),
+  });
+
+/** Whether Twilio can send, and to which (masked) number. */
+export const useWhatsAppStatus = () =>
+  useQuery({
+    queryKey: ['alerts', 'whatsapp'],
+    queryFn: () => api.get<WhatsAppStatus>('/alerts/whatsapp').then((r) => r.data),
+    staleTime: 5 * 60_000,
+  });
+
+/**
+ * Send a real WhatsApp message down the same path an alert takes. The backend
+ * reports a misconfiguration as `sent: false` with a reason rather than an
+ * error status, so the toast can say what to fix.
+ */
+export const useSendWhatsAppTest = () =>
+  useMutation({
+    mutationFn: () =>
+      api.post<WhatsAppTestResult>('/alerts/whatsapp/test').then((r) => r.data),
+    onSuccess: (result) => {
+      if (result.sent) toast.success(result.detail);
+      else toast.error(result.detail);
+    },
+    onError: (error) => toast.error(getErrorMessage(error) || 'Could not send the test message'),
   });

@@ -430,12 +430,13 @@ class TestJWTSecurity:
         resp = await client.get("/api/v1/users/me", headers=auth(user_a))
         assert resp.status_code == 200
 
-    async def test_user_b_token_cannot_access_user_a_resources(
+    async def test_second_account_reads_the_same_vault(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict
     ):
-        """Cross-user token cannot access another user's resource."""
+        """Accounts share one vault; the role, not the token, limits what they
+        may do with it (see test_rbac.py)."""
         resp = await client.get(
             f"/api/v1/assets/{building['id']}",
             headers=auth(user_b),
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200

@@ -53,7 +53,14 @@ const GOLD = '#C8860D';
 interface GoldVaultProps {
   assets: Asset[];
   isLoading: boolean;
-  isAdmin: boolean;
+  /** May add a jewel to a category. */
+  canAddGold: boolean;
+  /** May edit or archive an existing jewel. */
+  canEditGold: boolean;
+  /** May create a custom gold category. */
+  canAddCategory: boolean;
+  /** May delete an empty custom category. */
+  canDeleteCategory: boolean;
   onView: (a: Asset) => void;
   onEdit: (a: Asset) => void;
   onArchive: (a: Asset) => void;
@@ -64,7 +71,10 @@ interface GoldVaultProps {
 export function GoldVault({
   assets,
   isLoading,
-  isAdmin,
+  canAddGold,
+  canEditGold,
+  canAddCategory,
+  canDeleteCategory,
   onView,
   onEdit,
   onArchive,
@@ -140,7 +150,7 @@ export function GoldVault({
                 </p>
               </div>
             )}
-            {isAdmin && (
+            {canAddGold && (
               <Button onClick={() => onAddGold(activeCat.key)}>
                 <Plus className="h-4 w-4" /> Add gold
               </Button>
@@ -154,7 +164,7 @@ export function GoldVault({
             title={`No ${activeCat.label.toLowerCase()} yet`}
             description="Add a jewel to this category to record its weight, value and documents."
             action={
-              isAdmin ? (
+              canAddGold ? (
                 <Button onClick={() => onAddGold(activeCat.key)}>
                   <Plus className="h-4 w-4" /> Add gold
                 </Button>
@@ -167,7 +177,7 @@ export function GoldVault({
               <JewelCard
                 key={a.id}
                 asset={a}
-                isAdmin={isAdmin}
+                canEdit={canEditGold}
                 onView={onView}
                 onEdit={onEdit}
                 onArchive={onArchive}
@@ -206,7 +216,7 @@ export function GoldVault({
             <h2 className="text-lg font-semibold text-slate-900">Gold categories</h2>
             <p className="text-sm text-slate-700">Choose a category to view or add its jewels.</p>
           </div>
-          {isAdmin && (
+          {canAddCategory && (
             <Button variant="outline" onClick={() => setAddCatOpen(true)}>
               <FolderPlus className="h-4 w-4" /> Add category
             </Button>
@@ -218,7 +228,7 @@ export function GoldVault({
             // Deletable only when it's a user-created category with no jewels
             // (protects populated categories from orphaning their items).
             const onDelete =
-              isAdmin && id && c.pieces === 0
+              canDeleteCategory && id && c.pieces === 0
                 ? () => deleteCategory.mutate(id)
                 : undefined;
             return (
@@ -315,13 +325,13 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 
 function JewelCard({
   asset,
-  isAdmin,
+  canEdit,
   onView,
   onEdit,
   onArchive,
 }: {
   asset: Asset;
-  isAdmin: boolean;
+  canEdit: boolean;
   onView: (a: Asset) => void;
   onEdit: (a: Asset) => void;
   onArchive: (a: Asset) => void;
@@ -369,7 +379,7 @@ function JewelCard({
                 <DropdownMenuItem onClick={() => onView(asset)}>
                   <Eye /> View
                 </DropdownMenuItem>
-                {isAdmin && (
+                {canEdit && (
                   <>
                     <DropdownMenuItem onClick={() => onEdit(asset)}>
                       <Pencil /> Edit

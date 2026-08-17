@@ -6,8 +6,14 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_current_user, get_db, require_admin
-from app.models.user import User
+from app.core.dependencies import get_db, get_vault_owner_id, require
+from app.core.permissions import (
+    INSURANCE_CREATE,
+    INSURANCE_DELETE,
+    INSURANCE_EDIT,
+    INSURANCE_VIEW,
+    PAYMENTS_CREATE,
+)
 from app.schemas.insurance import (
     InsuranceCreate,
     InsuranceListResponse,
@@ -29,66 +35,81 @@ class PremiumPayRequest(BaseModel):
     receipt_document_id: uuid.UUID | None = None
 
 
-@router.get("/", response_model=InsuranceListResponse)
+@router.get(
+    "/", response_model=InsuranceListResponse, dependencies=[Depends(require(INSURANCE_VIEW))]
+)
 async def list_insurance(
     type: str | None = Query(None, alias="type"),
     status: str | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    return await insurance_service.list_insurance(db, current_user.id, type, status, skip, limit)
+    return await insurance_service.list_insurance(db, vault_id, type, status, skip, limit)
 
 
-@router.post("/", response_model=InsuranceOut, status_code=201, dependencies=[Depends(require_admin)])
+@router.post(
+    "/",
+    response_model=InsuranceOut,
+    status_code=201,
+    dependencies=[Depends(require(INSURANCE_CREATE))],
+)
 async def create_insurance(
     payload: InsuranceCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    return await insurance_service.create_insurance(db, current_user.id, payload)
+    return await insurance_service.create_insurance(db, vault_id, payload)
 
 
-@router.get("/{policy_id}", response_model=InsuranceOut)
+@router.get(
+    "/{policy_id}", response_model=InsuranceOut, dependencies=[Depends(require(INSURANCE_VIEW))]
+)
 async def get_insurance(
     policy_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    return await insurance_service.get_insurance(db, current_user.id, policy_id)
+    return await insurance_service.get_insurance(db, vault_id, policy_id)
 
 
-@router.patch("/{policy_id}", response_model=InsuranceOut, dependencies=[Depends(require_admin)])
+@router.patch(
+    "/{policy_id}", response_model=InsuranceOut, dependencies=[Depends(require(INSURANCE_EDIT))]
+)
 async def update_insurance(
     policy_id: uuid.UUID,
     payload: InsuranceUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    return await insurance_service.update_insurance(db, current_user.id, policy_id, payload)
+    return await insurance_service.update_insurance(db, vault_id, policy_id, payload)
 
 
-@router.delete("/{policy_id}", status_code=200, dependencies=[Depends(require_admin)])
+@router.delete("/{policy_id}", status_code=200, dependencies=[Depends(require(INSURANCE_DELETE))])
 async def archive_insurance(
     policy_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
-    await insurance_service.archive_insurance(db, current_user.id, policy_id)
+    await insurance_service.archive_insurance(db, vault_id, policy_id)
     return {"detail": "Insurance policy archived successfully"}
 
 
-@router.post("/{policy_id}/pay-premium", response_model=InsuranceOut)
+@router.post(
+    "/{policy_id}/pay-premium",
+    response_model=InsuranceOut,
+    dependencies=[Depends(require(PAYMENTS_CREATE))],
+)
 async def pay_premium(
     policy_id: uuid.UUID,
     payload: PremiumPayRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    vault_id: uuid.UUID = Depends(get_vault_owner_id),
 ):
     return await insurance_service.pay_premium(
         db,
-        current_user.id,
+        vault_id,
         policy_id,
         payload.amount_paid,
         payload.payment_date,

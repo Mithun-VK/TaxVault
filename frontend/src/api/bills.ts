@@ -49,7 +49,9 @@ function fromBackend(bill: Bill & { is_active?: boolean }): Bill {
   return { ...bill, status: isOverdue(bill.next_due_date) ? 'overdue' : 'pending' };
 }
 
-function toBackendPayload(data: Partial<BillCreate & BillUpdate>) {
+// Exported so the change-request flow can build the same backend-shaped
+// payload a direct edit would send (see hooks/usePayableChange.ts).
+export function toBackendBillPayload(data: Partial<BillCreate & BillUpdate>) {
   const { auto_pay, billing_cycle, bill_type, ...rest } = data as BillCreate & { auto_pay?: boolean };
   return {
     ...rest,
@@ -87,7 +89,7 @@ export const useBill = (id: string | undefined) =>
 export const useCreateBill = () =>
   useMutation({
     mutationFn: (data: BillCreate) =>
-      api.post<Bill>('/bills/', toBackendPayload(data)).then((r) => fromBackend(r.data)),
+      api.post<Bill>('/bills/', toBackendBillPayload(data)).then((r) => fromBackend(r.data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bills'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -99,7 +101,7 @@ export const useCreateBill = () =>
 export const useUpdateBill = () =>
   useMutation({
     mutationFn: ({ id, data }: { id: string; data: BillUpdate }) =>
-      api.patch<Bill>(`/bills/${id}`, toBackendPayload(data)).then((r) => fromBackend(r.data)),
+      api.patch<Bill>(`/bills/${id}`, toBackendBillPayload(data)).then((r) => fromBackend(r.data)),
     onSuccess: (bill) => {
       queryClient.invalidateQueries({ queryKey: ['bills'] });
       queryClient.invalidateQueries({ queryKey: ['bills', bill.id] });

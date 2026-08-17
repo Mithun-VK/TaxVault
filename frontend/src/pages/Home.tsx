@@ -12,19 +12,21 @@ import {
   BarChart3,
   Briefcase,
   Bell,
+  ClipboardCheck,
   type LucideIcon,
 } from 'lucide-react';
 import { HomeTile } from '@/components/shared/HomeTile';
 import { FeatureTile } from '@/components/shared/FeatureTile';
 import { useAssets } from '@/api/assets';
 import { useIndividuals } from '@/api/individuals';
+import { useCompanies } from '@/api/companies';
 import { useBills } from '@/api/bills';
 import { useInsurancePolicies } from '@/api/insurance';
 import { useTaxes } from '@/api/taxes';
 import { usePayments } from '@/api/payments';
 import { useDocuments } from '@/api/documents';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { useAuthStore } from '@/store/authStore';
+import { roleHasPermission, type Permission } from '@/utils/permissions';
 
 interface SectionTile {
   label: string;
@@ -35,7 +37,10 @@ interface SectionTile {
   unit?: string;
   loading?: boolean;
   addTo?: string;
-  adminOnly?: boolean;
+  /** Permission needed to see the tile. */
+  permission: Permission;
+  /** Permission needed for the tile's "+" quick-add. */
+  addPermission?: Permission;
 }
 
 function greeting(): string {
@@ -47,12 +52,14 @@ function greeting(): string {
 
 export function Home() {
   const navigate = useNavigate();
-  const isAdmin = useIsAdmin();
   const user = useAuthStore((s) => s.user);
+  const can = (permission?: Permission) =>
+    !permission || roleHasPermission(user?.role, permission);
   const firstName = (user?.full_name ?? '').trim().split(/\s+/)[0];
 
   const { data: assets = [], isLoading: assetsLoading } = useAssets();
   const { data: individuals, isLoading: individualsLoading } = useIndividuals();
+  const { data: companies, isLoading: companiesLoading } = useCompanies();
   const { data: bills = [], isLoading: billsLoading } = useBills();
   const { data: policies = [], isLoading: policiesLoading } = useInsurancePolicies();
   const { data: taxes = [], isLoading: taxesLoading } = useTaxes();
@@ -70,6 +77,8 @@ export function Home() {
       unit: 'asset',
       loading: assetsLoading,
       addTo: '/assets/new',
+      permission: 'properties.view',
+      addPermission: 'properties.create',
       description: 'Land, buildings, gold & vehicles — with taxes and documents.',
     },
     {
@@ -81,6 +90,8 @@ export function Home() {
       unit: 'person',
       loading: individualsLoading,
       addTo: '/individual/new',
+      permission: 'individuals.view',
+      addPermission: 'individuals.create',
       description: 'Family members, their assets, policies & personal taxes.',
     },
     {
@@ -88,11 +99,17 @@ export function Home() {
       icon: Briefcase,
       color: '#0F6E56',
       to: '/company',
+      count: companies?.items.length ?? 0,
+      unit: 'company',
+      loading: companiesLoading,
+      addTo: '/company/new',
+      permission: 'company.view',
+      addPermission: 'company.create',
       description: 'Filings, compliance, registrations & renewals.',
     },
   ];
 
-  // Data sections — a live count and (for admins) a quick-add.
+  // Data sections — a live count and, where the role allows it, a quick-add.
   const vault: SectionTile[] = [
     {
       label: 'Bills',
@@ -103,6 +120,8 @@ export function Home() {
       unit: 'bill',
       loading: billsLoading,
       addTo: '/bills/new',
+      permission: 'bills.view',
+      addPermission: 'bills.create',
     },
     {
       label: 'Insurance',
@@ -113,6 +132,8 @@ export function Home() {
       unit: 'policy',
       loading: policiesLoading,
       addTo: '/insurance/new',
+      permission: 'insurance.view',
+      addPermission: 'insurance.create',
     },
     {
       label: 'Taxes',
@@ -123,6 +144,8 @@ export function Home() {
       unit: 'tax',
       loading: taxesLoading,
       addTo: '/taxes/new',
+      permission: 'taxes.view',
+      addPermission: 'taxes.create',
     },
     {
       label: 'Payments',
@@ -132,6 +155,7 @@ export function Home() {
       count: payments.length,
       unit: 'payment',
       loading: paymentsLoading,
+      permission: 'payments.view',
     },
     {
       label: 'Documents',
@@ -141,16 +165,43 @@ export function Home() {
       count: documents.length,
       unit: 'document',
       loading: documentsLoading,
+      permission: 'documents.browse',
       addTo: '/documents/new',
+      addPermission: 'documents.create',
     },
   ];
 
   // Tools — no counts, just wayfinding.
   const tools: SectionTile[] = [
-    { label: 'Payment Calendar', icon: CalendarRange, color: '#1A3C6E', to: '/dashboard' },
-    { label: 'Reports', icon: FileSpreadsheet, color: '#0F6E56', to: '/reports' },
-    { label: 'Dashboard', icon: BarChart3, color: '#7C3AED', to: '/analytics', adminOnly: true },
-    { label: 'Alerts', icon: Bell, color: '#D97706', to: '/alerts' },
+    {
+      label: 'Payment Calendar',
+      icon: CalendarRange,
+      color: '#1A3C6E',
+      to: '/dashboard',
+      permission: 'calendar.view',
+    },
+    {
+      label: 'Reports',
+      icon: FileSpreadsheet,
+      color: '#0F6E56',
+      to: '/reports',
+      permission: 'reports.view',
+    },
+    {
+      label: 'Dashboard',
+      icon: BarChart3,
+      color: '#7C3AED',
+      to: '/analytics',
+      permission: 'analytics.view',
+    },
+    { label: 'Alerts', icon: Bell, color: '#D97706', to: '/alerts', permission: 'alerts.view' },
+    {
+      label: 'Approvals',
+      icon: ClipboardCheck,
+      color: '#9D174D',
+      to: '/approvals',
+      permission: 'change_requests.review',
+    },
   ];
 
   const renderTile = (t: SectionTile) => (
@@ -163,9 +214,13 @@ export function Home() {
       unit={t.unit}
       loading={t.loading}
       onOpen={() => navigate(t.to)}
-      onAdd={isAdmin && t.addTo ? () => navigate(t.addTo!) : undefined}
+      onAdd={t.addTo && can(t.addPermission) ? () => navigate(t.addTo!) : undefined}
     />
   );
+
+  const visibleFeatured = featured.filter((t) => can(t.permission));
+  const visibleVault = vault.filter((t) => can(t.permission));
+  const visibleTools = tools.filter((t) => can(t.permission));
 
   return (
     <div className="space-y-8">
@@ -179,9 +234,10 @@ export function Home() {
         </p>
       </div>
 
+      {visibleFeatured.length > 0 && (
       <section className="space-y-3">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {featured.map((t) => (
+          {visibleFeatured.map((t) => (
             <FeatureTile
               key={t.to}
               label={t.label}
@@ -192,23 +248,24 @@ export function Home() {
               unit={t.unit}
               loading={t.loading}
               onOpen={() => navigate(t.to)}
-              onAdd={isAdmin && t.addTo ? () => navigate(t.addTo!) : undefined}
+              onAdd={t.addTo && can(t.addPermission) ? () => navigate(t.addTo!) : undefined}
             />
           ))}
         </div>
       </section>
+      )}
 
       <section className="space-y-3">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Your vault</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5">
-          {vault.map(renderTile)}
+          {visibleVault.map(renderTile)}
         </div>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-600">Tools</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5">
-          {tools.filter((t) => !t.adminOnly || isAdmin).map(renderTile)}
+          {visibleTools.map(renderTile)}
         </div>
       </section>
     </div>

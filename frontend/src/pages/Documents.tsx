@@ -46,7 +46,7 @@ import { useBills } from '@/api/bills';
 import { useTaxes } from '@/api/taxes';
 import { useInsurancePolicies } from '@/api/insurance';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCan } from '@/hooks/usePermissions';
 import { getAssetOwner, getEntityTypeLabel } from '@/utils/formatters';
 import { DOCUMENT_CATEGORIES } from '@/utils/constants';
 import { queryClient } from '@/api/client';
@@ -90,7 +90,9 @@ export function Documents() {
   const deleteDoc = useDeleteDocument();
   const updateDoc = useUpdateDocument();
   const downloadUrl = useDownloadUrl();
-  const isAdmin = useIsAdmin();
+  const canUpload = useCan('documents.create');
+  const canRename = useCan('documents.edit');
+  const canDelete = useCan('documents.delete');
 
   const [propertyUpload, setPropertyUpload] = useState<Asset | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<TaxDocument | null>(null);
@@ -198,7 +200,7 @@ export function Documents() {
             and payment receipts, filed against the property they belong to.
           </p>
         </div>
-        {isAdmin && (
+        {canUpload && (
           <Button onClick={openUpload} disabled={!hasAnyEntity}>
             <Plus className="h-4 w-4" /> Upload document
           </Button>
@@ -242,7 +244,7 @@ export function Documents() {
                       </AccordionTrigger>
                       <AccordionContent>
                         {docs.length === 0 ? (
-                          isAdmin ? (
+                          canUpload ? (
                             <button
                               type="button"
                               onClick={() => setPropertyUpload(asset)}
@@ -268,10 +270,10 @@ export function Documents() {
                               documents={docs}
                               view="grid"
                               onDownload={handleDownload}
-                              onDelete={isAdmin ? setDeleteTarget : undefined}
-                              onRename={isAdmin ? startRename : undefined}
+                              onDelete={canDelete ? setDeleteTarget : undefined}
+                              onRename={canRename ? startRename : undefined}
                             />
-                            {isAdmin && (
+                            {canUpload && (
                               <Button variant="outline" size="sm" onClick={() => setPropertyUpload(asset)}>
                                 <Plus className="h-4 w-4" /> Upload document for this property
                               </Button>
@@ -324,7 +326,7 @@ export function Documents() {
                   : 'Add an asset, bill, tax or policy first, then upload its documents here.'
               }
               action={
-                hasAnyEntity && isAdmin ? (
+                hasAnyEntity && canUpload ? (
                   <Button onClick={openUpload}>
                     <Plus className="h-4 w-4" /> Upload a document
                   </Button>
@@ -336,8 +338,8 @@ export function Documents() {
               documents={visibleDocs}
               view="grid"
               onDownload={handleDownload}
-              onDelete={isAdmin ? setDeleteTarget : undefined}
-              onRename={isAdmin ? startRename : undefined}
+              onDelete={canDelete ? setDeleteTarget : undefined}
+              onRename={canRename ? startRename : undefined}
             />
           )}
         </TabsContent>

@@ -54,7 +54,7 @@ import { AssetForm } from '@/components/assets/AssetForm';
 import { SlideOverDrawer } from '@/components/shared/SlideOverDrawer';
 import { queryClient } from '@/api/client';
 import { individualKeys } from '@/api/individuals';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCan } from '@/hooks/usePermissions';
 import { RELATIONSHIP_OPTIONS, VISA_TYPES } from '@/utils/constants';
 import { getInitials, formatINR } from '@/utils/formatters';
 import { toInputDate, formatDate, daysUntil } from '@/utils/dates';
@@ -1129,7 +1129,7 @@ function CreateIndividual() {
 export function IndividualDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isAdmin = useIsAdmin();
+  const canEdit = useCan('individuals.edit');
   const isNew = !id || id === 'new';
 
   const { data: individual, isLoading } = useIndividual(isNew ? undefined : id);
@@ -1160,7 +1160,7 @@ export function IndividualDetail() {
     );
   }
 
-  const readOnly = !isAdmin;
+  const readOnly = !canEdit;
 
   return (
     <div className="space-y-5">
@@ -1168,7 +1168,7 @@ export function IndividualDetail() {
         <Breadcrumbs
           items={[{ label: 'Individuals', to: '/individual' }, { label: individual.full_name }]}
         />
-        {isAdmin && (
+        {canEdit && (
           <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
             <Pencil className="h-4 w-4" /> Edit
           </Button>

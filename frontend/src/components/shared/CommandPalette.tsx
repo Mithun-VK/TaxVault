@@ -13,6 +13,7 @@ import {
   FileSpreadsheet,
   BarChart3,
   Bell,
+  ClipboardCheck,
   User as UserIcon,
   UserCircle,
   Plus,
@@ -30,6 +31,8 @@ import { useInsurancePolicies } from '@/api/insurance';
 import { useIndividuals } from '@/api/individuals';
 import { ASSET_TYPES, BILL_TYPES, TAX_TYPES, INSURANCE_TYPES } from '@/utils/constants';
 import { getAssetOwner } from '@/utils/formatters';
+import { useAuthStore } from '@/store/authStore';
+import { roleHasPermission, type Permission } from '@/utils/permissions';
 
 interface CommandItem {
   id: string;
@@ -38,6 +41,8 @@ interface CommandItem {
   sub?: string;
   icon: LucideIcon | ComponentType<{ className?: string }>;
   to: string;
+  /** Permission needed to see this entry; omitted means everyone. */
+  permission?: Permission;
 }
 
 interface CommandPaletteProps {
@@ -49,18 +54,20 @@ interface CommandPaletteProps {
 // (Dashboard/Bills/Insurance/Tax/Payments/Documents live under Analytics) · Alerts · Profile.
 const NAV: CommandItem[] = [
   { id: 'nav-home', group: 'Go to', label: 'Home', icon: HomeIcon, to: '/' },
-  { id: 'nav-assets', group: 'Go to', label: 'Properties', icon: Building2, to: '/assets' },
-  { id: 'nav-individual', group: 'Go to', label: 'Individuals', icon: Users, to: '/individual' },
-  { id: 'nav-company', group: 'Go to', label: 'Company', icon: Briefcase, to: '/company' },
-  { id: 'nav-analytics', group: 'Go to', label: 'Dashboard', icon: BarChart3, to: '/analytics' },
-  { id: 'nav-reports', group: 'Go to', label: 'Reports', icon: FileSpreadsheet, to: '/reports' },
-  { id: 'nav-dashboard', group: 'Analytics', label: 'Payment Calendar', icon: LayoutDashboard, to: '/dashboard' },
-  { id: 'nav-bills', group: 'Analytics', label: 'Bills', icon: CreditCard, to: '/bills' },
-  { id: 'nav-insurance', group: 'Analytics', label: 'Insurance', icon: Shield, to: '/insurance' },
-  { id: 'nav-taxes', group: 'Analytics', label: 'Tax', icon: Receipt, to: '/taxes' },
-  { id: 'nav-payments', group: 'Analytics', label: 'Payments', icon: Wallet, to: '/payments' },
-  { id: 'nav-documents', group: 'Analytics', label: 'Documents', icon: FolderOpen, to: '/documents' },
-  { id: 'nav-alerts', group: 'Go to', label: 'Alerts', icon: Bell, to: '/alerts' },
+  { id: 'nav-assets', group: 'Go to', label: 'Properties', icon: Building2, to: '/assets', permission: 'properties.view' },
+  { id: 'nav-individual', group: 'Go to', label: 'Individuals', icon: Users, to: '/individual', permission: 'individuals.view' },
+  { id: 'nav-company', group: 'Go to', label: 'Companies', icon: Briefcase, to: '/company', permission: 'company.view' },
+  { id: 'nav-analytics', group: 'Go to', label: 'Dashboard', icon: BarChart3, to: '/analytics', permission: 'analytics.view' },
+  { id: 'nav-reports', group: 'Go to', label: 'Reports', icon: FileSpreadsheet, to: '/reports', permission: 'reports.view' },
+  { id: 'nav-dashboard', group: 'Analytics', label: 'Payment Calendar', icon: LayoutDashboard, to: '/dashboard', permission: 'calendar.view' },
+  { id: 'nav-bills', group: 'Analytics', label: 'Bills', icon: CreditCard, to: '/bills', permission: 'bills.view' },
+  { id: 'nav-insurance', group: 'Analytics', label: 'Insurance', icon: Shield, to: '/insurance', permission: 'insurance.view' },
+  { id: 'nav-taxes', group: 'Analytics', label: 'Tax', icon: Receipt, to: '/taxes', permission: 'taxes.view' },
+  { id: 'nav-payments', group: 'Analytics', label: 'Payments', icon: Wallet, to: '/payments', permission: 'payments.view' },
+  { id: 'nav-documents', group: 'Analytics', label: 'Documents', icon: FolderOpen, to: '/documents', permission: 'documents.browse' },
+  { id: 'nav-approvals', group: 'Go to', label: 'Approvals', icon: ClipboardCheck, to: '/approvals', permission: 'change_requests.review' },
+  { id: 'nav-alerts', group: 'Go to', label: 'Alerts', icon: Bell, to: '/alerts', permission: 'alerts.view' },
+  { id: 'nav-users', group: 'Go to', label: 'Users', icon: Users, to: '/users', permission: 'users.manage' },
   { id: 'nav-profile', group: 'Go to', label: 'Profile', icon: UserIcon, to: '/profile' },
 ];
 
@@ -71,15 +78,17 @@ const PROPERTY_TYPES: CommandItem[] = ASSET_TYPES.filter((t) => t.value !== 'oth
   label: t.label,
   icon: t.icon ?? Building2,
   to: `/assets?category=${t.group ?? 'movable'}&type=${t.value}`,
+  permission: 'properties.view',
 }));
 
 const ACTIONS: CommandItem[] = [
-  { id: 'new-asset', group: 'Create', label: 'Add property', icon: Plus, to: '/assets/new' },
-  { id: 'new-individual', group: 'Create', label: 'Add individual', icon: Plus, to: '/individual/new' },
-  { id: 'new-tax', group: 'Create', label: 'Add tax', icon: Plus, to: '/taxes/new' },
-  { id: 'new-bill', group: 'Create', label: 'Add bill', icon: Plus, to: '/bills/new' },
-  { id: 'new-policy', group: 'Create', label: 'Add insurance policy', icon: Plus, to: '/insurance/new' },
-  { id: 'new-document', group: 'Create', label: 'Upload document', icon: Plus, to: '/documents/new' },
+  { id: 'new-asset', group: 'Create', label: 'Add property', icon: Plus, to: '/assets/new', permission: 'properties.create' },
+  { id: 'new-individual', group: 'Create', label: 'Add individual', icon: Plus, to: '/individual/new', permission: 'individuals.create' },
+  { id: 'new-company', group: 'Create', label: 'Add company', icon: Plus, to: '/company/new', permission: 'company.create' },
+  { id: 'new-tax', group: 'Create', label: 'Add tax', icon: Plus, to: '/taxes/new', permission: 'taxes.create' },
+  { id: 'new-bill', group: 'Create', label: 'Add bill', icon: Plus, to: '/bills/new', permission: 'bills.create' },
+  { id: 'new-policy', group: 'Create', label: 'Add insurance policy', icon: Plus, to: '/insurance/new', permission: 'insurance.create' },
+  { id: 'new-document', group: 'Create', label: 'Upload document', icon: Plus, to: '/documents/new', permission: 'documents.create' },
 ];
 
 function PaletteBody({ onClose }: { onClose: () => void }) {
@@ -88,6 +97,9 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
   const [active, setActive] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
 
+  const role = useAuthStore((s) => s.user?.role ?? null);
+  // The asset and individual hooks opt out entirely for roles that cannot call
+  // them, so those result groups simply never appear.
   const { data: assets = [] } = useAssets();
   const { data: policies = [] } = useInsurancePolicies();
   const { data: individualsData } = useIndividuals();
@@ -107,6 +119,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
       label: t.label,
       icon: t.icon ?? Receipt,
       to: `/taxes?type=${t.value}`,
+      permission: 'taxes.view' as Permission,
     }));
     const billCats: CommandItem[] = BILL_TYPES.map((t) => ({
       id: `billcat-${t.value}`,
@@ -114,6 +127,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
       label: t.label,
       icon: t.icon ?? CreditCard,
       to: `/bills?type=${t.value}`,
+      permission: 'bills.view' as Permission,
     }));
     const insuranceCats: CommandItem[] = INSURANCE_TYPES.map((t) => ({
       id: `inscat-${t.value}`,
@@ -121,6 +135,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
       label: t.label,
       icon: t.icon ?? Shield,
       to: `/insurance?type=${t.value}`,
+      permission: 'insurance.view' as Permission,
     }));
     const assetItems: CommandItem[] = assets.map((a) => {
       const owner = getAssetOwner(a);
@@ -152,8 +167,8 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
       ...insuranceCats,
       ...assetItems,
       ...policyItems,
-    ];
-  }, [assets, policies, individualsData]);
+    ].filter((item) => !item.permission || roleHasPermission(role, item.permission));
+  }, [assets, policies, individualsData, role]);
 
   const filtered = useMemo(() => {
     const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);

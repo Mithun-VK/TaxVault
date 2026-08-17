@@ -8,10 +8,12 @@ import {
   Search,
   Plus,
   Building2,
+  Briefcase,
   Receipt,
   CreditCard,
   Shield,
   FileUp,
+  type LucideIcon,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -25,7 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuthStore } from '@/store/authStore';
 import { usePayableDeadlines } from '@/hooks/usePayableDeadlines';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { roleHasPermission, type Permission } from '@/utils/permissions';
 import { daysUntil } from '@/utils/dates';
 import { getInitials } from '@/utils/formatters';
 
@@ -35,12 +37,32 @@ interface NavbarProps {
   onOpenSearch: () => void;
 }
 
+interface CreateAction {
+  label: string;
+  to: string;
+  icon: LucideIcon;
+  permission: Permission;
+}
+
+const CREATE_ACTIONS: CreateAction[] = [
+  { label: 'Property', to: '/assets/new', icon: Building2, permission: 'properties.create' },
+  { label: 'Company', to: '/company/new', icon: Briefcase, permission: 'company.create' },
+  { label: 'Tax', to: '/taxes/new', icon: Receipt, permission: 'taxes.create' },
+  { label: 'Bill', to: '/bills/new', icon: CreditCard, permission: 'bills.create' },
+  { label: 'Insurance policy', to: '/insurance/new', icon: Shield, permission: 'insurance.create' },
+  { label: 'Document', to: '/documents/new', icon: FileUp, permission: 'documents.create' },
+];
+
 export function Navbar({ title, onMenuClick, onOpenSearch }: NavbarProps) {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
-  const isAdmin = useIsAdmin();
   const { payables } = usePayableDeadlines();
+  const can = (permission: Permission) => roleHasPermission(user?.role, permission);
+
+  // Quick-add offers exactly what this role may create — for a member that is
+  // bills alone, so the menu still earns its place.
+  const createActions = CREATE_ACTIONS.filter((action) => can(action.permission));
 
   const alertCount = payables.filter((p) => daysUntil(p.due_date) <= 0).length;
   const name = user?.full_name ?? 'TaxVault User';
@@ -87,8 +109,8 @@ export function Navbar({ title, onMenuClick, onOpenSearch }: NavbarProps) {
           <Search className="h-5 w-5" />
         </button>
 
-        {/* Global quick-add — admins only (members can't create records) */}
-        {isAdmin && (
+        {/* Global quick-add — only what this role is allowed to create */}
+        {createActions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button size="sm" className="h-10">
@@ -99,25 +121,16 @@ export function Navbar({ title, onMenuClick, onOpenSearch }: NavbarProps) {
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuLabel>Add new</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/assets/new')}>
-                <Building2 /> Property
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/taxes/new')}>
-                <Receipt /> Tax
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/bills/new')}>
-                <CreditCard /> Bill
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/insurance/new')}>
-                <Shield /> Insurance policy
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/documents/new')}>
-                <FileUp /> Document
-              </DropdownMenuItem>
+              {createActions.map(({ label, to, icon: Icon }) => (
+                <DropdownMenuItem key={to} onClick={() => navigate(to)}>
+                  <Icon /> {label}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
 
+        {can('alerts.view') && (
         <Link
           to="/alerts"
           className="relative flex h-11 w-11 items-center justify-center rounded-lg text-slate-700 transition-colors duration-150 hover:bg-slate-100 hover:text-text-primary"
@@ -133,6 +146,7 @@ export function Navbar({ title, onMenuClick, onOpenSearch }: NavbarProps) {
             </span>
           )}
         </Link>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -154,9 +168,11 @@ export function Navbar({ title, onMenuClick, onOpenSearch }: NavbarProps) {
             <DropdownMenuItem onClick={() => navigate('/profile')}>
               <UserIcon /> Profile
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/alerts')}>
-              <Settings /> Alert settings
-            </DropdownMenuItem>
+            {can('alerts.view') && (
+              <DropdownMenuItem onClick={() => navigate('/alerts')}>
+                <Settings /> Alert settings
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem destructive onClick={handleLogout}>
               <LogOut /> Log out

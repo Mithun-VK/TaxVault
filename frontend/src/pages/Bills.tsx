@@ -12,7 +12,7 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { BillCard } from '@/components/bills/BillCard';
 import { useBills } from '@/api/bills';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCan } from '@/hooks/usePermissions';
 import { allBillCategories } from '@/utils/constants';
 import { generateBillsReport } from '@/utils/reports';
 import { formatINRCompact } from '@/utils/formatters';
@@ -30,7 +30,7 @@ export function Bills() {
 
   const [search, setSearch] = useState('');
   const debounced = useDebounce(search);
-  const isAdmin = useIsAdmin();
+  const canCreate = useCan('bills.create');
 
   const { data: bills = [], isLoading } = useBills();
 
@@ -128,7 +128,7 @@ export function Bills() {
                 onExport={() => generateBillsReport(bills, { download: true })}
                 disabled={bills.length === 0}
               />
-              {isAdmin && (
+              {canCreate && (
                 <Button onClick={openCreate}>
                   <Plus className="h-4 w-4" /> Add bill
                 </Button>
@@ -186,7 +186,7 @@ export function Bills() {
             {categoryBills.length} bill{categoryBills.length === 1 ? '' : 's'}
           </p>
         </div>
-        {isAdmin && (
+        {canCreate && (
           <Button onClick={openCreate}>
             <Plus className="h-4 w-4" /> Add bill
           </Button>
@@ -214,7 +214,7 @@ export function Bills() {
           title={`No ${selectedMeta?.label.toLowerCase()} bills`}
           description="Add a bill in this category to track its due dates and amounts."
           action={
-            isAdmin ? (
+            canCreate ? (
               <Button onClick={openCreate}>
                 <Plus className="h-4 w-4" /> Add a bill
               </Button>

@@ -49,9 +49,22 @@ class TestCreateBill:
             )
             assert resp.status_code == 201, f"Failed for billing_cycle={cycle}"
 
-    async def test_invalid_bill_type_returns_422(self, client: AsyncClient, user_a: dict):
+    async def test_custom_bill_type_is_accepted(self, client: AsyncClient, user_a: dict):
+        """bill_type is a user-extensible category (see schemas/recurring_bill.py)
+        — any lowercase slug is valid, not just the built-in list."""
         resp = await client.post(
             "/api/v1/bills/", headers=auth(user_a), json={**_BILL, "bill_type": "cable_tv"}
+        )
+        assert resp.status_code == 201
+        assert resp.json()["bill_type"] == "cable_tv"
+
+    async def test_bill_type_with_invalid_format_returns_422(
+        self, client: AsyncClient, user_a: dict
+    ):
+        """The custom-category slug still has to match the allowed pattern
+        (lowercase letters, digits, underscore)."""
+        resp = await client.post(
+            "/api/v1/bills/", headers=auth(user_a), json={**_BILL, "bill_type": "Cable TV!"}
         )
         assert resp.status_code == 422
 
@@ -95,12 +108,13 @@ class TestListBills:
         resp = await client.get("/api/v1/bills/", headers=auth(user_b))
         assert resp.json()["total"] == 0
 
-    async def test_isolation(
+    async def test_admin_sees_the_shared_vault(
         self, client: AsyncClient, user_a: dict, user_b: dict, bill: dict
     ):
+        """One vault, many logins — an admin reads the owner's bills."""
         resp = await client.get("/api/v1/bills/", headers=auth(user_b))
         ids = [i["id"] for i in resp.json()["items"]]
-        assert bill["id"] not in ids
+        assert bill["id"] in ids
 
     async def test_filter_by_bill_type(
         self, client: AsyncClient, user_a: dict, bill: dict
@@ -135,11 +149,12 @@ class TestGetBill:
         resp = await client.get(f"/api/v1/bills/{uuid.uuid4()}", headers=auth(user_a))
         assert resp.status_code == 404
 
-    async def test_idor_returns_404(
+    async def test_admin_can_read_shared_bill(
         self, client: AsyncClient, user_a: dict, user_b: dict, bill: dict
     ):
         resp = await client.get(f"/api/v1/bills/{bill['id']}", headers=auth(user_b))
-        assert resp.status_code == 404
+        assert resp.status_code == 200
+        assert resp.json()["id"] == bill["id"]
 
     async def test_invalid_uuid_returns_422(self, client: AsyncClient, user_a: dict):
         resp = await client.get("/api/v1/bills/not-a-uuid", headers=auth(user_a))
@@ -169,15 +184,16 @@ class TestUpdateBill:
         assert resp.status_code == 200
         assert float(resp.json()["average_amount"]) == 1200.00
 
-    async def test_idor_update_returns_404(
+    async def test_admin_cannot_update(
         self, client: AsyncClient, user_a: dict, user_b: dict, bill: dict
     ):
+        """Admins add records but never change them."""
         resp = await client.patch(
             f"/api/v1/bills/{bill['id']}",
             headers=auth(user_b),
-            json={"provider_name": "Hacked"},
+            json={"provider_name": "Changed"},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403
 
 
 class TestPayBill:
@@ -230,15 +246,16 @@ class TestPayBill:
         entity_ids = [p["entity_id"] for p in payments.json()["items"]]
         assert bill_id in entity_ids
 
-    async def test_idor_pay_returns_404(
+    async def test_admin_can_log_a_payment(
         self, client: AsyncClient, user_a: dict, user_b: dict, bill: dict
     ):
+        """Logging a payment is an add, not an edit — admins may do it."""
         resp = await client.post(
             f"/api/v1/bills/{bill['id']}/pay",
             headers=auth(user_b),
             json={"amount_paid": "800.00", "payment_date": "2026-07-10"},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200
 
 
 class TestDeactivateBill:
@@ -261,13 +278,13 @@ class TestDeactivateBill:
         assert get.status_code == 200
         assert get.json()["is_active"] is False
 
-    async def test_idor_deactivate_returns_404(
+    async def test_admin_cannot_deactivate(
         self, client: AsyncClient, user_a: dict, user_b: dict, bill: dict
     ):
         resp = await client.delete(
             f"/api/v1/bills/{bill['id']}", headers=auth(user_b)
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403
 
     async def test_nonexistent_deactivate_returns_404(
         self, client: AsyncClient, user_a: dict

@@ -29,7 +29,7 @@ import { TaxForm } from '@/components/taxes/TaxForm';
 import { PolicyForm } from '@/components/insurance/PolicyForm';
 import { PaymentForm } from '@/components/shared/PaymentForm';
 import { PaymentRow } from '@/components/payments/PaymentRow';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCan } from '@/hooks/usePermissions';
 import { useAsset } from '@/api/assets';
 import { useTaxes, useCreateTax } from '@/api/taxes';
 import { useInsurancePolicies, useCreateInsurance } from '@/api/insurance';
@@ -64,23 +64,11 @@ import {
 import { formatINR, getAssetOwner, getAssetTypeColor, getStatusLabel } from '@/utils/formatters';
 import { formatDate } from '@/utils/dates';
 import { isPropertyType } from '@/types';
-import type { TaxDocument, TaxType } from '@/types';
+import type { TaxDocument } from '@/types';
 
-// Expected taxes per property kind — buildings owe property + water tax, land owes land tax.
 // Legacy metadata keys no longer surfaced under "Other recorded details" —
 // superseded by dedicated Property Details fields (property/water/land tax number).
 const HIDDEN_METADATA_KEYS = new Set(['tax_ids', 'tax_id']);
-
-const APPLICABLE_TAXES: Record<string, TaxType[]> = {
-  residential_building: ['property_tax', 'water_tax'],
-  commercial_building: ['property_tax', 'water_tax'],
-  agricultural_land: ['land_tax'],
-  non_agricultural_land: ['land_tax'],
-  // legacy
-  building: ['property_tax', 'water_tax'],
-  vacant_land: ['land_tax'],
-  land: ['land_tax'],
-};
 
 // EC status → badge styling.
 const EC_BADGE: Record<ECStatus, { label: string; cls: string }> = {
@@ -115,7 +103,10 @@ interface PayTarget {
 export function AssetDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isAdmin = useIsAdmin();
+  const canEditProperty = useCan('properties.edit');
+  const canAddTax = useCan('taxes.create');
+  const canAddInsurance = useCan('insurance.create');
+  const canLogPayment = useCan('payments.create');
   const { data: asset, isLoading } = useAsset(id);
   const { data: taxes = [] } = useTaxes();
   const { data: policies = [] } = useInsurancePolicies();
@@ -126,20 +117,21 @@ export function AssetDetail() {
   const createTax = useCreateTax();
   const createPolicy = useCreateInsurance();
   const [taxOpen, setTaxOpen] = useState(false);
-  const [taxDefaultType, setTaxDefaultType] = useState<TaxType | undefined>();
   const [policyOpen, setPolicyOpen] = useState(false);
   const [payTarget, setPayTarget] = useState<PayTarget | null>(null);
 
-  const openAddTax = (type?: TaxType) => {
-    setTaxDefaultType(type);
-    setTaxOpen(true);
-  };
+  const openAddTax = () => setTaxOpen(true);
 
   // Upload drawer — `uploadSlot` seeds the label + tag when adding to a slot.
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadSlot, setUploadSlot] = useState<PropertyDocSlot | null>(null);
 
   const linkedTaxes = useMemo(() => taxes.filter((t) => t.linked_asset_id === id), [taxes, id]);
+  // Newest assessment first, matching the payment history below it.
+  const sortedLinkedTaxes = useMemo(
+    () => [...linkedTaxes].sort((a, b) => b.due_date.localeCompare(a.due_date)),
+    [linkedTaxes],
+  );
   const linkedPolicies = useMemo(
     () => policies.filter((p) => p.linked_asset_id === id),
     [policies, id],
@@ -262,8 +254,6 @@ export function AssetDetail() {
   const otherDocs = docs.filter((d) => !matchedIds.has(d.id));
   const onFile = slotDocs.filter((s) => s.matches.length > 0).length;
 
-  const applicableTaxes = APPLICABLE_TAXES[asset.asset_type];
-
   const uploaderKey = uploadSlot?.key ?? 'other';
 
   return (
@@ -275,7 +265,7 @@ export function AssetDetail() {
             { label: asset.name },
           ]}
         />
-        {isAdmin && (
+        {canEditProperty && (
           <Button
             variant="outline"
             size="sm"
@@ -653,117 +643,61 @@ export function AssetDetail() {
 
         {/* ── Taxes ── */}
         <TabsContent value="taxes" className="space-y-4">
-          {applicableTaxes && (
-            <div className="rounded-xl border border-surface-border bg-white p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    Applicable taxes for this {typeMeta?.label?.toLowerCase()}
-                  </p>
-                  <p className="mb-3 text-xs text-slate-700">
-                    The taxes a {typeMeta?.label?.toLowerCase()} is expected to carry, and whether
-                    they're recorded.
-                  </p>
-                </div>
-                {isAdmin && (
-                  <Button variant="outline" size="sm" onClick={() => openAddTax()}>
-                    <Plus className="h-4 w-4" /> Add tax
-                  </Button>
-                )}
+          {/* Only the taxes actually linked to this property. There is no
+              "expected taxes" checklist: which taxes a property owes varies by
+              locality and use, so a template invented rows the user never
+              created and left them looking unrecorded forever. */}
+          <div className="rounded-xl border border-surface-border bg-white p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Taxes</p>
+                <p className="text-xs text-slate-700">
+                  Taxes linked to this {typeMeta?.label?.toLowerCase()}.
+                </p>
               </div>
-              <div className="divide-y divide-surface-border">
-                {applicableTaxes.map((taxType) => {
-                  const meta = TAX_TYPES.find((t) => t.value === taxType);
+              {canAddTax && (
+                <Button variant="outline" size="sm" onClick={openAddTax}>
+                  <Plus className="h-4 w-4" /> Add tax
+                </Button>
+              )}
+            </div>
+
+            {sortedLinkedTaxes.length === 0 ? (
+              <p className="mt-3 text-sm text-slate-600">
+                No taxes linked to this {typeMeta?.label?.toLowerCase()} yet.
+              </p>
+            ) : (
+              <div className="mt-1 divide-y divide-surface-border">
+                {sortedLinkedTaxes.map((t) => {
+                  const meta = TAX_TYPES.find((tt) => tt.value === t.tax_type);
                   const Icon = meta?.icon;
-                  const matches = linkedTaxes
-                    .filter((t) => t.tax_type === taxType)
-                    .sort((a, b) => b.due_date.localeCompare(a.due_date));
-                  const latest = matches[0];
                   return (
-                    <div key={taxType} className="flex items-center justify-between gap-3 py-2.5">
-                      <div className="flex items-center gap-3">
+                    <div
+                      key={t.id}
+                      className="flex flex-wrap items-center justify-between gap-3 py-2.5"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
                         <span
                           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
                           style={{ backgroundColor: `${meta?.color}1A`, color: meta?.color }}
                         >
                           {Icon && <Icon className="h-4 w-4" />}
                         </span>
-                        <div>
-                          <p className="text-sm font-medium text-slate-800">{meta?.label}</p>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-slate-800">
+                            {t.name || t.description || meta?.label || t.tax_type}
+                          </p>
                           <p className="text-xs text-slate-600">
-                            {latest
-                              ? `Due ${formatDate(latest.due_date)}${matches.length > 1 ? ` · ${matches.length} records` : ''}`
-                              : 'Not recorded yet'}
+                            {meta?.label ?? t.tax_type} · Due {formatDate(t.due_date)}
                           </p>
                         </div>
                       </div>
-                      {latest ? (
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono text-sm tabular-nums text-slate-700">
-                            {formatINR(latest.total_amount)}
-                          </span>
-                          <StatusBadge status={latest.status} />
-                          {isAdmin && latest.status !== 'paid' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                setPayTarget({
-                                  entityType: 'tax',
-                                  id: latest.id,
-                                  name: latest.description,
-                                  amount: latest.total_amount,
-                                })
-                              }
-                            >
-                              Record payment
-                            </Button>
-                          )}
-                        </div>
-                      ) : (
-                        isAdmin && (
-                          <Button variant="outline" size="sm" onClick={() => openAddTax(taxType)}>
-                            <Plus className="h-4 w-4" /> Add
-                          </Button>
-                        )
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Types without a standard checklist (vehicles, gold, …) still get a
-              plain list + Add tax. */}
-          {!applicableTaxes && (
-            <div className="rounded-xl border border-surface-border bg-white p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">Taxes</p>
-                  <p className="text-xs text-slate-700">
-                    Taxes recorded against this {typeMeta?.label?.toLowerCase()}.
-                  </p>
-                </div>
-                {isAdmin && (
-                  <Button variant="outline" size="sm" onClick={() => openAddTax()}>
-                    <Plus className="h-4 w-4" /> Add tax
-                  </Button>
-                )}
-              </div>
-              {linkedTaxes.length === 0 ? (
-                <p className="mt-3 text-sm text-slate-600">No taxes recorded yet.</p>
-              ) : (
-                <div className="mt-2 divide-y divide-surface-border">
-                  {linkedTaxes.map((t) => (
-                    <div key={t.id} className="flex items-center justify-between gap-3 py-2 text-sm">
-                      <span className="min-w-0 truncate text-slate-700">{t.description}</span>
-                      <span className="flex shrink-0 items-center gap-3">
-                        <span className="font-mono text-slate-600">
+                      <div className="flex shrink-0 items-center gap-3">
+                        <span className="font-mono text-sm tabular-nums text-slate-700">
                           {formatINR(Number(t.total_amount))}
                         </span>
                         <StatusBadge status={t.status} />
-                        {isAdmin && t.status !== 'paid' && (
+                        {canLogPayment && t.status !== 'paid' && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -771,7 +705,7 @@ export function AssetDetail() {
                               setPayTarget({
                                 entityType: 'tax',
                                 id: t.id,
-                                name: t.description,
+                                name: t.name || t.description,
                                 amount: t.total_amount,
                               })
                             }
@@ -779,13 +713,13 @@ export function AssetDetail() {
                             Record payment
                           </Button>
                         )}
-                      </span>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Historical list of taxes paid, each with its receipt for proof */}
           <div className="rounded-xl border border-surface-border bg-white p-4">
@@ -822,7 +756,7 @@ export function AssetDetail() {
             items={linkedPolicies}
             getKey={(p) => p.id}
             emptyText="No insurance linked to this asset."
-            onAdd={isAdmin ? () => setPolicyOpen(true) : undefined}
+            onAdd={canAddInsurance ? () => setPolicyOpen(true) : undefined}
             addLabel="Add insurance"
             renderItem={(policy) => (
               <div className="flex items-center justify-between gap-3">
@@ -835,7 +769,7 @@ export function AssetDetail() {
                     {formatINR(policy.premium_amount)}
                   </span>
                   <CountdownChip date={policy.next_premium_date} showIcon={false} />
-                  {isAdmin && (
+                  {canLogPayment && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -911,9 +845,7 @@ export function AssetDetail() {
         }
       >
         <TaxForm
-          key={taxDefaultType ?? 'any'}
           formId={TAX_FORM_ID}
-          defaultType={taxDefaultType}
           defaultAssetId={asset.id}
           onSubmit={async (data) => {
             await createTax.mutateAsync(data);

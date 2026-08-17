@@ -6,6 +6,7 @@ from app.notifications.base import NotificationChannel
 from app.notifications.channels.email import EmailChannel
 from app.notifications.channels.push import PushChannel
 from app.notifications.channels.sms import SMSChannel
+from app.notifications.channels.whatsapp import WhatsAppChannel
 from app.notifications.service import NotificationService
 
 logger = logging.getLogger("taxvault.notifications")
@@ -37,6 +38,7 @@ def _init_firebase() -> None:
 def get_notification_service() -> NotificationService:
     _init_firebase()
     svc = NotificationService()
+    svc.register(NotificationChannel.WHATSAPP, WhatsAppChannel())
     svc.register(NotificationChannel.EMAIL, EmailChannel())
     svc.register(NotificationChannel.SMS, SMSChannel())
     svc.register(NotificationChannel.PUSH, PushChannel())

@@ -130,6 +130,7 @@ class EntityType(str, Enum):
 
 
 class AlertChannel(str, Enum):
+    whatsapp = "whatsapp"
     email = "email"
     sms = "sms"
     push = "push"

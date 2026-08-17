@@ -1,5 +1,6 @@
 export * from './asset';
 export * from './individual';
+export * from './company';
 export * from './insurance';
 export * from './tax';
 export * from './bill';
@@ -11,7 +12,7 @@ export * from './report';
 
 import type { PayableEntityType } from './payment';
 
-export type UserRole = 'admin' | 'user';
+export type UserRole = 'super_admin' | 'admin' | 'user';
 
 export interface User {
   id: string;

@@ -1,14 +1,30 @@
-import { Shield, ShieldCheck, User as UserIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck, ShieldHalf, User as UserIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useUsers, useSetUserRole } from '@/api/users';
 import { useAuthStore } from '@/store/authStore';
 import { getInitials } from '@/utils/formatters';
 import { formatDate } from '@/utils/dates';
+import { ROLE_DESCRIPTIONS, ROLE_LABELS } from '@/utils/permissions';
+import type { UserRole } from '@/types';
+
+const ROLE_ORDER: UserRole[] = ['super_admin', 'admin', 'user'];
+
+const ROLE_BADGE: Record<UserRole, { icon: typeof UserIcon; className: string }> = {
+  super_admin: { icon: ShieldCheck, className: 'gap-1.5 text-brand-navy' },
+  admin: { icon: ShieldHalf, className: 'gap-1.5 text-brand-teal' },
+  user: { icon: UserIcon, className: 'gap-1.5 text-slate-700' },
+};
 
 export function Users() {
   const { data: users = [], isLoading } = useUsers();
@@ -20,21 +36,40 @@ export function Users() {
       <div>
         <h2 className="text-lg font-semibold text-slate-900">Team &amp; access</h2>
         <p className="text-sm text-slate-700">
-          Admins have full access — add, edit and manage every record and view analytics. Members
-          can view everything and log payments, but can&apos;t change amounts or open analytics.
+          Every account reads the same vault; the role decides what they can do with it.
         </p>
       </div>
+
+      <Card className="divide-y divide-surface-border">
+        {ROLE_ORDER.map((role) => {
+          const Icon = ROLE_BADGE[role].icon;
+          return (
+            <div key={role} className="flex items-start gap-3 p-4">
+              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-slate-600" aria-hidden="true" />
+              <p className="text-sm text-slate-700">
+                <span className="font-medium text-slate-900">{ROLE_LABELS[role]}</span> —{' '}
+                {ROLE_DESCRIPTIONS[role]}
+              </p>
+            </div>
+          );
+        })}
+      </Card>
 
       {isLoading ? (
         <Skeleton className="h-64 w-full rounded-xl" />
       ) : users.length === 0 ? (
-        <EmptyState icon={UserIcon} title="No users found" description="Invite people by having them register." />
+        <EmptyState
+          icon={UserIcon}
+          title="No users found"
+          description="Invite people by having them register."
+        />
       ) : (
         <Card className="divide-y divide-surface-border">
           {users.map((u) => {
-            const isAdmin = u.role === 'admin';
             const isMe = u.id === me?.id;
             const name = u.full_name || u.email;
+            const badge = ROLE_BADGE[u.role];
+            const BadgeIcon = badge.icon;
             return (
               <div key={u.id} className="flex items-center gap-4 p-4">
                 <Avatar className="h-10 w-10">
@@ -50,31 +85,28 @@ export function Users() {
                 <div className="hidden text-xs text-slate-600 sm:block">
                   Joined {formatDate(u.created_at)}
                 </div>
-                <Badge
-                  variant="outline"
-                  className={isAdmin ? 'gap-1.5 text-brand-navy' : 'gap-1.5 text-slate-700'}
-                >
-                  {isAdmin ? <ShieldCheck className="h-3 w-3" /> : <UserIcon className="h-3 w-3" />}
-                  {isAdmin ? 'Admin' : 'Member'}
+                <Badge variant="outline" className={badge.className}>
+                  <BadgeIcon className="h-3 w-3" />
+                  {ROLE_LABELS[u.role]}
                 </Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
+                {/* The backend refuses to demote the last super admin, so the
+                    deployment can never lose its only full-access account. */}
+                <Select
+                  value={u.role}
                   disabled={setRole.isPending}
-                  onClick={() =>
-                    setRole.mutate({ id: u.id, role: isAdmin ? 'user' : 'admin' })
-                  }
+                  onValueChange={(role) => setRole.mutate({ id: u.id, role: role as UserRole })}
                 >
-                  {isAdmin ? (
-                    <>
-                      <UserIcon className="h-4 w-4" /> Make member
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="h-4 w-4" /> Make admin
-                    </>
-                  )}
-                </Button>
+                  <SelectTrigger className="w-40" aria-label={`Change role for ${name}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLE_ORDER.map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {ROLE_LABELS[role]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             );
           })}

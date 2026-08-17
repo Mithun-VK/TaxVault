@@ -1,5 +1,5 @@
 """
-Asset endpoint tests — CRUD, IDOR, filtering, pagination.
+Asset endpoint tests — CRUD, RBAC, filtering, pagination.
 
 AssetType: land | vehicle | building | other
 AssetStatus: active | sold | transferred
@@ -132,12 +132,12 @@ class TestListAssets:
         assert data["total"] == 0
         assert data["items"] == []
 
-    async def test_user_sees_only_own_assets(
+    async def test_admin_sees_the_shared_vault(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict
     ):
         resp = await client.get("/api/v1/assets/", headers=auth(user_b))
         ids = [i["id"] for i in resp.json()["items"]]
-        assert building["id"] not in ids
+        assert building["id"] in ids
 
     async def test_filter_by_asset_type(
         self, client: AsyncClient, user_a: dict, building: dict, land: dict
@@ -202,14 +202,14 @@ class TestGetAsset:
         resp = await client.get(f"/api/v1/assets/{uuid.uuid4()}", headers=auth(user_a))
         assert resp.status_code == 404
 
-    async def test_idor_returns_404_not_403(
+    async def test_admin_can_read_shared_asset(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict
     ):
-        """user_b cannot see user_a's asset — 404, not 403 (don't reveal existence)."""
         resp = await client.get(
             f"/api/v1/assets/{building['id']}", headers=auth(user_b)
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200
+        assert resp.json()["id"] == building["id"]
 
     async def test_invalid_uuid_returns_422(self, client: AsyncClient, user_a: dict):
         resp = await client.get("/api/v1/assets/not-a-uuid", headers=auth(user_a))
@@ -233,13 +233,13 @@ class TestGetAssetSummary:
         assert "total_taxes_pending" in data
         assert "docs_count" in data
 
-    async def test_idor_summary_returns_404(
+    async def test_admin_can_read_shared_summary(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict
     ):
         resp = await client.get(
             f"/api/v1/assets/{building['id']}/summary", headers=auth(user_b)
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200
 
 
 class TestUpdateAsset:
@@ -282,15 +282,15 @@ class TestUpdateAsset:
         )
         assert resp.status_code == 422
 
-    async def test_idor_update_returns_404(
+    async def test_admin_cannot_update(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict
     ):
         resp = await client.patch(
             f"/api/v1/assets/{building['id']}",
             headers=auth(user_b),
-            json={"name": "Hacked Name"},
+            json={"name": "Changed Name"},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403
 
     async def test_nonexistent_returns_404(self, client: AsyncClient, user_a: dict):
         resp = await client.patch(
@@ -320,13 +320,13 @@ class TestDeleteAsset:
         get = await client.get(f"/api/v1/assets/{asset_id}", headers=auth(user_a))
         assert get.status_code == 404
 
-    async def test_idor_delete_returns_404(
+    async def test_admin_cannot_archive(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict
     ):
         resp = await client.delete(
             f"/api/v1/assets/{building['id']}", headers=auth(user_b)
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403
 
     async def test_nonexistent_delete_returns_404(self, client: AsyncClient, user_a: dict):
         resp = await client.delete(

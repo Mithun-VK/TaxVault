@@ -59,7 +59,9 @@ function fromBackend(p: BackendInsurance): InsurancePolicy {
   };
 }
 
-function toBackendPayload(data: Partial<InsuranceCreate & InsuranceUpdate>) {
+// Exported so the change-request flow can build the same backend-shaped
+// payload a direct edit would send (see hooks/usePayableChange.ts).
+export function toBackendInsurancePayload(data: Partial<InsuranceCreate & InsuranceUpdate>) {
   const {
     provider,
     start_date,
@@ -112,7 +114,7 @@ export const useInsurancePolicy = (id: string | undefined) =>
 export const useCreateInsurance = () =>
   useMutation({
     mutationFn: (data: InsuranceCreate) =>
-      api.post<BackendInsurance>('/insurance/', toBackendPayload(data)).then((r) => fromBackend(r.data)),
+      api.post<BackendInsurance>('/insurance/', toBackendInsurancePayload(data)).then((r) => fromBackend(r.data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['insurance'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -124,7 +126,7 @@ export const useCreateInsurance = () =>
 export const useUpdateInsurance = () =>
   useMutation({
     mutationFn: ({ id, data }: { id: string; data: InsuranceUpdate }) =>
-      api.patch<BackendInsurance>(`/insurance/${id}`, toBackendPayload(data)).then((r) => fromBackend(r.data)),
+      api.patch<BackendInsurance>(`/insurance/${id}`, toBackendInsurancePayload(data)).then((r) => fromBackend(r.data)),
     onSuccess: (policy) => {
       queryClient.invalidateQueries({ queryKey: ['insurance'] });
       queryClient.invalidateQueries({ queryKey: ['insurance', policy.id] });

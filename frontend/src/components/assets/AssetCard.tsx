@@ -8,7 +8,7 @@ import {
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCan } from '@/hooks/usePermissions';
 import { ASSET_TYPES } from '@/utils/constants';
 import { formatDate } from '@/utils/dates';
 import { isPropertyType, type Asset } from '@/types';
@@ -65,7 +65,7 @@ export function AssetCard({
   const accent = TIER_ACCENT[tier];
   const typeMeta = ASSET_TYPES.find((t) => t.value === asset.asset_type);
   const Icon = typeMeta?.icon;
-  const isAdmin = useIsAdmin();
+  const canEdit = useCan('properties.edit');
 
   const location =
     meta(asset, 'address') ??
@@ -101,7 +101,7 @@ export function AssetCard({
               <DropdownMenuItem onClick={() => onView(asset)}>
                 <Eye /> View
               </DropdownMenuItem>
-              {isAdmin && (
+              {canEdit && (
                 <>
                   <DropdownMenuItem onClick={() => onEdit(asset)}>
                     <Pencil /> Edit

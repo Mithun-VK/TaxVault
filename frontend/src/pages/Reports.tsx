@@ -32,6 +32,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { cn } from '@/lib/utils';
 import { useAssets } from '@/api/assets';
 import { useIndividuals } from '@/api/individuals';
+import { useCompanies } from '@/api/companies';
 import { useTaxes } from '@/api/taxes';
 import { useInsurancePolicies } from '@/api/insurance';
 import { useBills } from '@/api/bills';
@@ -107,6 +108,7 @@ export function Reports() {
   // Reports include archived properties too (shown with an "Archived" status).
   const { data: assets = [] } = useAssets({ include_archived: true });
   const { data: individualsData } = useIndividuals();
+  const { data: companiesData } = useCompanies();
   const { data: taxes = [] } = useTaxes();
   const { data: insurance = [] } = useInsurancePolicies();
   const { data: bills = [] } = useBills();
@@ -126,9 +128,15 @@ export function Reports() {
   const [goldPrice, setGoldPrice] = useState('');
   const goldPricePerGram = Number(goldPrice) || 0;
 
+  const companies = companiesData?.items ?? [];
+
   const datasets = useMemo(
-    () => buildDatasets({ assets, taxes, insurance, bills, payments, linkedName }, goldPricePerGram),
-    [assets, taxes, insurance, bills, payments, linkedName, goldPricePerGram],
+    () =>
+      buildDatasets(
+        { assets, companies, taxes, insurance, bills, payments, linkedName },
+        goldPricePerGram,
+      ),
+    [assets, companies, taxes, insurance, bills, payments, linkedName, goldPricePerGram],
   );
 
   const [datasetId, setDatasetId] = useState('properties');

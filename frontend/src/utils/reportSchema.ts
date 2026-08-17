@@ -1,4 +1,5 @@
 import {
+  Briefcase,
   Building2,
   Landmark,
   Shield,
@@ -6,13 +7,14 @@ import {
   Wallet,
   type LucideIcon,
 } from 'lucide-react';
-import type { Asset, Bill, InsurancePolicy, Payment, Tax } from '@/types';
+import type { Asset, Bill, Company, InsurancePolicy, Payment, Tax } from '@/types';
 import {
   INSURANCE_TYPES,
   TAX_TYPES,
   ASSET_TYPES,
   allBillCategories,
   gramsToSovereigns,
+  gstStateName,
 } from './constants';
 import { formatINR, getAssetOwner, getStatusLabel } from './formatters';
 import { formatDate } from './dates';
@@ -127,6 +129,7 @@ type Row = Record<string, unknown>;
 
 export interface ReportData {
   assets: Asset[];
+  companies?: Company[];
   taxes: Tax[];
   insurance: InsurancePolicy[];
   bills: Bill[];
@@ -491,10 +494,75 @@ function paymentsDataset(payments: Payment[]): ReportDataset<Payment> {
   };
 }
 
+// ── Companies ─────────────────────────────────────────────────────────────────
+function companiesDataset(companies: Company[]): ReportDataset<Company> {
+  const primaryBank = (c: Company) =>
+    (c.bank_accounts ?? []).find((b) => b.is_primary) ?? (c.bank_accounts ?? [])[0];
+
+  const columns: ReportColumn<Company>[] = [
+    { key: 'legal_name', label: 'Legal Name', group: 'Core', type: 'text', get: (c) => c.legal_name },
+    { key: 'trade_name', label: 'Trade Name', group: 'Core', type: 'text', get: (c) => c.trade_name },
+    { key: 'company_type', label: 'Type', group: 'Core', type: 'label', get: (c) => c.company_type },
+    { key: 'status', label: 'Status', group: 'Core', type: 'status', get: (c) => c.status },
+    { key: 'industry', label: 'Industry', group: 'Core', type: 'text', get: (c) => c.industry },
+    { key: 'incorporation_date', label: 'Incorporated', group: 'Incorporation', type: 'date', get: (c) => c.incorporation_date },
+    { key: 'incorporation_state', label: 'State', group: 'Incorporation', type: 'text', get: (c) => c.incorporation_state },
+    { key: 'cin', label: 'CIN', group: 'Registrations', type: 'text', get: (c) => c.cin },
+    { key: 'llpin', label: 'LLPIN', group: 'Registrations', type: 'text', defaultHidden: true, get: (c) => c.llpin },
+    { key: 'pan_number', label: 'PAN', group: 'Registrations', type: 'text', get: (c) => c.pan_number },
+    { key: 'tan_number', label: 'TAN', group: 'Registrations', type: 'text', get: (c) => c.tan_number },
+    { key: 'gstin', label: 'GSTIN', group: 'Registrations', type: 'text', get: (c) => c.gstin },
+    { key: 'gst_state', label: 'GST State', group: 'Registrations', type: 'text', get: (c) => gstStateName(c.gstin_state_code) },
+    { key: 'income_tax_ward', label: 'IT Ward', group: 'Registrations', type: 'text', defaultHidden: true, get: (c) => c.income_tax_ward },
+    { key: 'foreign_jurisdiction', label: 'Foreign Jurisdiction', group: 'Foreign', type: 'text', defaultHidden: true, get: (c) => c.foreign_jurisdiction },
+    { key: 'foreign_registration_number', label: 'Foreign Reg. No.', group: 'Foreign', type: 'text', defaultHidden: true, get: (c) => c.foreign_registration_number },
+    { key: 'foreign_registration_expiry', label: 'Foreign Reg. Expiry', group: 'Foreign', type: 'date', defaultHidden: true, get: (c) => c.foreign_registration_expiry },
+    { key: 'other_registrations', label: 'Other Registrations', group: 'Registrations', type: 'text', defaultHidden: true, get: (c) => (c.other_registrations ?? []).map((r) => r.name).join(', ') },
+    { key: 'authorized_capital', label: 'Authorized Capital', group: 'Capital', type: 'money', get: (c) => (c.authorized_capital != null ? Number(c.authorized_capital) : undefined) },
+    { key: 'paid_up_capital', label: 'Paid-up Capital', group: 'Capital', type: 'money', get: (c) => (c.paid_up_capital != null ? Number(c.paid_up_capital) : undefined) },
+    { key: 'auditor_name', label: 'Auditor', group: 'Audit', type: 'text', get: (c) => c.auditor_name },
+    { key: 'auditor_firm_number', label: 'ICAI FRN', group: 'Audit', type: 'text', defaultHidden: true, get: (c) => c.auditor_firm_number },
+    { key: 'financial_year_end', label: 'FY End', group: 'Audit', type: 'text', get: (c) => c.financial_year_end },
+    { key: 'active_director_count', label: 'Directors', group: 'Counts', type: 'number', total: true, get: (c) => c.active_director_count },
+    { key: 'document_count', label: 'Documents', group: 'Counts', type: 'number', total: true, get: (c) => c.document_count },
+    { key: 'asset_count', label: 'Properties', group: 'Counts', type: 'number', total: true, get: (c) => c.asset_count },
+    { key: 'expiring_docs_count', label: 'Expiring', group: 'Counts', type: 'number', total: true, get: (c) => c.expiring_docs_count },
+    { key: 'has_compliance_gap', label: 'Compliance Gap', group: 'Counts', type: 'bool', get: (c) => c.has_compliance_gap },
+    { key: 'phone_number', label: 'Phone', group: 'Contact', type: 'text', defaultHidden: true, get: (c) => c.phone_number },
+    { key: 'email', label: 'Email', group: 'Contact', type: 'text', defaultHidden: true, get: (c) => c.email },
+    { key: 'website', label: 'Website', group: 'Contact', type: 'text', defaultHidden: true, get: (c) => c.website },
+    { key: 'registered_address', label: 'Registered Address', group: 'Contact', type: 'text', defaultHidden: true, get: (c) => c.registered_address },
+    { key: 'bank_name', label: 'Primary Bank', group: 'Banking', type: 'text', defaultHidden: true, get: (c) => primaryBank(c)?.bank_name },
+    { key: 'bank_ifsc', label: 'Primary IFSC', group: 'Banking', type: 'text', defaultHidden: true, get: (c) => primaryBank(c)?.ifsc_code },
+    { key: 'notes', label: 'Remarks', group: 'Detail', type: 'text', defaultHidden: true, get: (c) => c.notes },
+  ];
+
+  const filters: ReportFilter<Company>[] = [
+    { key: 'company_type', label: 'Type', kind: 'select', primary: true, options: distinctOptions(companies, (c) => c.company_type), get: (c) => c.company_type },
+    { key: 'status', label: 'Status', kind: 'select', primary: true, options: distinctOptions(companies, (c) => c.status), get: (c) => c.status },
+    { key: 'industry', label: 'Industry', kind: 'select', primary: true, options: distinctOptions(companies, (c) => c.industry), get: (c) => c.industry },
+    { key: 'has_compliance_gap', label: 'Compliance gap', kind: 'bool', get: (c) => c.has_compliance_gap },
+    { key: 'incorporation_date', label: 'Incorporated', kind: 'dateRange', get: (c) => c.incorporation_date },
+    { key: 'paid_up_capital', label: 'Paid-up capital', kind: 'numberRange', get: (c) => (c.paid_up_capital != null ? Number(c.paid_up_capital) : undefined) },
+  ];
+
+  return {
+    id: 'companies',
+    label: 'Companies',
+    icon: Briefcase,
+    rows: companies,
+    columns,
+    filters,
+    rowKey: (c) => c.id,
+    search: (c) => `${c.legal_name} ${c.trade_name ?? ''} ${c.cin ?? ''} ${c.gstin ?? ''}`,
+  };
+}
+
 /** Build every dataset from the currently-loaded data. */
 export function buildDatasets(data: ReportData, goldPricePerGram = 0): ReportDataset[] {
   return [
     propertiesDataset(data.assets, goldPricePerGram),
+    companiesDataset(data.companies ?? []),
     taxesDataset(data.taxes, data.linkedName),
     insuranceDataset(data.insurance, data.linkedName),
     billsDataset(data.bills),

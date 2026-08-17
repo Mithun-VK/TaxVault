@@ -7,8 +7,12 @@ import {
   Briefcase,
   BarChart3,
   Bell,
+  CalendarRange,
+  ClipboardCheck,
   FileSpreadsheet,
+  Receipt,
   User as UserIcon,
+  Wallet,
   UserCircle,
   Users as UsersIcon,
   ChevronDown,
@@ -24,13 +28,19 @@ import { CommandPalette } from './CommandPalette';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuthStore } from '@/store/authStore';
 import { useIndividuals } from '@/api/individuals';
+import { useCompanies } from '@/api/companies';
 import { getInitials } from '@/utils/formatters';
+import { roleHasPermission, type Permission } from '@/utils/permissions';
 
 interface Leaf {
   to: string;
   label: string;
   /** Path opened by the leaf's "+" quick-add button (creates that exact type). */
   addTo?: string;
+  /** Permission required to see this leaf at all. */
+  permission?: Permission;
+  /** Permission required for the "+" quick-add. Defaults to `permission`. */
+  addPermission?: Permission;
 }
 
 interface SubGroup {
@@ -38,12 +48,13 @@ interface SubGroup {
   children: Leaf[];
   /** Path opened by the header "+" quick-add button. */
   addTo?: string;
+  addPermission?: Permission;
 }
 
-type GroupKey = 'properties' | 'individual' | 'analytics';
+type GroupKey = 'properties' | 'individual' | 'company' | 'analytics';
 
 type NavItem =
-  | { type: 'link'; to: string; label: string; icon: LucideIcon; adminOnly?: boolean }
+  | { type: 'link'; to: string; label: string; icon: LucideIcon; permission?: Permission }
   | {
       type: 'group';
       key: GroupKey;
@@ -54,6 +65,9 @@ type NavItem =
       subgroups?: SubGroup[];
       /** Path opened by the header "+" quick-add button. */
       addTo?: string;
+      /** Permission required to see the group. Omit for per-leaf gating. */
+      permission?: Permission;
+      addPermission?: Permission;
     };
 
 const NAV_ITEMS: NavItem[] = [
@@ -66,6 +80,8 @@ const NAV_ITEMS: NavItem[] = [
     basePath: '/assets',
     // Header "+" is the general "add property" (asks which type).
     addTo: '/assets/new',
+    permission: 'properties.view',
+    addPermission: 'properties.create',
     subgroups: [
             {
         label: 'Immovable',
@@ -113,25 +129,53 @@ const NAV_ITEMS: NavItem[] = [
     basePath: '/individual',
     addTo: '/individual/new',
     children: [], // populated from the individuals API
+    permission: 'individuals.view',
+    addPermission: 'individuals.create',
   },
-  { type: 'link', to: '/company', label: 'Company', icon: Briefcase },
+  {
+    type: 'group',
+    key: 'company',
+    label: 'Company',
+    icon: Briefcase,
+    basePath: '/company',
+    addTo: '/company/new',
+    children: [], // populated from the companies API
+    permission: 'company.view',
+    addPermission: 'company.create',
+  },
   {
     type: 'group',
     key: 'analytics',
     label: 'Financials',
     icon: BarChart3,
     basePath: '/analytics',
+    // No group-level permission: each leaf carries its own, so a member sees
+    // this group holding only the four surfaces they're entitled to.
     children: [
-      { to: '/dashboard', label: 'Payment Calendar' },
-      { to: '/bills', label: 'Bills' },
-      { to: '/insurance', label: 'Insurance' },
-      { to: '/taxes', label: 'Tax' },
-      { to: '/payments', label: 'Payments' },
-      { to: '/documents', label: 'Documents' },
+      { to: '/dashboard', label: 'Payment Calendar', permission: 'calendar.view' },
+      { to: '/bills', label: 'Bills', permission: 'bills.view' },
+      { to: '/insurance', label: 'Insurance', permission: 'insurance.view' },
+      { to: '/taxes', label: 'Tax', permission: 'taxes.view' },
+      { to: '/payments', label: 'Payments', permission: 'payments.view' },
+      { to: '/documents', label: 'Documents', permission: 'documents.browse' },
     ],
   },
-  { type: 'link', to: '/reports', label: 'Reports', icon: FileSpreadsheet },
-  { type: 'link', to: '/alerts', label: 'Alerts', icon: Bell },
+  {
+    type: 'link',
+    to: '/reports',
+    label: 'Reports',
+    icon: FileSpreadsheet,
+    permission: 'reports.view',
+  },
+  {
+    type: 'link',
+    to: '/approvals',
+    label: 'Approvals',
+    icon: ClipboardCheck,
+    permission: 'change_requests.review',
+  },
+  { type: 'link', to: '/alerts', label: 'Alerts', icon: Bell, permission: 'alerts.view' },
+  { type: 'link', to: '/users', label: 'Users', icon: UsersIcon, permission: 'users.manage' },
   { type: 'link', to: '/profile', label: 'Profile', icon: UserIcon },
 ];
 
@@ -139,16 +183,23 @@ interface MobileItem {
   to: string;
   label: string;
   icon: LucideIcon;
-  adminOnly?: boolean;
+  permission?: Permission;
 }
 
+// The bottom tab bar shows the first few destinations the role can reach, so a
+// member gets a useful bar (Home · Bills · Payments · Calendar) instead of the
+// near-empty one that filtering a fixed admin list would leave behind.
 const MOBILE_ITEMS: MobileItem[] = [
   { to: '/', label: 'Home', icon: HomeIcon },
-  { to: '/assets', label: 'Properties', icon: Building2 },
-  { to: '/individual', label: 'People', icon: UsersIcon },
-  { to: '/company', label: 'Company', icon: Briefcase },
-  { to: '/analytics', label: 'Dashboard', icon: BarChart3, adminOnly: true },
+  { to: '/assets', label: 'Properties', icon: Building2, permission: 'properties.view' },
+  { to: '/individual', label: 'People', icon: UsersIcon, permission: 'individuals.view' },
+  { to: '/company', label: 'Company', icon: Briefcase, permission: 'company.view' },
+  { to: '/analytics', label: 'Dashboard', icon: BarChart3, permission: 'analytics.view' },
+  { to: '/bills', label: 'Bills', icon: Receipt, permission: 'bills.view' },
+  { to: '/payments', label: 'Payments', icon: Wallet, permission: 'payments.view' },
+  { to: '/dashboard', label: 'Calendar', icon: CalendarRange, permission: 'calendar.view' },
 ];
+const MOBILE_TAB_COUNT = 5;
 
 const TITLES: Record<string, string> = {
   '/': 'Home',
@@ -164,7 +215,9 @@ const TITLES: Record<string, string> = {
   '/alerts': 'Alert Settings',
   '/profile': 'Profile',
   '/individual': 'Individuals',
-  '/company': 'Company',
+  '/company': 'Companies',
+  '/approvals': 'Approvals',
+  '/users': 'Team & access',
 };
 
 function deriveTitle(pathname: string): string {
@@ -173,6 +226,8 @@ function deriveTitle(pathname: string): string {
   if (pathname.startsWith('/insurance/')) return 'Policy Details';
   if (pathname.startsWith('/bills/')) return 'Bill Details';
   if (pathname.startsWith('/individual/')) return 'Individual Profile';
+  if (pathname === '/company/new') return 'Add Company';
+  if (pathname.startsWith('/company/')) return 'Company Details';
   return 'TaxVault';
 }
 
@@ -181,6 +236,15 @@ function leafActive(to: string, pathname: string, search: string): boolean {
   if (query) return pathname === path && pathname + search === to;
   if (path === '/') return pathname === '/';
   return pathname === path || pathname.startsWith(`${path}/`);
+}
+
+/**
+ * Returns a predicate for "may the signed-in role see this nav entry".
+ * An entry with no permission is visible to everyone.
+ */
+function usePermissionCheck() {
+  const role = useAuthStore((s) => s.user?.role ?? null);
+  return (permission?: Permission) => !permission || roleHasPermission(role, permission);
 }
 
 /** Quick-add "+" that sits at the right end of an expandable nav tab. */
@@ -216,13 +280,18 @@ function NavLeaf({
   pathname,
   search,
   onNavigate,
+  addPermission,
 }: {
   leaf: Leaf;
   pathname: string;
   search: string;
   onNavigate: () => void;
+  /** Parent's add permission, used when the leaf declares none of its own. */
+  addPermission?: Permission;
 }) {
+  const can = usePermissionCheck();
   const active = leafActive(leaf.to, pathname, search);
+  const canAdd = can(leaf.addPermission ?? addPermission);
   return (
     <div className="flex items-center">
       <NavLink
@@ -237,7 +306,7 @@ function NavLeaf({
       >
         {leaf.label}
       </NavLink>
-      {leaf.addTo && (
+      {leaf.addTo && canAdd && (
         <NavAddButton to={leaf.addTo} label={`Add ${leaf.label}`} onNavigate={onNavigate} />
       )}
     </div>
@@ -249,12 +318,16 @@ function NavSubGroup({
   pathname,
   search,
   onNavigate,
+  addPermission,
 }: {
   group: SubGroup;
   pathname: string;
   search: string;
   onNavigate: () => void;
+  addPermission?: Permission;
 }) {
+  const can = usePermissionCheck();
+  const effectiveAddPermission = group.addPermission ?? addPermission;
   const active = group.children.some((c) => leafActive(c.to, pathname, search));
   const [open, setOpen] = useState(active);
   return (
@@ -277,7 +350,7 @@ function NavSubGroup({
             aria-hidden="true"
           />
         </button>
-        {group.addTo && (
+        {group.addTo && can(effectiveAddPermission) && (
           <NavAddButton to={group.addTo} label={`Add ${group.label} asset`} onNavigate={onNavigate} />
         )}
       </div>
@@ -290,6 +363,7 @@ function NavSubGroup({
               pathname={pathname}
               search={search}
               onNavigate={onNavigate}
+              addPermission={effectiveAddPermission}
             />
           ))}
         </div>
@@ -307,19 +381,30 @@ function NavGroup({
 }) {
   const location = useLocation();
   const { pathname, search } = location;
+  const can = usePermissionCheck();
+  // Both hooks opt out for roles without the matching *.view permission.
   const { data: individuals } = useIndividuals();
+  const { data: companies } = useCompanies();
 
-  const leaves: Leaf[] | undefined =
-    item.key === 'individual'
-      ? (individuals?.items ?? []).map((ind) => ({
-          to: `/individual/${ind.id}`,
-          label: ind.full_name,
-        }))
-      : item.children;
+  let leaves: Leaf[] | undefined;
+  if (item.key === 'individual') {
+    leaves = (individuals?.items ?? []).map((ind) => ({
+      to: `/individual/${ind.id}`,
+      label: ind.full_name,
+    }));
+  } else if (item.key === 'company') {
+    // Trade name where one exists — it's what the business is called day to day.
+    leaves = (companies?.items ?? []).map((c) => ({
+      to: `/company/${c.id}`,
+      label: c.trade_name || c.legal_name,
+    }));
+  } else {
+    leaves = (item.children ?? []).filter((leaf) => can(leaf.permission));
+  }
 
   const isActive =
     item.key === 'analytics'
-      ? (item.children ?? []).some((c) => leafActive(c.to, pathname, search))
+      ? (leaves ?? []).some((c) => leafActive(c.to, pathname, search))
       : pathname.startsWith(item.basePath);
 
   const [open, setOpen] = useState(isActive);
@@ -347,7 +432,7 @@ function NavGroup({
             aria-hidden="true"
           />
         </button>
-        {item.addTo && (
+        {item.addTo && can(item.addPermission) && (
           <NavAddButton to={item.addTo} label={`Add ${item.label}`} onNavigate={onNavigate} />
         )}
       </div>
@@ -362,6 +447,7 @@ function NavGroup({
                   pathname={pathname}
                   search={search}
                   onNavigate={onNavigate}
+                  addPermission={item.addPermission}
                 />
               ))
             : (leaves ?? []).map((leaf) => (
@@ -387,9 +473,17 @@ export function Shell() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const name = user?.full_name ?? 'TaxVault User';
-  const isAdmin = user?.role === 'admin';
-  const navItems = NAV_ITEMS.filter((i) => i.type === 'group' || !i.adminOnly || isAdmin);
-  const mobileItems = MOBILE_ITEMS.filter((i) => !i.adminOnly || isAdmin);
+  const can = usePermissionCheck();
+  // A group with per-leaf permissions (Financials) drops out entirely once the
+  // role can reach none of its leaves.
+  const navItems = NAV_ITEMS.filter((item) => {
+    if (!can(item.permission)) return false;
+    if (item.type === 'group' && !item.permission && item.children) {
+      return item.children.some((leaf) => can(leaf.permission));
+    }
+    return true;
+  });
+  const mobileItems = MOBILE_ITEMS.filter((i) => can(i.permission)).slice(0, MOBILE_TAB_COUNT);
 
   // Global ⌘K / Ctrl+K toggles the command palette from anywhere.
   useEffect(() => {

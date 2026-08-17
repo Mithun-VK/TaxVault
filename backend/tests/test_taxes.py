@@ -55,22 +55,34 @@ class TestCreateTax:
         assert resp.status_code == 201
         assert resp.json()["asset_id"] == building["id"]
 
-    async def test_link_to_other_users_asset_returns_404(
+    async def test_admin_can_link_to_a_shared_asset(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict
     ):
-        """Cannot link tax to asset owned by another user."""
+        """The asset is in the shared vault, so an admin may file a tax on it."""
         resp = await client.post(
             "/api/v1/taxes/",
             headers=auth(user_b),
             json={**_TAX, "asset_id": building["id"]},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 201
 
-    async def test_invalid_tax_type_returns_422(self, client: AsyncClient, user_a: dict):
+    async def test_custom_tax_type_is_accepted(self, client: AsyncClient, user_a: dict):
+        """tax_type is a user-extensible category (see schemas/tax_obligation.py)
+        — any non-empty string up to 50 chars is valid, not just the built-in
+        list."""
         resp = await client.post(
             "/api/v1/taxes/",
             headers=auth(user_a),
             json={**_TAX, "tax_type": "alien_tax"},
+        )
+        assert resp.status_code == 201
+        assert resp.json()["tax_type"] == "alien_tax"
+
+    async def test_empty_tax_type_returns_422(self, client: AsyncClient, user_a: dict):
+        resp = await client.post(
+            "/api/v1/taxes/",
+            headers=auth(user_a),
+            json={**_TAX, "tax_type": ""},
         )
         assert resp.status_code == 422
 
@@ -118,12 +130,12 @@ class TestListTaxes:
         assert resp.status_code == 200
         assert resp.json()["total"] == 0
 
-    async def test_isolation_user_b_cannot_see_user_a_taxes(
+    async def test_admin_sees_the_shared_vault(
         self, client: AsyncClient, user_a: dict, user_b: dict, tax: dict
     ):
         resp = await client.get("/api/v1/taxes/", headers=auth(user_b))
         ids = [i["id"] for i in resp.json()["items"]]
-        assert tax["id"] not in ids
+        assert tax["id"] in ids
 
     async def test_filter_by_status_pending(
         self, client: AsyncClient, user_a: dict, tax: dict
@@ -158,11 +170,11 @@ class TestGetTax:
         resp = await client.get(f"/api/v1/taxes/{uuid.uuid4()}", headers=auth(user_a))
         assert resp.status_code == 404
 
-    async def test_idor_returns_404(
+    async def test_admin_can_read_shared_tax(
         self, client: AsyncClient, user_a: dict, user_b: dict, tax: dict
     ):
         resp = await client.get(f"/api/v1/taxes/{tax['id']}", headers=auth(user_b))
-        assert resp.status_code == 404
+        assert resp.status_code == 200
 
     async def test_invalid_uuid_returns_422(self, client: AsyncClient, user_a: dict):
         resp = await client.get("/api/v1/taxes/not-a-uuid", headers=auth(user_a))
@@ -188,15 +200,15 @@ class TestUpdateTax:
         assert resp.status_code == 200
         assert resp.json()["due_date"] == "2026-12-31"
 
-    async def test_idor_update_returns_404(
+    async def test_admin_cannot_update(
         self, client: AsyncClient, user_a: dict, user_b: dict, tax: dict
     ):
         resp = await client.patch(
             f"/api/v1/taxes/{tax['id']}",
             headers=auth(user_b),
-            json={"jurisdiction": "Hacked"},
+            json={"jurisdiction": "Changed"},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403
 
 
 class TestPayTax:
@@ -268,7 +280,7 @@ class TestPayTax:
         assert resp.json()["due_date"] != original_due
         assert resp.json()["status"] == "pending"  # reset for next cycle
 
-    async def test_idor_pay_returns_404(
+    async def test_admin_can_log_a_payment(
         self, client: AsyncClient, user_a: dict, user_b: dict, tax: dict
     ):
         resp = await client.post(
@@ -276,7 +288,7 @@ class TestPayTax:
             headers=auth(user_b),
             json={"amount_paid": "5000.00", "payment_date": "2026-09-25"},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200
 
     async def test_missing_amount_returns_422(
         self, client: AsyncClient, user_a: dict, tax: dict
@@ -304,10 +316,10 @@ class TestDeleteTax:
         get = await client.get(f"/api/v1/taxes/{tax_id}", headers=auth(user_a))
         assert get.status_code == 404
 
-    async def test_idor_delete_returns_404(
+    async def test_admin_cannot_archive(
         self, client: AsyncClient, user_a: dict, user_b: dict, tax: dict
     ):
         resp = await client.delete(
             f"/api/v1/taxes/{tax['id']}", headers=auth(user_b)
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403

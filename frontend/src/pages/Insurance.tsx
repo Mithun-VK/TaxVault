@@ -18,7 +18,7 @@ import { CategoryCard } from '@/components/shared/CategoryCard';
 import { PolicyCard } from '@/components/insurance/PolicyCard';
 import { useInsurancePolicies } from '@/api/insurance';
 import { useDebounce } from '@/hooks/useDebounce';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCan } from '@/hooks/usePermissions';
 import { allInsuranceCategories } from '@/utils/constants';
 import { loadCustomCategories } from '@/utils/customCategories';
 import { formatINRCompact } from '@/utils/formatters';
@@ -34,7 +34,7 @@ export function Insurance() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<PolicyStatus | 'all'>('all');
   const debounced = useDebounce(search);
-  const isAdmin = useIsAdmin();
+  const canCreate = useCan('insurance.create');
 
   // Fetch all policies once; categories, stats and the drill-down list are
   // derived client-side (mirrors Taxes/Bills).
@@ -135,7 +135,7 @@ export function Insurance() {
                 onExport={() => generateInsuranceReport(policies, { download: true })}
                 disabled={policies.length === 0}
               />
-              {isAdmin && (
+              {canCreate && (
                 <Button onClick={openCreate}>
                   <Plus className="h-4 w-4" /> Add policy
                 </Button>
@@ -194,7 +194,7 @@ export function Insurance() {
             {categoryPolicies.length} polic{categoryPolicies.length === 1 ? 'y' : 'ies'}
           </p>
         </div>
-        {isAdmin && (
+        {canCreate && (
           <Button onClick={openCreate}>
             <Plus className="h-4 w-4" /> Add policy
           </Button>

@@ -18,7 +18,8 @@ class User(Base):
     phone_number: Mapped[str | None] = mapped_column(String)
     device_tokens: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    # RBAC role: "admin" (full access) or "user" (view + log payments only).
+    # RBAC role: "super_admin" (full CRUD), "admin" (view everything + add
+    # records) or "user" (payables desk). See app.core.permissions.
     role: Mapped[str] = mapped_column(
         String, nullable=False, default="user", server_default="user"
     )
@@ -32,6 +33,7 @@ class User(Base):
     assets = relationship("Asset", back_populates="user", lazy="noload")
     gold_categories = relationship("GoldCategory", back_populates="user", lazy="noload")
     individuals = relationship("Individual", back_populates="user", lazy="noload")
+    companies = relationship("Company", back_populates="user", lazy="noload")
     insurance_policies = relationship("InsurancePolicy", back_populates="user", lazy="noload")
     tax_obligations = relationship("TaxObligation", back_populates="user", lazy="noload")
     recurring_bills = relationship("RecurringBill", back_populates="user", lazy="noload")

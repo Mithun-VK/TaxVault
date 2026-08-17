@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Zap, Pencil, FileText, Download, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Zap, FileText, Download, RefreshCw } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +18,8 @@ import { PaymentRow } from '@/components/payments/PaymentRow';
 import { useBill, useBillTrend } from '@/api/bills';
 import { useEntityPayments } from '@/api/payments';
 import { useEntityDocuments, useDownloadUrl, triggerDownload } from '@/api/documents';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { PayableActions } from '@/components/shared/PayableActions';
+import { useDeleteBill } from '@/api/bills';
 import { BILL_TYPES, billPriority } from '@/utils/constants';
 import { formatINR, getBillTypeColor, getBillTypeIcon, getStatusLabel } from '@/utils/formatters';
 import { formatDate } from '@/utils/dates';
@@ -27,7 +28,7 @@ import { formatDate } from '@/utils/dates';
 export function BillDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isAdmin = useIsAdmin();
+  const deleteBill = useDeleteBill();
   const { data: bill, isLoading } = useBill(id);
   const { data: payments = [] } = useEntityPayments(id);
   const { data: docs = [] } = useEntityDocuments(id);
@@ -131,11 +132,16 @@ export function BillDetail() {
           <div className="flex flex-col items-end gap-3">
             <CountdownChip date={bill.next_due_date} />
             <div className="flex items-center gap-2">
-              {isAdmin && (
-                <Button variant="outline" onClick={() => navigate(`/bills/${bill.id}/edit`)}>
-                  <Pencil className="h-4 w-4" /> Edit
-                </Button>
-              )}
+              <PayableActions
+                entityType="bill"
+                entityId={bill.id}
+                entityName={bill.name || bill.provider_name}
+                editPath={`/bills/${bill.id}/edit`}
+                onDelete={() =>
+                  deleteBill.mutate(bill.id, { onSuccess: () => navigate('/bills') })
+                }
+                deleting={deleteBill.isPending}
+              />
               <Button variant="teal" onClick={() => setPayOpen(true)}>
                 <Zap className="h-4 w-4" /> Record payment
               </Button>

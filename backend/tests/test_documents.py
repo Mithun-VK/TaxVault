@@ -89,10 +89,10 @@ class TestUploadUrl:
         # storage_key should include the entity context
         assert building["id"] in resp.json()["storage_key"]
 
-    async def test_upload_url_with_wrong_users_entity_returns_404(
+    async def test_admin_can_upload_against_a_shared_entity(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict
     ):
-        """Cannot generate upload URL for another user's entity."""
+        """The property belongs to the shared vault, so an admin may attach to it."""
         resp = await client.post(
             "/api/v1/documents/upload-url",
             headers=auth(user_b),
@@ -104,7 +104,7 @@ class TestUploadUrl:
                 "entity_id": building["id"],
             },
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200
 
     async def test_requires_auth(self, client: AsyncClient):
         resp = await client.post(
@@ -161,7 +161,7 @@ class TestCreateDocument:
         assert resp.status_code == 201
         assert resp.json()["entity_id"] == building["id"]
 
-    async def test_link_to_other_users_entity_returns_404(
+    async def test_admin_can_link_to_a_shared_entity(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict
     ):
         resp = await client.post(
@@ -173,7 +173,7 @@ class TestCreateDocument:
                 "entity_id": building["id"],
             },
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 201
 
     async def test_requires_auth(self, client: AsyncClient):
         resp = await client.post("/api/v1/documents/", json=_DOC)
@@ -192,12 +192,12 @@ class TestListDocuments:
         resp = await client.get("/api/v1/documents/", headers=auth(user_b))
         assert resp.json()["total"] == 0
 
-    async def test_isolation(
+    async def test_admin_sees_the_shared_library(
         self, client: AsyncClient, user_a: dict, user_b: dict, document: dict
     ):
         resp = await client.get("/api/v1/documents/", headers=auth(user_b))
         ids = [i["id"] for i in resp.json()["items"]]
-        assert document["id"] not in ids
+        assert document["id"] in ids
 
     async def test_filter_by_category(
         self, client: AsyncClient, user_a: dict, document: dict
@@ -245,13 +245,14 @@ class TestSearchDocuments:
         assert resp.status_code == 200
         assert resp.json()["total"] == 0
 
-    async def test_isolation_user_b_cannot_search_user_a_docs(
+    async def test_admin_can_search_the_shared_library(
         self, client: AsyncClient, user_a: dict, user_b: dict, document: dict
     ):
         resp = await client.get(
             "/api/v1/documents/search?q=ITR", headers=auth(user_b)
         )
-        assert resp.json()["total"] == 0
+        assert resp.status_code == 200
+        assert resp.json()["total"] >= 1
 
     async def test_missing_q_param_returns_422(
         self, client: AsyncClient, user_a: dict
@@ -297,15 +298,15 @@ class TestUpdateDocument:
         )
         assert resp.status_code == 422
 
-    async def test_idor_update_returns_404(
+    async def test_admin_cannot_rename(
         self, client: AsyncClient, user_a: dict, user_b: dict, document: dict
     ):
         resp = await client.patch(
             f"/api/v1/documents/{document['id']}",
             headers=auth(user_b),
-            json={"label": "Hacked"},
+            json={"label": "Renamed"},
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403
 
 
 class TestDownloadDocument:
@@ -320,14 +321,14 @@ class TestDownloadDocument:
         assert "download_url" in resp.json()
         assert len(resp.json()["download_url"]) > 0
 
-    async def test_idor_download_returns_404(
+    async def test_admin_can_download(
         self, client: AsyncClient, user_a: dict, user_b: dict, document: dict
     ):
         resp = await client.get(
             f"/api/v1/documents/{document['id']}/download",
             headers=auth(user_b),
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 200
 
     async def test_nonexistent_download_returns_404(
         self, client: AsyncClient, user_a: dict
@@ -359,13 +360,13 @@ class TestDeleteDocument:
         )
         assert resp.status_code == 404
 
-    async def test_idor_delete_returns_404(
+    async def test_admin_cannot_delete(
         self, client: AsyncClient, user_a: dict, user_b: dict, document: dict
     ):
         resp = await client.delete(
             f"/api/v1/documents/{document['id']}", headers=auth(user_b)
         )
-        assert resp.status_code == 404
+        assert resp.status_code == 403
 
     async def test_nonexistent_delete_returns_404(
         self, client: AsyncClient, user_a: dict

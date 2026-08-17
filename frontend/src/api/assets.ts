@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api, getErrorMessage, queryClient } from './client';
 import { applySearch } from '@/utils/search';
+import { useCan } from '@/hooks/usePermissions';
 import type { Asset, AssetCreate, AssetFilters, AssetType, AssetUpdate } from '@/types';
 
 // The backend has no full-text search param — it's applied client-side
@@ -28,9 +29,15 @@ function withDerivedStatus(asset: Asset & { is_archived?: boolean }): Asset {
   };
 }
 
-export const useAssets = (filters?: AssetFilters) =>
-  useQuery({
+// Roles without `properties.view` (members) get a 403 from /assets, and the
+// hook is called from shared surfaces they *can* reach — the home hub, the
+// command palette. Skipping the request there keeps those pages clean rather
+// than papering over an error; callers already default to an empty list.
+export const useAssets = (filters?: AssetFilters) => {
+  const canView = useCan('properties.view');
+  return useQuery({
     queryKey: ['assets', filters ?? {}],
+    enabled: canView,
     queryFn: async () => {
       const params: Record<string, string | number | boolean> = { limit: 100 };
       if (filters?.asset_type && filters.asset_type !== 'all') params.asset_type = filters.asset_type;
@@ -45,6 +52,7 @@ export const useAssets = (filters?: AssetFilters) =>
       return searchAssets(items, filters?.search);
     },
   });
+};
 
 export const useAsset = (id: string | undefined) =>
   useQuery({

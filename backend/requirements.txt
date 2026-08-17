@@ -16,6 +16,10 @@ pydantic-settings==2.7.0
 # ── Auth / security ──────────────────────────────────────────
 python-jose[cryptography]==3.3.0
 bcrypt==5.0.0
+# Pinned explicitly, not left to python-jose's transitive floor: this is the
+# data-at-rest crypto for every stored document. AES-GCM, AES-KW (RFC 3394),
+# Ed25519 and HKDF all come from here.
+cryptography==44.0.0
 slowapi==0.1.9
 limits==3.12.0
 

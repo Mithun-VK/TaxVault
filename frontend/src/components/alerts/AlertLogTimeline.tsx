@@ -1,9 +1,10 @@
-import { Mail, MessageSquare, Bell, type LucideIcon } from 'lucide-react';
+import { Mail, MessageCircle, MessageSquare, Bell, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDateTime } from '@/utils/dates';
 import type { AlertChannel, AlertLog } from '@/types';
 
 const CHANNEL_ICON: Record<AlertChannel, LucideIcon> = {
+  whatsapp: MessageCircle,
   email: Mail,
   sms: MessageSquare,
   push: Bell,

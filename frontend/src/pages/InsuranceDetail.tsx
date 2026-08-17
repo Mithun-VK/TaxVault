@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Wallet, Pencil, FileText, Download } from 'lucide-react';
+import { ArrowLeft, Wallet, FileText, Download } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,8 @@ import { ClaimHistory } from '@/components/insurance/ClaimHistory';
 import { AssetLinkedItems } from '@/components/assets/AssetLinkedItems';
 import { useInsurancePolicy } from '@/api/insurance';
 import { useAssets } from '@/api/assets';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { PayableActions } from '@/components/shared/PayableActions';
+import { useDeleteInsurance } from '@/api/insurance';
 import { useEntityDocuments, useDownloadUrl, triggerDownload } from '@/api/documents';
 import { INSURANCE_TYPES } from '@/utils/constants';
 import { formatINR, getInsuranceTypeColor, getStatusLabel } from '@/utils/formatters';
@@ -27,7 +28,7 @@ import { formatDate } from '@/utils/dates';
 export function InsuranceDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const isAdmin = useIsAdmin();
+  const deletePolicy = useDeleteInsurance();
   const { data: policy, isLoading } = useInsurancePolicy(id);
   const { data: docs = [] } = useEntityDocuments(id);
   const { data: assets = [] } = useAssets();
@@ -120,11 +121,16 @@ export function InsuranceDetail() {
           <div className="flex flex-col items-end gap-3">
             {policy.status === 'active' && <CountdownChip date={policy.next_premium_date} />}
             <div className="flex items-center gap-2">
-              {isAdmin && (
-                <Button variant="outline" onClick={() => navigate(`/insurance/${policy.id}/edit`)}>
-                  <Pencil className="h-4 w-4" /> Edit
-                </Button>
-              )}
+              <PayableActions
+                entityType="insurance"
+                entityId={policy.id}
+                entityName={policy.provider}
+                editPath={`/insurance/${policy.id}/edit`}
+                onDelete={() =>
+                  deletePolicy.mutate(policy.id, { onSuccess: () => navigate('/insurance') })
+                }
+                deleting={deletePolicy.isPending}
+              />
               <Button
                 variant="teal"
                 onClick={() => setPayOpen(true)}

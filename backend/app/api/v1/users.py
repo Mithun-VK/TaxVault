@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_current_user, get_db, require_admin
+from app.core.dependencies import get_current_user, get_db, require_super_admin
 from app.core.exceptions import AuthenticationError, NotFoundError, PermissionDeniedError
+from app.core.permissions import ROLE_SUPER_ADMIN
 from app.core.security import hash_password, verify_password
 from app.models.user import User
 from app.schemas.user import (
@@ -50,8 +51,8 @@ async def change_password(
     return {"detail": "Password changed successfully"}
 
 
-# ── Admin: user management ──────────────────────────────────────────────────
-@router.get("/", response_model=UserListResponse, dependencies=[Depends(require_admin)])
+# ── Super admin: user management ────────────────────────────────────────────
+@router.get("/", response_model=UserListResponse, dependencies=[Depends(require_super_admin)])
 async def list_users(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
@@ -70,21 +71,22 @@ async def set_user_role(
     user_id: uuid.UUID,
     payload: RoleUpdate,
     db: AsyncSession = Depends(get_db),
-    admin: User = Depends(require_admin),
+    admin: User = Depends(require_super_admin),
 ):
     result = await db.execute(select(User).where(User.id == user_id))
     target = result.scalar_one_or_none()
     if target is None:
         raise NotFoundError("User not found")
 
-    # Never allow the deployment to end up with zero admins: block demoting the
-    # last remaining admin (covers an admin demoting themselves too).
-    if target.role == "admin" and payload.role != "admin":
-        admin_count = await db.scalar(
-            select(func.count()).select_from(User).where(User.role == "admin")
+    # Never allow the deployment to end up with zero super admins: they alone
+    # can edit and delete, and one of them owns the shared vault every other
+    # login reads. Blocks demoting the last one (including oneself).
+    if target.role == ROLE_SUPER_ADMIN and payload.role != ROLE_SUPER_ADMIN:
+        super_admin_count = await db.scalar(
+            select(func.count()).select_from(User).where(User.role == ROLE_SUPER_ADMIN)
         )
-        if (admin_count or 0) <= 1:
-            raise PermissionDeniedError("Cannot remove the last admin")
+        if (super_admin_count or 0) <= 1:
+            raise PermissionDeniedError("Cannot remove the last super admin")
 
     target.role = payload.role
     await db.commit()

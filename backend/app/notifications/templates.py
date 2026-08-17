@@ -3,6 +3,12 @@ from typing import Any
 
 from app.notifications.base import Notification, NotificationChannel
 
+ENTITY_LABEL = {
+    "tax": "Tax",
+    "insurance": "Insurance premium",
+    "bill": "Bill",
+}
+
 
 def _days_label(days: int) -> str:
     if days == 0:
@@ -10,6 +16,38 @@ def _days_label(days: int) -> str:
     elif days == 1:
         return "tomorrow"
     return f"in {days} days"
+
+
+def _amount_label(amount: float | None) -> str:
+    """₹12,000 rather than ₹12000.0 — these are read on a phone."""
+    if amount in (None, ""):
+        return "—"
+    try:
+        return f"₹{float(amount):,.0f}"
+    except (TypeError, ValueError):
+        return f"₹{amount}"
+
+
+def build_whatsapp_body(
+    entity_type: str, name: str, due_date: date | None, amount: float | None, days_before: int
+) -> str:
+    """A WhatsApp reminder: the payable, the money, the date, in that order.
+
+    Deliberately short and unformatted beyond WhatsApp's own *bold* — this is
+    read on a lock screen, so the first line has to carry the whole message.
+    """
+    label = _days_label(days_before)
+    heading = "overdue" if days_before == 0 else f"due {label}"
+    lines = [
+        f"*{ENTITY_LABEL.get(entity_type, 'Payment')} {heading}*",
+        "",
+        f"*{name}*",
+        f"Amount: {_amount_label(amount)}",
+        f"Due: {due_date.strftime('%d %b %Y') if due_date else '—'}",
+        "",
+        "— TaxVault",
+    ]
+    return "\n".join(lines)
 
 
 def build_notification(
@@ -29,10 +67,14 @@ def build_notification(
         or getattr(entity, "premium_amount", None)
         or getattr(entity, "average_amount", None)
     )
+    # Prefer the editable `name` column every payable now carries (migration
+    # 0010) so the reminder reads with the same label as the calendar and the
+    # payments ledger, then fall back to the historical derivation.
     name: str = (
-        getattr(entity, "description", None)
-        or getattr(entity, "policy_number", None)
+        getattr(entity, "name", None)
+        or getattr(entity, "description", None)
         or getattr(entity, "provider_name", None)
+        or getattr(entity, "policy_number", None)
         or entity_type
     )
 
@@ -44,13 +86,16 @@ def build_notification(
     }
     subject = subject_map.get(entity_type, f"Payment due {label}")
 
-    body = (
-        f"Hi {user.full_name or user.email},\n\n"
-        f"Your {entity_type} '{name}' is due {label}.\n"
-        f"Due date: {due_date}\n"
-        f"Amount: ₹{amount or 'N/A'}\n\n"
-        f"Please make the payment on time to avoid penalties.\n"
-    )
+    if channel == NotificationChannel.WHATSAPP:
+        body = build_whatsapp_body(entity_type, name, due_date, amount, days_before)
+    else:
+        body = (
+            f"Hi {user.full_name or user.email},\n\n"
+            f"Your {entity_type} '{name}' is due {label}.\n"
+            f"Due date: {due_date}\n"
+            f"Amount: ₹{amount or 'N/A'}\n\n"
+            f"Please make the payment on time to avoid penalties.\n"
+        )
 
     html_body = f"""<html><body>
 <p>Hi {user.full_name or user.email},</p>

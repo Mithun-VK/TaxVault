@@ -339,7 +339,204 @@ export function billPriority(type: string): 'variable' | 'fixed' {
   return BILL_PRIORITY[type] ?? 'fixed';
 }
 
+// ── Company module ───────────────────────────────────────────────────────────
+// Mirrors CompanyType / CompanyStatus / CompanyDocumentCategory in the backend
+// (app/models/company.py, app/models/company_document.py). Keep in sync — the
+// API rejects any value not in its own enum.
+
+export const COMPANY_TYPES: Option[] = [
+  { value: 'private_limited', label: 'Private Limited (Pvt Ltd)' },
+  { value: 'public_limited', label: 'Public Limited (Ltd)' },
+  { value: 'llp', label: 'Limited Liability Partnership (LLP)' },
+  { value: 'partnership', label: 'Partnership Firm' },
+  { value: 'proprietorship', label: 'Sole Proprietorship' },
+  { value: 'trust', label: 'Charitable / Religious Trust' },
+  { value: 'section_8', label: 'Section 8 Company (NGO)' },
+  { value: 'one_person', label: 'One Person Company (OPC)' },
+  { value: 'foreign_subsidiary', label: 'Foreign Subsidiary' },
+  { value: 'branch_office', label: 'Branch / Liaison Office' },
+  { value: 'other', label: 'Other' },
+];
+
+export const COMPANY_STATUSES: Option[] = [
+  { value: 'active', label: 'Active', color: 'green' },
+  { value: 'dormant', label: 'Dormant', color: 'amber' },
+  { value: 'under_winding', label: 'Under Winding Up', color: 'red' },
+  { value: 'struck_off', label: 'Struck Off', color: 'slate' },
+  { value: 'dissolved', label: 'Dissolved', color: 'slate' },
+];
+
+/** Document-category groups, in the order the Documents tab stacks them. */
+export const COMPANY_DOC_GROUP_LABELS: Record<string, string> = {
+  incorporation: 'Incorporation',
+  tax: 'Tax Registrations',
+  filings: 'Annual Filings',
+  licenses: 'Licenses & Renewals',
+  foreign: 'Foreign Entity',
+  banking: 'Banking',
+  hr: 'HR & Payroll',
+  other: 'Other',
+};
+
+export const COMPANY_DOCUMENT_CATEGORIES: Option[] = [
+  { value: 'coi', label: 'Certificate of Incorporation', group: 'incorporation' },
+  { value: 'moa', label: 'Memorandum of Association', group: 'incorporation' },
+  { value: 'aoa', label: 'Articles of Association', group: 'incorporation' },
+  { value: 'llp_agreement', label: 'LLP Agreement', group: 'incorporation' },
+  { value: 'partnership_deed', label: 'Partnership Deed', group: 'incorporation' },
+  { value: 'trust_deed', label: 'Trust Deed', group: 'incorporation' },
+  { value: 'pan_card', label: 'Company PAN Card', group: 'tax' },
+  { value: 'gst_certificate', label: 'GST Registration Certificate', group: 'tax' },
+  { value: 'tan_allotment', label: 'TAN Allotment Letter', group: 'tax' },
+  { value: 'annual_return', label: 'ROC Annual Return', group: 'filings' },
+  { value: 'financial_stmt', label: 'Audited Financial Statements', group: 'filings' },
+  { value: 'directors_report', label: 'Directors Report', group: 'filings' },
+  { value: 'audit_report', label: 'Auditor Report', group: 'filings' },
+  { value: 'itr', label: 'Income Tax Return', group: 'filings' },
+  { value: 'gst_return', label: 'GST Annual Return (GSTR-9)', group: 'filings' },
+  { value: 'tds_certificate', label: 'TDS Certificate', group: 'filings' },
+  { value: 'trade_license', label: 'Trade License', group: 'licenses' },
+  { value: 'fssai_license', label: 'FSSAI Food License', group: 'licenses' },
+  { value: 'import_export', label: 'IEC Certificate', group: 'licenses' },
+  { value: 'spice_board', label: 'Spice Board Registration', group: 'licenses' },
+  { value: 'aepc_cert', label: 'AEPC Registration', group: 'licenses' },
+  { value: 'textiles_cert', label: 'Textiles Committee Certificate', group: 'licenses' },
+  { value: 'jafza_license', label: 'JAFZA Trade License', group: 'foreign' },
+  { value: 'foreign_reg', label: 'Foreign Registration', group: 'foreign' },
+  { value: 'vat_certificate', label: 'UAE VAT Registration', group: 'foreign' },
+  { value: 'bank_statement', label: 'Bank Statement', group: 'banking' },
+  { value: 'cancelled_cheque', label: 'Cancelled Cheque', group: 'banking' },
+  { value: 'epf_certificate', label: 'EPF Registration', group: 'hr' },
+  { value: 'esi_certificate', label: 'ESI Registration', group: 'hr' },
+  { value: 'pt_certificate', label: 'Professional Tax Registration', group: 'hr' },
+  { value: 'board_resolution', label: 'Board Resolution', group: 'other' },
+  { value: 'power_of_attorney', label: 'Power of Attorney', group: 'other' },
+  { value: 'other', label: 'Other Document', group: 'other' },
+];
+
+/** Categories that recur each financial year — these prompt for an FY. */
+export const COMPANY_FILING_CATEGORIES = [
+  'annual_return',
+  'financial_stmt',
+  'directors_report',
+  'audit_report',
+  'itr',
+  'gst_return',
+  'tds_certificate',
+] as const;
+
+export const DIRECTOR_DESIGNATIONS = [
+  'Director',
+  'Managing Director',
+  'Whole-time Director',
+  'Independent Director',
+  'Nominee Director',
+  'Partner',
+  'Designated Partner',
+  'Trustee',
+  'Managing Trustee',
+  'Secretary',
+] as const;
+
+export const ACCOUNT_TYPES: Option[] = [
+  { value: 'current', label: 'Current Account' },
+  { value: 'savings', label: 'Savings Account' },
+  { value: 'cc', label: 'Cash Credit (CC)' },
+  { value: 'od', label: 'Overdraft (OD)' },
+];
+
+export const FINANCIAL_YEAR_ENDS: Option[] = [
+  { value: '03-31', label: 'March 31 (Indian standard)' },
+  { value: '09-30', label: 'September 30 (UAE aligned)' },
+  { value: '12-31', label: 'December 31 (Calendar year)' },
+  { value: '06-30', label: 'June 30' },
+];
+
+/** GSTIN's first two digits → state. Lets the UI show "33 → Tamil Nadu". */
+export const GST_STATE_NAMES: Record<string, string> = {
+  '01': 'Jammu & Kashmir', '02': 'Himachal Pradesh', '03': 'Punjab',
+  '04': 'Chandigarh', '05': 'Uttarakhand', '06': 'Haryana', '07': 'Delhi',
+  '08': 'Rajasthan', '09': 'Uttar Pradesh', '10': 'Bihar', '11': 'Sikkim',
+  '12': 'Arunachal Pradesh', '13': 'Nagaland', '14': 'Manipur', '15': 'Mizoram',
+  '16': 'Tripura', '17': 'Meghalaya', '18': 'Assam', '19': 'West Bengal',
+  '20': 'Jharkhand', '21': 'Odisha', '22': 'Chhattisgarh', '23': 'Madhya Pradesh',
+  '24': 'Gujarat', '25': 'Daman & Diu', '26': 'Dadra & Nagar Haveli',
+  '27': 'Maharashtra', '28': 'Andhra Pradesh (Old)', '29': 'Karnataka',
+  '30': 'Goa', '31': 'Lakshadweep', '32': 'Kerala', '33': 'Tamil Nadu',
+  '34': 'Puducherry', '35': 'Andaman & Nicobar Islands', '36': 'Telangana',
+  '37': 'Andhra Pradesh', '38': 'Ladakh', '97': 'Other Territory',
+};
+
+export const gstStateName = (code?: string): string | undefined =>
+  code ? GST_STATE_NAMES[code] : undefined;
+
+/** Typeahead suggestions for the bank-account form. */
+export const BANK_NAME_SUGGESTIONS = [
+  'State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank',
+  'Punjab National Bank', 'Bank of Baroda', 'Canara Bank', 'Union Bank of India',
+  'Indian Bank', 'Indian Overseas Bank', 'Kotak Mahindra Bank', 'IndusInd Bank',
+  'Yes Bank', 'IDFC First Bank', 'Federal Bank', 'South Indian Bank',
+  'Karur Vysya Bank', 'Tamilnad Mercantile Bank', 'City Union Bank',
+] as const;
+
+/**
+ * The statutory calendar the Compliance tab is built from.
+ *
+ * `day` is the day of the month a monthly filing is due; annual rows use
+ * `month`/`day` as a fixed calendar date, except `fyOffsetMonths`, which counts
+ * months from the company's own financial-year end (so a Sept-30 FY shifts the
+ * whole annual set with it). `category` ties a row to the document that proves
+ * it was filed.
+ */
+export interface ComplianceRule {
+  id: string;
+  label: string;
+  frequency: 'monthly' | 'quarterly' | 'annual';
+  /** Day of month the filing is due. */
+  day: number;
+  /** Fixed month (1-12) for annual rows pinned to the calendar. */
+  month?: number;
+  /** Months after the company's FY end, for annual rows that follow it. */
+  fyOffsetMonths?: number;
+  /** Document category that satisfies this filing. */
+  category?: string;
+  /** Only applies when the company is registered for this. */
+  requires?: 'gstin' | 'tan';
+}
+
+export const COMPLIANCE_RULES: ComplianceRule[] = [
+  { id: 'gst_monthly', label: 'GST Return (GSTR-3B)', frequency: 'monthly', day: 11, requires: 'gstin' },
+  { id: 'tds_payable', label: 'TDS Payable', frequency: 'monthly', day: 7, requires: 'tan' },
+  { id: 'epf_return', label: 'EPF Return', frequency: 'monthly', day: 14, category: 'epf_certificate' },
+  { id: 'esi_return', label: 'ESI Return', frequency: 'monthly', day: 15, category: 'esi_certificate' },
+  { id: 'tds_quarterly', label: 'TDS Return (Quarterly)', frequency: 'quarterly', day: 31, category: 'tds_certificate', requires: 'tan' },
+  // Annual due dates hang off the company's own FY end, so a Sept-30 year
+  // (JAFZA) shifts the whole set. Offsets reproduce the Indian statutory
+  // calendar for a March-31 year: ITR 30 Sep, ROC 12 Oct, AOC-4 30 Oct,
+  // GSTR-9 31 Dec.
+  { id: 'itr', label: 'Company Income Tax Return', frequency: 'annual', day: 30, fyOffsetMonths: 6, category: 'itr' },
+  { id: 'roc_annual', label: 'ROC Annual Return', frequency: 'annual', day: 12, fyOffsetMonths: 7, category: 'annual_return' },
+  { id: 'financials', label: 'Audited Financial Statements', frequency: 'annual', day: 30, fyOffsetMonths: 7, category: 'financial_stmt' },
+  { id: 'gstr9', label: 'GST Annual Return (GSTR-9)', frequency: 'annual', day: 31, fyOffsetMonths: 9, category: 'gst_return', requires: 'gstin' },
+];
+
+/** Company type → accent colour for the card's left border (mirrors the asset tiers). */
+export const COMPANY_TYPE_COLOR: Record<string, string> = {
+  private_limited: '#1A3C6E', // navy
+  public_limited: '#1A3C6E',
+  llp: '#0369A1', // blue
+  partnership: '#0369A1',
+  proprietorship: '#0F6E56', // teal
+  trust: '#7C3AED', // purple
+  section_8: '#7C3AED',
+  one_person: '#0F6E56',
+  foreign_subsidiary: '#9D174D', // rose
+  branch_office: '#9D174D',
+  other: '#475569', // slate
+};
+
 export const ALERT_CHANNELS: Option<AlertChannel>[] = [
+  { label: 'WhatsApp', value: 'whatsapp', color: '#25D366' },
   { label: 'Email', value: 'email', color: '#1A3C6E' },
   { label: 'SMS', value: 'sms', color: '#0F6E56' },
   { label: 'Push', value: 'push', color: '#7C3AED' },

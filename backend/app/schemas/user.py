@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-Role = Literal["admin", "user"]
+Role = Literal["super_admin", "admin", "user"]
 
 
 class UserOut(BaseModel):

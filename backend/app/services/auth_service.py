@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.exceptions import AuthenticationError, DuplicateError
+from app.core.permissions import ROLE_SUPER_ADMIN, ROLE_USER
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -28,10 +29,11 @@ async def register(db: AsyncSession, payload: RegisterRequest) -> TokenResponse:
     if existing.scalar_one_or_none():
         raise DuplicateError("Email already registered")
 
-    # First account to register bootstraps the deployment's admin; everyone
-    # after that is a normal user until an admin promotes them.
+    # First account to register bootstraps the deployment's super admin and
+    # owns the shared vault; everyone after that is a plain user until a super
+    # admin promotes them.
     user_count = await db.scalar(select(func.count()).select_from(User))
-    role = "admin" if not user_count else "user"
+    role = ROLE_SUPER_ADMIN if not user_count else ROLE_USER
 
     user = User(
         email=payload.email,

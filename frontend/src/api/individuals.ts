@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api, getErrorMessage, queryClient } from './client';
+import { useCan } from '@/hooks/usePermissions';
 import type {
   Asset,
   IdentityDocType,
@@ -21,9 +22,13 @@ export interface IndividualList {
   total: number;
 }
 
+// Skipped entirely for roles without `individuals.view` — the sidebar renders
+// this list on every page, so an unauthorised call would fire constantly.
 export function useIndividuals() {
+  const canView = useCan('individuals.view');
   return useQuery({
     queryKey: individualKeys.lists(),
+    enabled: canView,
     queryFn: async () => {
       const { data } = await api.get<IndividualList>('/individuals/', {
         params: { limit: 50 },

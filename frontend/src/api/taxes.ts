@@ -10,7 +10,9 @@ function fromBackend(tax: Tax & { asset_id?: string | null }): Tax {
   return { ...tax, linked_asset_id: tax.asset_id ?? tax.linked_asset_id ?? null };
 }
 
-function toBackendPayload(data: Partial<TaxCreate & TaxUpdate>) {
+// Exported so the change-request flow can build the same backend-shaped
+// payload a direct edit would send (see hooks/usePayableChange.ts).
+export function toBackendTaxPayload(data: Partial<TaxCreate & TaxUpdate>) {
   const { linked_asset_id, individual_id, tax_type, ...rest } = data as TaxCreate & {
     linked_asset_id?: string | null;
     individual_id?: string | null;
@@ -54,7 +56,7 @@ export const useTax = (id: string | undefined) =>
 export const useCreateTax = () =>
   useMutation({
     mutationFn: (data: TaxCreate) =>
-      api.post<Tax>('/taxes/', toBackendPayload(data)).then((r) => fromBackend(r.data)),
+      api.post<Tax>('/taxes/', toBackendTaxPayload(data)).then((r) => fromBackend(r.data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['taxes'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
@@ -66,7 +68,7 @@ export const useCreateTax = () =>
 export const useUpdateTax = () =>
   useMutation({
     mutationFn: ({ id, data }: { id: string; data: TaxUpdate }) =>
-      api.patch<Tax>(`/taxes/${id}`, toBackendPayload(data)).then((r) => fromBackend(r.data)),
+      api.patch<Tax>(`/taxes/${id}`, toBackendTaxPayload(data)).then((r) => fromBackend(r.data)),
     onSuccess: (tax) => {
       queryClient.invalidateQueries({ queryKey: ['taxes'] });
       queryClient.invalidateQueries({ queryKey: ['taxes', tax.id] });

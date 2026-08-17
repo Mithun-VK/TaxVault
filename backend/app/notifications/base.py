@@ -6,6 +6,7 @@ from typing import Any
 
 
 class NotificationChannel(str, Enum):
+    WHATSAPP = "whatsapp"
     EMAIL = "email"
     SMS = "sms"
     PUSH = "push"

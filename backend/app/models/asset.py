@@ -21,6 +21,13 @@ class Asset(Base):
         nullable=True,
         index=True,
     )
+    # A property may be held by a company instead of (or alongside) a person.
+    company_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("companies.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     asset_type: Mapped[str] = mapped_column(String, nullable=False)
     name: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str | None] = mapped_column(String)
@@ -61,6 +68,12 @@ class Asset(Base):
         "Individual",
         back_populates="assets",
         foreign_keys="Asset.individual_id",
+        lazy="noload",
+    )
+    company = relationship(
+        "Company",
+        back_populates="assets",
+        foreign_keys="Asset.company_id",
         lazy="noload",
     )
     tax_obligations = relationship("TaxObligation", back_populates="asset", lazy="noload")

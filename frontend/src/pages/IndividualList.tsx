@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { useIndividuals } from '@/api/individuals';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCan } from '@/hooks/usePermissions';
 import { getInitials } from '@/utils/formatters';
 import { daysUntil } from '@/utils/dates';
 import { cn } from '@/lib/utils';
@@ -126,7 +126,7 @@ function IndividualCard({ ind }: { ind: Individual }) {
 
 export function IndividualList() {
   const navigate = useNavigate();
-  const isAdmin = useIsAdmin();
+  const canCreate = useCan('individuals.create');
   const { data, isLoading } = useIndividuals();
   const individuals = data?.items ?? [];
 
@@ -141,7 +141,7 @@ export function IndividualList() {
             Personal documents and linked assets for each family member
           </p>
         </div>
-        {isAdmin && (
+        {canCreate && (
           <Button onClick={() => navigate('/individual/new')}>
             <Plus className="h-4 w-4" /> Add Individual
           </Button>
@@ -160,7 +160,7 @@ export function IndividualList() {
           title="No individuals added yet"
           description="Add family members to track their properties and documents"
           action={
-            isAdmin ? (
+            canCreate ? (
               <Button onClick={() => navigate('/individual/new')}>
                 <Plus className="h-4 w-4" /> Add Individual
               </Button>

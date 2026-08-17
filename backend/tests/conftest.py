@@ -62,6 +62,12 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 
 
 # ── User creation helpers ─────────────────────────────────────────────────────
+#
+# TaxVault holds one shared vault owned by the earliest-created super admin, and
+# the first account to register takes that role. So `user_a` is the vault owner
+# and every other account reads the *same* data through a narrower role — what
+# differs between fixtures is what they are allowed to do, not what they can see.
+
 
 async def _create_user(
     client: AsyncClient, email: str, password: str, full_name: str
@@ -86,14 +92,40 @@ async def _create_user(
     }
 
 
+async def _set_role(
+    client: AsyncClient, owner: dict[str, Any], user: dict[str, Any], role: str
+) -> dict[str, Any]:
+    """Promote/demote via the API, which only the super admin may call."""
+    resp = await client.patch(
+        f"/api/v1/users/{user['id']}/role", headers=owner["headers"], json={"role": role}
+    )
+    assert resp.status_code == 200, f"Role change failed: {resp.json()}"
+    user["role"] = role
+    return user
+
+
 @pytest_asyncio.fixture
 async def user_a(client: AsyncClient) -> dict[str, Any]:
-    return await _create_user(client, "user_a@test.com", "Password123!", "User Alpha")
+    """The vault owner — first to register, so `super_admin`: full CRUD."""
+    user = await _create_user(client, "user_a@test.com", "Password123!", "User Alpha")
+    user["role"] = "super_admin"
+    return user
 
 
 @pytest_asyncio.fixture
-async def user_b(client: AsyncClient) -> dict[str, Any]:
-    return await _create_user(client, "user_b@test.com", "Password123!", "User Beta")
+async def user_b(client: AsyncClient, user_a: dict) -> dict[str, Any]:
+    """A second account with the `admin` role: sees the whole shared vault and
+    may add records, but may never edit or delete."""
+    user = await _create_user(client, "user_b@test.com", "Password123!", "User Beta")
+    return await _set_role(client, user_a, user, "admin")
+
+
+@pytest_asyncio.fixture
+async def member(client: AsyncClient, user_a: dict) -> dict[str, Any]:
+    """A `user`-role account: the payables desk. Bills, taxes, insurance,
+    payments and the calendar — and it may add bills and log payments."""
+    user = await _create_user(client, "member@test.com", "Password123!", "Member Gamma")
+    return await _set_role(client, user_a, user, "user")
 
 
 # Keep legacy fixtures so old-style tests don't break

@@ -75,6 +75,7 @@ export function Profile() {
   const changePassword = useChangePassword();
 
   const [prefs, setPrefs] = useState<Record<AlertChannel, boolean>>({
+    whatsapp: true,
     email: true,
     sms: false,
     push: true,

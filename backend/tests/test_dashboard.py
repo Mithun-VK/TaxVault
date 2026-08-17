@@ -7,7 +7,7 @@ GET /dashboard/recent-activity → list of recent events
 GET /dashboard/calendar        → list of calendar events (requires ?month=YYYY-MM)
 
 All endpoints require auth.
-All endpoints are user-scoped (never leak other users' data).
+All endpoints read the deployment’s shared vault, gated by role (see test_rbac.py).
 """
 from httpx import AsyncClient
 
@@ -51,14 +51,14 @@ class TestDashboardSummary:
         assert resp.status_code == 200
         # We can't assert exact value without knowing all assets, but it must be >= 0
 
-    async def test_isolation_from_other_users(
+    async def test_admin_sees_the_same_summary(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict, tax: dict
     ):
-        """user_b sees zero even though user_a has assets and taxes."""
+        """The summary describes the vault, not the caller — both roles match."""
+        resp_a = await client.get("/api/v1/dashboard/summary", headers=auth(user_a))
         resp_b = await client.get("/api/v1/dashboard/summary", headers=auth(user_b))
-        data_b = resp_b.json()
-        assert float(data_b["total_assets_value"]) == 0
-        assert int(data_b["overdue_count"]) == 0
+        assert resp_b.status_code == 200
+        assert resp_b.json() == resp_a.json()
 
     async def test_requires_auth(self, client: AsyncClient):
         resp = await client.get("/api/v1/dashboard/summary")
@@ -88,13 +88,12 @@ class TestDashboardUpcoming:
         # Just confirm we got a list back without errors
         assert isinstance(items, list)
 
-    async def test_isolation_user_b_cannot_see_user_a_data(
+    async def test_admin_sees_the_same_upcoming(
         self, client: AsyncClient, user_a: dict, user_b: dict, tax: dict, bill: dict
     ):
         resp_a = await client.get("/api/v1/dashboard/upcoming", headers=auth(user_a))
         resp_b = await client.get("/api/v1/dashboard/upcoming", headers=auth(user_b))
-        # user_b should have no items
-        assert resp_b.json() == []
+        assert resp_b.json() == resp_a.json()
 
     async def test_requires_auth(self, client: AsyncClient):
         resp = await client.get("/api/v1/dashboard/upcoming")
@@ -175,13 +174,16 @@ class TestDashboardCalendar:
         assert resp.status_code == 200
         assert resp.json() == []
 
-    async def test_isolation(
+    async def test_admin_sees_the_same_calendar(
         self, client: AsyncClient, user_a: dict, user_b: dict, tax: dict
     ):
+        resp_a = await client.get(
+            "/api/v1/dashboard/calendar?month=2026-09", headers=auth(user_a)
+        )
         resp_b = await client.get(
             "/api/v1/dashboard/calendar?month=2026-09", headers=auth(user_b)
         )
-        assert resp_b.json() == []
+        assert resp_b.json() == resp_a.json()
 
     async def test_requires_auth(self, client: AsyncClient):
         resp = await client.get("/api/v1/dashboard/calendar?month=2026-09")

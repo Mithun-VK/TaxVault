@@ -34,6 +34,7 @@ class AssetCreate(PropertyDetailsMixin):
     current_value: Decimal | None = Field(default=None, ge=0)
     status: AssetStatus = AssetStatus.active
     individual_id: uuid.UUID | None = None
+    company_id: uuid.UUID | None = None
     asset_metadata: dict = Field(default={}, alias="metadata")
     notes: str | None = Field(default=None, max_length=2000)
 
@@ -49,6 +50,7 @@ class AssetUpdate(PropertyDetailsMixin):
     current_value: Decimal | None = Field(default=None, ge=0)
     status: AssetStatus | None = None
     individual_id: uuid.UUID | None = None
+    company_id: uuid.UUID | None = None
     asset_metadata: dict | None = Field(default=None, alias="metadata")
     notes: str | None = Field(default=None, max_length=2000)
 
@@ -59,6 +61,7 @@ class AssetOut(PropertyDetailsMixin):
     id: uuid.UUID
     user_id: uuid.UUID
     individual_id: uuid.UUID | None = None
+    company_id: uuid.UUID | None = None
     asset_type: str
     name: str
     description: str | None

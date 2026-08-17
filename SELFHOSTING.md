@@ -186,7 +186,60 @@ Two things worth knowing:
   transfers with the data and step 5's `alembic upgrade head` is a no-op.
 
 **Starting fresh instead?** Skip this step. Alembic creates the schema in step
-5, and the first user you register becomes the admin.
+5, and the first user you register becomes the **super admin** — the account
+that owns the vault every other login reads.
+
+**Roles.** TaxVault holds one shared vault; the role decides what a login may
+do with it:
+
+| Role | Sees | Can add | Can edit / delete | Manages users |
+| --- | --- | --- | --- | --- |
+| `super_admin` | everything | everything | yes | yes |
+| `admin` | everything | properties, individuals, bills, taxes, insurance, documents, payments | no — but approves members' requests | no |
+| `user` | calendar, bills, taxes, insurance, payments | bills, taxes, insurance, payments | only via approval | no |
+
+Promote or demote from **Users** in the sidebar (super admin only). The full
+table lives in `backend/app/core/permissions.py`; the frontend mirrors it in
+`frontend/src/utils/permissions.ts`.
+
+**Approvals (maker/checker).** A member adds bills, taxes and insurance
+policies outright, but editing or deleting one is filed as a *change request*
+rather than applied. Their Edit button reads "Request edit"; submitting sends
+only the fields they changed. An admin or super admin reviews it under
+**Approvals** in the sidebar, and approving applies the change through exactly
+the same code path a super admin's own edit takes.
+
+Admins deliberately hold no `*.request_change` permission: they are the
+checker, never the maker, so an admin cannot file a request and then approve it
+to sidestep their own read-only limit. A super admin can file one, but has no
+reason to — they can simply make the edit.
+
+The **Approvals** tab itself is reviewer-only (admin and super admin). Members
+get a confirmation when they submit, but no queue of their own.
+
+**Requests expire.** A request nobody reviews within
+`CHANGE_REQUEST_TTL_MINUTES` (default **15**) lapses to `expired` and can no
+longer be approved — a stale edit should not land on a record that has moved on
+since. Expiry is evaluated whenever the queue is read or reviewed rather than
+by a background job, so it is exact at the moment it matters and needs no
+worker running. Change the window in `backend/.env`:
+
+```
+CHANGE_REQUEST_TTL_MINUTES=60
+```
+
+It applies immediately to requests already in flight.
+
+**Test logins.** To exercise all three roles against real data:
+
+```powershell
+docker compose -f docker-compose.selfhost.yml exec api python scripts/seed_rbac_users.py
+```
+
+It creates `super.admin@taxvault.in` / `SuperAdmin@123`,
+`admin@taxvault.in` / `Admin@123` and `user@taxvault.in` / `User@123`, and is
+idempotent (re-running just resets those three). Delete them before the
+deployment goes anywhere real — the passwords are in source control.
 
 ---
 
@@ -258,6 +311,56 @@ Then browse to `http://192.168.1.50:8080` from any device on the network.
 
 > Only ports 8080 (web) and, on loopback, 8001/5433 are bound. Postgres and
 > Redis are not reachable from the LAN at all.
+
+---
+
+## Step 6.5 — Turn on WhatsApp reminders
+
+Payment reminders go out over WhatsApp via Twilio. Nothing else needs
+configuring — email needs SES credentials and push needs a Firebase service
+account, so on a stock self-hosted install WhatsApp is the channel that works.
+
+**Get the credentials.** In the [Twilio console](https://console.twilio.com):
+Account SID and Auth Token are on the dashboard. For the sender, use
+**Messaging → Try it out → Send a WhatsApp message** — the sandbox gives you a
+number (`+14155238886`) and a `join <code>` message. Send that message from the
+phone that should receive alerts; the sandbox only delivers to numbers that
+have opted in this way. For production, register your own sender under
+**Messaging → Senders**.
+
+**Set them in `backend/.env.selfhost`:**
+
+```
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your-auth-token
+TWILIO_WHATSAPP_FROM=+14155238886
+TWILIO_WHATSAPP_TO=+919876543210
+```
+
+`TWILIO_WHATSAPP_TO` is the one number every reminder goes to — the household
+number. Leave it blank to send to each user's own `phone_number` instead.
+Numbers are plain E.164; the `whatsapp:` prefix Twilio wants is added for you.
+
+Restart the API and worker so they pick the values up:
+
+```powershell
+docker compose -f docker-compose.selfhost.yml --env-file backend/.env.selfhost up -d api worker beat
+```
+
+**Verify it.** Open **Alerts** in the sidebar. The card at the top says either
+*Sending to +91••••3210* or exactly which variable is still missing. Hit **Send
+test message** — it goes down the same code path a real reminder takes, so if
+it arrives, reminders will too.
+
+**When they fire.** A Celery beat job scans every morning at 08:00 IST and
+sends a reminder for anything due in 15, 7 or 1 day; a second job at 09:00
+chases anything already overdue. Change the schedule for every payable at once
+on the Alerts page, or switch individual ones off there. Alerts are idempotent
+— the same reminder is never sent twice on the same day, even if the worker
+restarts.
+
+Note the `worker` and `beat` containers must both be running: `beat` decides
+*when*, `worker` does the sending.
 
 ---
 

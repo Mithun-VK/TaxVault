@@ -18,7 +18,7 @@ import { TaxCard } from '@/components/taxes/TaxCard';
 import { useTaxes } from '@/api/taxes';
 import { TAX_TYPES, TAX_STATUSES } from '@/utils/constants';
 import { getFYOptions } from '@/utils/dates';
-import { useIsAdmin } from '@/hooks/useIsAdmin';
+import { useCan } from '@/hooks/usePermissions';
 import { formatINRCompact } from '@/utils/formatters';
 import type { Tax, TaxType, TaxStatus } from '@/types';
 
@@ -46,7 +46,7 @@ export function Taxes() {
   // Fetch all taxes once; categories, stats and the drill-down list are derived
   // client-side (mirrors the Assets owner flow).
   const { data: taxes = [], isLoading } = useTaxes();
-  const isAdmin = useIsAdmin();
+  const canCreate = useCan('taxes.create');
 
   const stats = useMemo(
     () => ({
@@ -124,7 +124,7 @@ export function Taxes() {
                 onExport={() => generateTaxReport(taxes, { download: true })}
                 disabled={taxes.length === 0}
               />
-              {isAdmin && (
+              {canCreate && (
                 <Button onClick={openCreate}>
                   <Plus className="h-4 w-4" /> Add tax
                 </Button>
@@ -181,7 +181,7 @@ export function Taxes() {
             {categoryTaxes.length} obligation{categoryTaxes.length === 1 ? '' : 's'}
           </p>
         </div>
-        {isAdmin && (
+        {canCreate && (
           <Button onClick={openCreate}>
             <Plus className="h-4 w-4" /> Add tax
           </Button>
@@ -229,7 +229,7 @@ export function Taxes() {
           title={`No ${selectedMeta?.label.toLowerCase()} obligations`}
           description="Add a tax in this category to track its due dates and payments."
           action={
-            isAdmin ? (
+            canCreate ? (
               <Button onClick={openCreate}>
                 <Plus className="h-4 w-4" /> Add a tax
               </Button>

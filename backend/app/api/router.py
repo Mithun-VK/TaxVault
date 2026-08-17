@@ -5,6 +5,8 @@ from app.api.v1 import (
     assets,
     auth,
     bills,
+    change_requests,
+    companies,
     dashboard,
     documents,
     gold_categories,
@@ -23,10 +25,12 @@ api_router.include_router(users.router)
 api_router.include_router(assets.router)
 api_router.include_router(gold_categories.router)
 api_router.include_router(individuals.router)
+api_router.include_router(companies.router)
 api_router.include_router(insurance.router)
 api_router.include_router(taxes.router)
 api_router.include_router(bills.router)
 api_router.include_router(payments.router)
+api_router.include_router(change_requests.router)
 api_router.include_router(documents.router)
 api_router.include_router(alerts.router)
 api_router.include_router(dashboard.router)
