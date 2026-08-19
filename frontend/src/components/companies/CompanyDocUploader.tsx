@@ -22,7 +22,7 @@ import {
   MAX_UPLOAD_SIZE,
 } from '@/utils/constants';
 
-/** Financial-year options, newest first — filings are almost always recent. */
+/** Financial-year options, newest first - filings are almost always recent. */
 function financialYears(count = 8): string[] {
   const now = new Date();
   // The FY starting in April of the current calendar year hasn't closed yet,
@@ -39,7 +39,7 @@ const isFiling = (category: string) =>
 
 interface CompanyDocUploaderProps {
   companyId: string;
-  /** Pre-selects the category — used by the per-section upload buttons. */
+  /** Pre-selects the category - used by the per-section upload buttons. */
   defaultCategory?: string;
   /** Pre-selects the financial year, e.g. from the Compliance row being filed. */
   defaultFinancialYear?: string;
@@ -204,7 +204,7 @@ export function CompanyDocUploader({
             onChange={(e) => setExpiryDate(e.target.value)}
           />
           <p className="text-xs text-slate-600">
-            Set this for renewable licenses — it drives the expiry warnings.
+            Set this for renewable licenses - it drives the expiry warnings.
           </p>
         </div>
       </div>

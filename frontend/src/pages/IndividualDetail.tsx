@@ -137,7 +137,7 @@ function ageFrom(dob?: string): number | null {
 }
 
 /**
- * Hero summary — mirrors the Property Details hero (accent border, badge row,
+ * Hero summary - mirrors the Property Details hero (accent border, badge row,
  * name, and a labelled detail grid), so a person and a property read the same.
  */
 function IndividualHero({ individual }: { individual: Individual }) {
@@ -149,28 +149,28 @@ function IndividualHero({ individual }: { individual: Individual }) {
       label: 'Date of birth',
       value: individual.date_of_birth
         ? `${formatDate(individual.date_of_birth)}${age !== null ? ` · ${age} yrs` : ''}`
-        : '—',
+        : '-',
     },
-    { label: 'Phone', value: individual.phone_number ?? '—' },
-    { label: 'Email', value: individual.email ?? '—' },
-    { label: 'Address', value: individual.address ?? '—' },
-    { label: 'Aadhaar', value: individual.aadhaar_number ?? '—' },
-    { label: 'PAN', value: individual.pan_number ?? '—' },
-    { label: 'Passport', value: individual.passport_number ?? '—' },
+    { label: 'Phone', value: individual.phone_number ?? '-' },
+    { label: 'Email', value: individual.email ?? '-' },
+    { label: 'Address', value: individual.address ?? '-' },
+    { label: 'Aadhaar', value: individual.aadhaar_number ?? '-' },
+    { label: 'PAN', value: individual.pan_number ?? '-' },
+    { label: 'Passport', value: individual.passport_number ?? '-' },
     {
       label: 'Passport expiry',
-      value: individual.passport_expiry ? formatDate(individual.passport_expiry) : '—',
+      value: individual.passport_expiry ? formatDate(individual.passport_expiry) : '-',
     },
-    { label: 'Driving license', value: individual.driving_license_number ?? '—' },
-    { label: 'Voter ID', value: individual.voter_id_number ?? '—' },
+    { label: 'Driving license', value: individual.driving_license_number ?? '-' },
+    { label: 'Voter ID', value: individual.voter_id_number ?? '-' },
   ];
 
   const membershipRows: { label: string; value: string }[] = [
-    { label: 'Skywards', value: individual.skywards_number ?? '—' },
-    { label: 'Maharaja', value: individual.maharaja_number ?? '—' },
-    { label: 'Indigo chip', value: individual.indigo_chip_number ?? '—' },
+    { label: 'Skywards', value: individual.skywards_number ?? '-' },
+    { label: 'Maharaja', value: individual.maharaja_number ?? '-' },
+    { label: 'Indigo chip', value: individual.indigo_chip_number ?? '-' },
   ];
-  const hasMembership = membershipRows.some((r) => r.value !== '—');
+  const hasMembership = membershipRows.some((r) => r.value !== '-');
 
   return (
     <Card className="border-l-4 p-6" style={{ borderLeftColor: '#1A3C6E' }}>
@@ -257,8 +257,8 @@ function IndividualHero({ individual }: { individual: Individual }) {
         >
           <AlertTriangle className="h-3.5 w-3.5" />
           {passportDays < 0
-            ? 'Passport has expired — renew immediately'
-            : `Passport expires in ${passportDays} days — renew soon`}
+            ? 'Passport has expired - renew immediately'
+            : `Passport expires in ${passportDays} days - renew soon`}
         </div>
       )}
 
@@ -458,7 +458,7 @@ function DocumentsTab({ individual, readOnly }: { individual: Individual; readOn
         <NumberField
           label="Aadhaar number"
           value={aadhaar}
-          display={individual.aadhaar_number ?? '—'}
+          display={individual.aadhaar_number ?? '-'}
           placeholder="12 digits"
           readOnly={readOnly}
           onChange={setAadhaar}
@@ -477,7 +477,7 @@ function DocumentsTab({ individual, readOnly }: { individual: Individual; readOn
         <NumberField
           label="PAN number"
           value={pan}
-          display={individual.pan_number ?? '—'}
+          display={individual.pan_number ?? '-'}
           placeholder="ABCDE1234F"
           readOnly={readOnly}
           uppercase
@@ -498,7 +498,7 @@ function DocumentsTab({ individual, readOnly }: { individual: Individual; readOn
           <NumberField
             label="Passport number"
             value={passport}
-            display={individual.passport_number ?? '—'}
+            display={individual.passport_number ?? '-'}
             placeholder="e.g. Z1234567"
             readOnly={readOnly}
             onChange={setPassport}
@@ -523,8 +523,8 @@ function DocumentsTab({ individual, readOnly }: { individual: Individual; readOn
           >
             <AlertTriangle className="h-3.5 w-3.5" />
             {passportDays < 0
-              ? 'Passport has expired — renew immediately'
-              : `Passport expires in ${passportDays} days — renew soon`}
+              ? 'Passport has expired - renew immediately'
+              : `Passport expires in ${passportDays} days - renew soon`}
           </div>
         )}
       </DocSection>
@@ -680,7 +680,7 @@ function PropertiesTab({ individual, readOnly }: { individual: Individual; readO
         linkedIds={new Set(assets.map((a) => a.id))}
       />
 
-      {/* Create a property linked to this individual — stays on this page. */}
+      {/* Create a property linked to this individual - stays on this page. */}
       <SlideOverDrawer
         open={addOpen}
         onOpenChange={setAddOpen}
@@ -734,7 +734,7 @@ function LinkPropertyDialog({
   );
 
   const link = async (asset: Asset) => {
-    // Set owner_name too — the owner shown everywhere (getAssetOwner) reads that
+    // Set owner_name too - the owner shown everywhere (getAssetOwner) reads that
     // column, not individual_id, so linking alone wouldn't update the display.
     await updateAsset.mutateAsync({
       id: asset.id,
@@ -806,7 +806,7 @@ function FinancialsTab({
   const createTax = useCreateTax();
   const [taxOpen, setTaxOpen] = useState(false);
 
-  // Only the person's own taxes and policies — anything tied to a property or
+  // Only the person's own taxes and policies - anything tied to a property or
   // vehicle lives on that asset, not on the person.
   const personalTaxes = taxes.filter((t) => t.individual_id === individual.id);
   const myPolicies = policies.filter((p) => p.linked_individual_id === individual.id);
@@ -835,7 +835,7 @@ function FinancialsTab({
           </div>
         </div>
 
-        {/* Personal — income tax, professional tax, … (property taxes belong to
+        {/* Personal - income tax, professional tax, … (property taxes belong to
             the property, not the person, so they're intentionally excluded). */}
         {personalTaxes.length === 0 ? (
           <p className="text-sm text-slate-600">
@@ -846,7 +846,7 @@ function FinancialsTab({
         )}
       </section>
 
-      {/* Add a personal tax — stored against this individual. */}
+      {/* Add a personal tax - stored against this individual. */}
       <SlideOverDrawer
         open={taxOpen}
         onOpenChange={setTaxOpen}
@@ -1199,7 +1199,7 @@ export function IndividualDetail() {
         </TabsContent>
       </Tabs>
 
-      {/* Edit drawer — mirrors the Property Details edit flow. */}
+      {/* Edit drawer - mirrors the Property Details edit flow. */}
       <SlideOverDrawer
         open={editOpen}
         onOpenChange={setEditOpen}

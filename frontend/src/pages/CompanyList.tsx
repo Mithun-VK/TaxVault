@@ -34,7 +34,7 @@ const typeLabel = (value: string) =>
   COMPANY_TYPES.find((t) => t.value === value)?.label ?? value;
 const statusOption = (value: string) => COMPANY_STATUSES.find((s) => s.value === value);
 
-/** Registration presence chip — the same ✓/✗ vocabulary as the Individual card. */
+/** Registration presence chip - the same ✓/✗ vocabulary as the Individual card. */
 function RegChip({ label, ok }: { label: string; ok: boolean }) {
   const Icon = ok ? CheckCircle2 : XCircle;
   return (

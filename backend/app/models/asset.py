@@ -36,7 +36,7 @@ class Asset(Base):
     current_value: Mapped[float | None] = mapped_column(Numeric(14, 2))
     status: Mapped[str] = mapped_column(String, nullable=False, default="active")
 
-    # ── Property Details (land & building) — first-class columns. Values are
+    # ── Property Details (land & building) - first-class columns. Values are
     # stored as text; multi-value fields (patta/EB numbers) are comma-joined.
     # asset_metadata still holds extras (deed_type, tax ids, lease notes, …).
     owner_name: Mapped[str | None] = mapped_column(String)

@@ -85,7 +85,7 @@ export function Taxes() {
 
   const openCreate = () =>
     navigate(selectedType ? `/taxes/new?type=${selectedType}` : '/taxes/new');
-  // Open the tax's detail page — Edit and Record payment live there, mirroring
+  // Open the tax's detail page - Edit and Record payment live there, mirroring
   // the Bills and Insurance card → detail flow.
   const openDetail = (tax: Tax) => navigate(`/taxes/${tax.id}`);
 

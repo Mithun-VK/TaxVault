@@ -393,7 +393,7 @@ function NavGroup({
       label: ind.full_name,
     }));
   } else if (item.key === 'company') {
-    // Trade name where one exists — it's what the business is called day to day.
+    // Trade name where one exists - it's what the business is called day to day.
     leaves = (companies?.items ?? []).map((c) => ({
       to: `/company/${c.id}`,
       label: c.trade_name || c.legal_name,
@@ -575,7 +575,7 @@ export function Shell() {
 
   return (
     <div className="min-h-screen bg-surface-page">
-      {/* Desktop sidebar — widens a touch on large displays so labels breathe */}
+      {/* Desktop sidebar - widens a touch on large displays so labels breathe */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] flex-col border-r border-surface-border bg-white md:flex 2xl:w-[288px]">
         {SidebarContent}
       </aside>

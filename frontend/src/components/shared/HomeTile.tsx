@@ -17,7 +17,7 @@ interface HomeTileProps {
 }
 
 /**
- * A launcher tile for the Home hub — mirrors CategoryCard's accent strip + icon
+ * A launcher tile for the Home hub - mirrors CategoryCard's accent strip + icon
  * chip + chevron, and adds an optional quick-add "+" for creatable sections.
  */
 export function HomeTile({

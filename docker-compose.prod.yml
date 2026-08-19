@@ -1,5 +1,5 @@
 # Production stack: API + Celery worker + Celery beat.
-# Uses managed Postgres (Supabase) and Redis (Upstash) via env — no local DB here.
+# Uses managed Postgres (Supabase) and Redis (Upstash) via env - no local DB here.
 # Usage: docker compose -f docker-compose.prod.yml --env-file backend/.env.prod up -d
 services:
   api:

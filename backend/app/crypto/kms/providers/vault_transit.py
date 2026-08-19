@@ -2,7 +2,7 @@
 
 Transit is Vault's encryption-as-a-service engine: the key never leaves Vault,
 we send a DEK and get back an opaque ``vault:v3:...`` string. That moves the KEK
-out of the application's blast radius entirely — a stolen application server no
+out of the application's blast radius entirely - a stolen application server no
 longer yields the master key, only the ability to ask Vault to unwrap while the
 token is valid.
 
@@ -26,7 +26,7 @@ RETRIES
 -------
 One retry with jitter on connect errors and 5xx, because Vault seal/unseal and
 HA failover are routine events rather than exceptional ones. **403 is never
-retried** — an auth failure will fail identically on the second attempt and only
+retried** - an auth failure will fail identically on the second attempt and only
 adds noise to Vault's audit log.
 """
 
@@ -139,7 +139,7 @@ class VaultTransitKmsProvider(KeyManagementProvider):
                     f"Vault unreachable at {self._addr} after {attempt} attempts: "
                     f"{type(exc).__name__}. The document is intact; the key service is not."
                 ) from exc
-            except httpx.HTTPError as exc:  # pragma: no cover — transport-level oddities
+            except httpx.HTTPError as exc:  # pragma: no cover - transport-level oddities
                 raise KmsError(f"Vault transport error: {exc}") from exc
 
             if response.status_code in (401, 403):
@@ -218,7 +218,7 @@ class VaultTransitKmsProvider(KeyManagementProvider):
             {"ciphertext": wrapped.ciphertext.decode("ascii")},
         )
         try:
-            # b64decode allocates an immutable bytes we cannot zero — the leak
+            # b64decode allocates an immutable bytes we cannot zero - the leak
             # documented in KeyManagementProvider.unwrap_dek.
             return bytearray(base64.b64decode(_require(body, "plaintext")))
         except (ValueError, TypeError) as exc:
@@ -239,7 +239,7 @@ class VaultTransitKmsProvider(KeyManagementProvider):
     async def health_check(self) -> KmsHealth:
         try:
             key_id, version = await self.current_key()
-        except Exception as exc:  # noqa: BLE001 — health checks must never raise
+        except Exception as exc:  # noqa: BLE001 - health checks must never raise
             return KmsHealth(
                 ok=False,
                 provider=self.name,
@@ -273,7 +273,7 @@ def _parse_version(ciphertext: str) -> int:
 
 
 def _safe_errors(response: httpx.Response) -> str:
-    """Vault's error list, never the raw body — it can echo request material."""
+    """Vault's error list, never the raw body - it can echo request material."""
     try:
         errors = response.json().get("errors")
     except ValueError:

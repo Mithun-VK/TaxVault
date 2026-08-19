@@ -1,4 +1,4 @@
-"""PKCS#11 HSM provider — interface only, not implemented in this release.
+"""PKCS#11 HSM provider - interface only, not implemented in this release.
 
 This file exists so the shape of an HSM backend is fixed and reviewable before
 anyone builds it, and so ``KMS_PROVIDER=pkcs11`` fails at startup with an honest
@@ -7,7 +7,7 @@ message rather than a confusing import error.
 A real implementation needs, at minimum:
 
   * a ``python-pkcs11`` or ``PyKCS11`` binding plus the vendor's .so/.dll
-  * a session pool — PKCS#11 sessions are not thread-safe and login is
+  * a session pool - PKCS#11 sessions are not thread-safe and login is
     expensive, so a per-worker pool with health checks is mandatory
   * ``C_WrapKey`` / ``C_UnwrapKey`` with ``CKM_AES_KEY_WRAP`` against a
     non-extractable ``CKO_SECRET_KEY``, so the KEK never leaves the device

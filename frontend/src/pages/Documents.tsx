@@ -149,7 +149,7 @@ export function Documents() {
       );
   }, [withNames, categoryFilter, debounced]);
 
-  // ── "By Property" — land & buildings, each with its own documents ──
+  // ── "By Property" - land & buildings, each with its own documents ──
   const properties = useMemo(
     () => assets.filter((a) => isPropertyType(a.asset_type)),
     [assets],
@@ -196,7 +196,7 @@ export function Documents() {
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Documents</h2>
           <p className="text-sm text-slate-700">
-            Every paper in one place — deeds and pattas, bill statements, tax and insurance papers,
+            Every paper in one place - deeds and pattas, bill statements, tax and insurance papers,
             and payment receipts, filed against the property they belong to.
           </p>
         </div>
@@ -213,7 +213,7 @@ export function Documents() {
           <TabsTrigger value="all">All Documents</TabsTrigger>
         </TabsList>
 
-        {/* ── TAB 1 — By Property ── */}
+        {/* ── TAB 1 - By Property ── */}
         <TabsContent value="by-property">
           {properties.length === 0 ? (
             <EmptyState
@@ -289,7 +289,7 @@ export function Documents() {
           )}
         </TabsContent>
 
-        {/* ── TAB 2 — All Documents ── */}
+        {/* ── TAB 2 - All Documents ── */}
         <TabsContent value="all">
           <div className="mb-4 flex flex-col gap-3 rounded-xl border border-surface-border bg-white p-3 sm:flex-row sm:items-center">
             <SearchInput

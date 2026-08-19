@@ -1,4 +1,4 @@
-/* TaxVault service worker — push notifications for deadline reminders. */
+/* TaxVault service worker - push notifications for deadline reminders. */
 
 self.addEventListener('install', () => {
   self.skipWaiting();

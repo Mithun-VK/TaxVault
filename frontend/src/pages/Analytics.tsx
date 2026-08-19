@@ -193,12 +193,12 @@ export function Analytics() {
     const total = periodMonthly.reduce((s, m) => s + cats(m), 0);
     const highest = periodMonthly.reduce(
       (best, m) => (cats(m) > best.value ? { label: m.month_label, value: cats(m) } : best),
-      { label: '—', value: 0 },
+      { label: '-', value: 0 },
     );
     const avg = periodMonthly.length ? total / periodMonthly.length : 0;
     const biggest = breakdown.reduce(
       (best, c) => (c.amount > best.amount ? c : best),
-      { label: '—', amount: 0, percentage: 0 } as (typeof breakdown)[number],
+      { label: '-', amount: 0, percentage: 0 } as (typeof breakdown)[number],
     );
     return { total, highest, avg, biggest };
   }, [periodMonthly, breakdown]);
@@ -262,7 +262,7 @@ export function Analytics() {
     [billTrends],
   );
 
-  // "What changed this month" — bills whose last month moved >10% vs the prior.
+  // "What changed this month" - bills whose last month moved >10% vs the prior.
   const insights = useMemo(() => {
     return billTrends
       .map((t) => {
@@ -310,7 +310,7 @@ export function Analytics() {
         </button>
       </div>
 
-      {/* ROW 1 — KPI cards */}
+      {/* ROW 1 - KPI cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <SummaryStatCard
           label="Total spent"
@@ -321,7 +321,7 @@ export function Analytics() {
         />
         <SummaryStatCard
           label="Highest month"
-          value={kpis.highest.value ? formatINRCompact(kpis.highest.value) : '—'}
+          value={kpis.highest.value ? formatINRCompact(kpis.highest.value) : '-'}
           sublabel={kpis.highest.label}
           icon={CalendarRange}
           accent="warning"
@@ -329,7 +329,7 @@ export function Analytics() {
         />
         <SummaryStatCard
           label="Avg monthly"
-          value={kpis.avg ? formatINRCompact(kpis.avg) : '—'}
+          value={kpis.avg ? formatINRCompact(kpis.avg) : '-'}
           icon={Divide}
           accent="teal"
           loading={monthlyLoading}
@@ -357,7 +357,7 @@ export function Analytics() {
         </ChartCard>
       ) : (
         <>
-          {/* ROW 2 — Monthly stacked bar */}
+          {/* ROW 2 - Monthly stacked bar */}
           <ChartCard title="Monthly Spending Breakdown">
             <div className="h-64 w-full sm:h-72">
               <ResponsiveContainer width="100%" height="100%">
@@ -386,11 +386,11 @@ export function Analytics() {
             </div>
           </ChartCard>
 
-          {/* ROW 2b — Spending Explorer (Category → Sub-type → Entity) */}
+          {/* ROW 2b - Spending Explorer (Category → Sub-type → Entity) */}
           <ChartCard title="Spending Explorer" icon={Filter}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                {/* Level 1 — category */}
+                {/* Level 1 - category */}
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-slate-600">Category</label>
                   <Select
@@ -414,7 +414,7 @@ export function Analytics() {
                   </Select>
                 </div>
 
-                {/* Level 2 — sub-type (only when a category is chosen) */}
+                {/* Level 2 - sub-type (only when a category is chosen) */}
                 {focusCat !== 'all' && (
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-600">
@@ -444,7 +444,7 @@ export function Analytics() {
                   </div>
                 )}
 
-                {/* Level 3 — specific entity (only when a category is chosen) */}
+                {/* Level 3 - specific entity (only when a category is chosen) */}
                 {focusCat !== 'all' && (
                   <div className="space-y-1">
                     <label className="text-xs font-medium text-slate-600">
@@ -488,7 +488,7 @@ export function Analytics() {
                   <p>No payments for this selection in {PERIODS.find((p) => p.key === period)?.label.toLowerCase()}.</p>
                   {period !== 'fy' && (
                     <p className="text-xs">
-                      Taxes and insurance are often paid yearly — try{' '}
+                      Taxes and insurance are often paid yearly - try{' '}
                       <button
                         type="button"
                         onClick={() => setPeriod('fy')}
@@ -525,7 +525,7 @@ export function Analytics() {
             </div>
           </ChartCard>
 
-          {/* ROW 3 — donut + bill trends */}
+          {/* ROW 3 - donut + bill trends */}
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             <ChartCard title="Spending by Category">
               <div className="flex flex-col items-center gap-4 sm:flex-row">
@@ -617,7 +617,7 @@ export function Analytics() {
             </ChartCard>
           </div>
 
-          {/* ROW 4 — What changed this month */}
+          {/* ROW 4 - What changed this month */}
           <ChartCard title="What Changed This Month?">
             {insights.length === 0 ? (
               <p className="flex items-center gap-2 text-sm text-slate-700">

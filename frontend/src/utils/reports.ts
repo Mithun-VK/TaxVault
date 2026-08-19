@@ -71,11 +71,11 @@ export function generatePropertiesReport(assets: Asset[], opts?: ExportOpts): XL
     for (const f of PROPERTY_FIELDS) {
       row[f.label] =
         f.key === 'owner_name'
-          ? (getAssetOwner(a) ?? resolveAssetField(a, f) ?? '—')
-          : (resolveAssetField(a, f) ?? '—');
+          ? (getAssetOwner(a) ?? resolveAssetField(a, f) ?? '-')
+          : (resolveAssetField(a, f) ?? '-');
     }
     row.Type = getStatusLabel(a.asset_type);
-    row['Current Value'] = a.current_value ? formatINR(a.current_value) : '—';
+    row['Current Value'] = a.current_value ? formatINR(a.current_value) : '-';
     row.Status = getStatusLabel(a.status);
     return row;
   });
@@ -95,14 +95,14 @@ export function generateGoldReport(
     Jewels: String(c.pieces),
     'Weight (g)': c.grams.toFixed(2),
     Sovereign: c.sovereigns.toFixed(3),
-    'Est. Value': c.value ? formatINR(c.value) : '—',
+    'Est. Value': c.value ? formatINR(c.value) : '-',
   }));
   rows.push({
     Category: 'TOTAL',
     Jewels: String(totals.pieces),
     'Weight (g)': totals.grams.toFixed(2),
     Sovereign: totals.sovereigns.toFixed(3),
-    'Est. Value': totals.value ? formatINR(totals.value) : '—',
+    'Est. Value': totals.value ? formatINR(totals.value) : '-',
   });
   return finalize(XLSX.utils.json_to_sheet(rows), 'Gold', opts, 'Gold');
 }
@@ -112,13 +112,13 @@ export function generateTaxReport(taxes: Tax[], opts?: ExportOpts): XLSX.WorkShe
   const rows = taxes.map((t) => ({
     Name: t.name || t.description,
     Description: t.description,
-    'Tax Number': t.tax_number ?? '—',
+    'Tax Number': t.tax_number ?? '-',
     Type: getStatusLabel(t.tax_type),
-    'Assessment Year': t.assessment_year ?? '—',
+    'Assessment Year': t.assessment_year ?? '-',
     Amount: t.total_amount ? formatINR(t.total_amount) : 'TBD',
-    'Due Date': t.due_date ? formatDate(t.due_date) : '—',
+    'Due Date': t.due_date ? formatDate(t.due_date) : '-',
     Status: getStatusLabel(t.status),
-    'Linked Property': t.linked_asset_name ?? '—',
+    'Linked Property': t.linked_asset_name ?? '-',
   }));
   return finalize(XLSX.utils.json_to_sheet(rows), 'Tax Obligations', opts, 'Taxes');
 }
@@ -133,11 +133,11 @@ export function generateInsuranceReport(
     'Policy Number': p.policy_number,
     Provider: p.provider,
     Type: getStatusLabel(p.insurance_type),
-    'Sum Insured': p.sum_insured ? formatINR(p.sum_insured) : '—',
-    'Premium Amount': p.premium_amount ? formatINR(p.premium_amount) : '—',
+    'Sum Insured': p.sum_insured ? formatINR(p.sum_insured) : '-',
+    'Premium Amount': p.premium_amount ? formatINR(p.premium_amount) : '-',
     Frequency: getStatusLabel(p.premium_frequency),
-    'Next Premium Date': p.next_premium_date ? formatDate(p.next_premium_date) : '—',
-    Nominee: p.nominee ?? '—',
+    'Next Premium Date': p.next_premium_date ? formatDate(p.next_premium_date) : '-',
+    Nominee: p.nominee ?? '-',
     Status: getStatusLabel(p.status),
   }));
   return finalize(XLSX.utils.json_to_sheet(rows), 'Insurance', opts, 'Insurance');
@@ -149,10 +149,10 @@ export function generateBillsReport(bills: Bill[], opts?: ExportOpts): XLSX.Work
     Name: b.name || b.provider_name,
     Provider: b.provider_name,
     Type: getStatusLabel(b.bill_type),
-    'Account Number': b.account_number ?? '—',
+    'Account Number': b.account_number ?? '-',
     'Billing Cycle': getStatusLabel(b.billing_cycle),
-    'Avg Amount': b.average_amount ? formatINR(b.average_amount) : '—',
-    'Next Due Date': b.next_due_date ? formatDate(b.next_due_date) : '—',
+    'Avg Amount': b.average_amount ? formatINR(b.average_amount) : '-',
+    'Next Due Date': b.next_due_date ? formatDate(b.next_due_date) : '-',
     'Auto Pay': b.auto_pay ? 'Yes' : 'No',
   }));
   return finalize(XLSX.utils.json_to_sheet(rows), 'Bills', opts, 'Bills');
@@ -161,14 +161,14 @@ export function generateBillsReport(bills: Bill[], opts?: ExportOpts): XLSX.Work
 // ── Payments Report ──────────────────────────────────────────────────────────
 export function generatePaymentsReport(payments: Payment[], opts?: ExportOpts): XLSX.WorkSheet {
   const rows = payments.map((p) => ({
-    Date: p.payment_date ? formatDate(p.payment_date) : '—',
+    Date: p.payment_date ? formatDate(p.payment_date) : '-',
     Category: getStatusLabel(p.entity_type),
-    Entity: p.entity_name ?? '—',
+    Entity: p.entity_name ?? '-',
     'Amount Paid': formatINR(Number(p.amount_paid)),
-    'Payment Method': p.payment_method ? getStatusLabel(p.payment_method) : '—',
-    Period: p.period ?? '—',
-    'Reference Number': p.reference_number ?? '—',
-    Remarks: p.notes ?? '—',
+    'Payment Method': p.payment_method ? getStatusLabel(p.payment_method) : '-',
+    Period: p.period ?? '-',
+    'Reference Number': p.reference_number ?? '-',
+    Remarks: p.notes ?? '-',
   }));
   const total = payments.reduce((sum, p) => sum + (Number(p.amount_paid) || 0), 0);
   const withTotal = [...rows, {}, { Date: 'TOTAL', 'Amount Paid': formatINR(total) }];

@@ -258,7 +258,7 @@ export const insurancePolicies: InsurancePolicy[] = (() => {
           date: iso(-120),
           amount: 64500,
           status: 'settled',
-          description: 'Day-care procedure — cashless at Apollo.',
+          description: 'Day-care procedure - cashless at Apollo.',
         },
       ],
       created_at: iso(-200) + 'T09:00:00.000Z',
@@ -312,7 +312,7 @@ export const taxes: Tax[] = [
   {
     id: 't1',
     tax_type: 'property_tax',
-    description: 'Property Tax — Velachery Apartment (H1)',
+    description: 'Property Tax - Velachery Apartment (H1)',
     linked_asset_id: 'a5',
     linked_asset_name: 'Velachery Apartment',
     assessment_year: AY,
@@ -328,7 +328,7 @@ export const taxes: Tax[] = [
   {
     id: 't2',
     tax_type: 'land_tax',
-    description: 'Land Tax — Perumbakkam Plot',
+    description: 'Land Tax - Perumbakkam Plot',
     linked_asset_id: 'a1',
     linked_asset_name: 'Perumbakkam Land Plot',
     assessment_year: AY,
@@ -344,7 +344,7 @@ export const taxes: Tax[] = [
   {
     id: 't3',
     tax_type: 'land_tax',
-    description: 'Land Tax — Sholinganallur Plot',
+    description: 'Land Tax - Sholinganallur Plot',
     linked_asset_id: 'a2',
     linked_asset_name: 'Sholinganallur Land Plot',
     assessment_year: AY,
@@ -360,7 +360,7 @@ export const taxes: Tax[] = [
   {
     id: 't4',
     tax_type: 'water_tax',
-    description: 'Water & Sewerage Tax — Velachery',
+    description: 'Water & Sewerage Tax - Velachery',
     linked_asset_id: 'a5',
     linked_asset_name: 'Velachery Apartment',
     assessment_year: AY,
@@ -376,7 +376,7 @@ export const taxes: Tax[] = [
   {
     id: 't5',
     tax_type: 'professional_tax',
-    description: 'Professional Tax — H1 self-assessment',
+    description: 'Professional Tax - H1 self-assessment',
     linked_asset_id: null,
     linked_asset_name: null,
     assessment_year: AY,
@@ -492,7 +492,7 @@ export const documents: TaxDocument[] = [
   },
   {
     id: 'd2',
-    label: 'Form 16 — FY 2024-25',
+    label: 'Form 16 - FY 2024-25',
     category: 'income_tax',
     financial_year: '2024-25',
     file_name: 'Form16-2024-25.pdf',
@@ -503,7 +503,7 @@ export const documents: TaxDocument[] = [
   },
   {
     id: 'd3',
-    label: 'Sale Deed — Perumbakkam Plot',
+    label: 'Sale Deed - Perumbakkam Plot',
     category: 'property',
     financial_year: '2019-20',
     file_name: 'SaleDeed-Perumbakkam.pdf',
@@ -512,12 +512,12 @@ export const documents: TaxDocument[] = [
     tags: ['sale-deed', 'registration', 'land'],
     entity_type: 'tax',
     entity_id: 't2',
-    entity_name: 'Land Tax — Perumbakkam Plot',
+    entity_name: 'Land Tax - Perumbakkam Plot',
     created_at: isoTime(400),
   },
   {
     id: 'd4',
-    label: 'Patta — Sholinganallur Plot',
+    label: 'Patta - Sholinganallur Plot',
     category: 'property',
     financial_year: '2021-22',
     file_name: 'Patta-Sholinganallur.pdf',
@@ -528,7 +528,7 @@ export const documents: TaxDocument[] = [
   },
   {
     id: 'd5',
-    label: 'RC Book — Honda City',
+    label: 'RC Book - Honda City',
     category: 'vehicle',
     financial_year: '2022-23',
     file_name: 'RC-HondaCity.pdf',
@@ -551,7 +551,7 @@ export const documents: TaxDocument[] = [
     tags: ['professional-tax', 'receipt'],
     entity_type: 'tax',
     entity_id: 't5',
-    entity_name: 'Professional Tax — H1 self-assessment',
+    entity_name: 'Professional Tax - H1 self-assessment',
     created_at: isoTime(100),
   },
   {
@@ -581,7 +581,7 @@ export const documents: TaxDocument[] = [
   },
   {
     id: 'd9',
-    label: 'TNEB Bill — Last Cycle',
+    label: 'TNEB Bill - Last Cycle',
     category: 'bills',
     financial_year: FY,
     file_name: 'TNEB-LastBill.pdf',
@@ -604,7 +604,7 @@ export const documents: TaxDocument[] = [
     tags: ['property-tax', 'gcc', 'receipt'],
     entity_type: 'tax',
     entity_id: 't1',
-    entity_name: 'Property Tax — Velachery Apartment',
+    entity_name: 'Property Tax - Velachery Apartment',
     created_at: isoTime(190),
   },
 ];
@@ -614,7 +614,7 @@ export const payments: Payment[] = [
     id: 'p1',
     entity_type: 'tax',
     entity_id: 't5',
-    entity_name: 'Professional Tax — H1',
+    entity_name: 'Professional Tax - H1',
     amount_paid: 1250,
     payment_date: iso(-100),
     payment_method: 'net_banking',
@@ -692,7 +692,7 @@ export const payments: Payment[] = [
     id: 'p7',
     entity_type: 'tax',
     entity_id: 't1',
-    entity_name: 'Property Tax — Velachery (H2 2024)',
+    entity_name: 'Property Tax - Velachery (H2 2024)',
     amount_paid: 18400,
     payment_date: iso(-190),
     payment_method: 'net_banking',
@@ -757,7 +757,7 @@ export const payments: Payment[] = [
     id: 'p12',
     entity_type: 'tax',
     entity_id: 't2',
-    entity_name: 'Land Tax — Perumbakkam (prev year)',
+    entity_name: 'Land Tax - Perumbakkam (prev year)',
     amount_paid: 4000,
     payment_date: iso(-380),
     payment_method: 'cash',
@@ -768,7 +768,7 @@ export const payments: Payment[] = [
   },
 ];
 
-// Alert configs — one per outstanding payable, generated from the data above.
+// Alert configs - one per outstanding payable, generated from the data above.
 export const alertConfigs: AlertConfig[] = [
   ...taxes
     .filter((t) => t.status !== 'paid' && t.status !== 'exempt')
@@ -836,7 +836,7 @@ export const alertLogs: AlertLog[] = [
     id: 'al3',
     entity_type: 'tax',
     entity_id: 't2',
-    entity_name: 'Land Tax — Perumbakkam Plot',
+    entity_name: 'Land Tax - Perumbakkam Plot',
     channel: 'email',
     status: 'sent',
     days_before: 7,
@@ -847,7 +847,7 @@ export const alertLogs: AlertLog[] = [
     id: 'al4',
     entity_type: 'tax',
     entity_id: 't1',
-    entity_name: 'Property Tax — Velachery Apartment',
+    entity_name: 'Property Tax - Velachery Apartment',
     channel: 'push',
     status: 'sent',
     days_before: 30,
@@ -907,8 +907,8 @@ export const activityLog: ActivityLogEntry[] = [
     id: 'act4',
     action: 'document_uploaded',
     entity_type: 'document',
-    entity_name: 'TNEB Bill — Last Cycle',
-    description: 'Uploaded TNEB Bill — Last Cycle',
+    entity_name: 'TNEB Bill - Last Cycle',
+    description: 'Uploaded TNEB Bill - Last Cycle',
     timestamp: isoTime(20),
   },
   {

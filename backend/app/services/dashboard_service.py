@@ -367,7 +367,7 @@ def _occurrence_status(occurrence: date, current_due: date, today: date, termina
     if terminal:
         return "paid"
     if occurrence < current_due:
-        # Earlier than the entity's current stored due date — the schedule has
+        # Earlier than the entity's current stored due date - the schedule has
         # already advanced past it, so it was paid.
         return "paid"
     if occurrence < today:

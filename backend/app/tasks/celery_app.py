@@ -11,7 +11,7 @@ celery_app = Celery(
 )
 
 celery_app.conf.update(
-    # Serialization — JSON only (no pickle deserialization risk)
+    # Serialization - JSON only (no pickle deserialization risk)
     task_serializer="json",
     accept_content=["json"],
     result_serializer="json",
@@ -21,7 +21,7 @@ celery_app.conf.update(
     # Reliability
     task_acks_late=True,  # ack only after the task completes
     task_reject_on_worker_lost=True,  # re-queue if the worker crashes mid-task
-    worker_prefetch_multiplier=1,  # one task at a time — safe for long tasks
+    worker_prefetch_multiplier=1,  # one task at a time - safe for long tasks
     task_track_started=True,
     # Don't keep results forever
     result_expires=60 * 60 * 24,  # 24 hours

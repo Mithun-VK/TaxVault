@@ -15,5 +15,5 @@ export async function enableMocking(): Promise<void> {
     onUnhandledRequest: 'bypass',
     quiet: true,
   });
-  console.info('%c[TaxVault] MSW active — using mock data', 'color: #0F6E56; font-weight: bold');
+  console.info('%c[TaxVault] MSW active - using mock data', 'color: #0F6E56; font-weight: bold');
 }

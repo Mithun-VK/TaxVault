@@ -50,7 +50,7 @@ from app.models.user import User  # noqa: E402
 TODAY = date.today()
 
 # ════════════════════════════════════════════════════════════════════════════
-# CLIENT — change these before a real handover.
+# CLIENT - change these before a real handover.
 # ════════════════════════════════════════════════════════════════════════════
 CLIENT = {
     "full_name": "Inigo Irudayaraj",
@@ -60,7 +60,7 @@ CLIENT = {
 }
 
 # ════════════════════════════════════════════════════════════════════════════
-# SECTION A — BUILDINGS
+# SECTION A - BUILDINGS
 # ════════════════════════════════════════════════════════════════════════════
 BUILDINGS = [
     {
@@ -136,7 +136,7 @@ BUILDINGS = [
 ]
 
 # ════════════════════════════════════════════════════════════════════════════
-# SECTION B — LAND PARCELS (25)
+# SECTION B - LAND PARCELS (25)
 # ════════════════════════════════════════════════════════════════════════════
 LAND_ASSETS = [
     {
@@ -503,7 +503,7 @@ LAND_ASSETS = [
 ]
 
 # ════════════════════════════════════════════════════════════════════════════
-# SECTION C — TAX OBLIGATIONS
+# SECTION C - TAX OBLIGATIONS
 # ════════════════════════════════════════════════════════════════════════════
 TAX_OBLIGATIONS = [
     {
@@ -787,7 +787,7 @@ TAX_OBLIGATIONS = [
 ]
 
 # ════════════════════════════════════════════════════════════════════════════
-# SECTION D — RECURRING BILLS
+# SECTION D - RECURRING BILLS
 # ════════════════════════════════════════════════════════════════════════════
 RECURRING_BILLS = [
     {"bill_type": "phone", "provider_name": "Vodafone", "description": "Vodafone Monthly Payable", "billing_cycle": "monthly", "next_due": "2026-07-04", "is_active": True},
@@ -823,7 +823,7 @@ RECURRING_BILLS = [
 ]
 
 # ════════════════════════════════════════════════════════════════════════════
-# SECTION E — INSURANCE POLICIES
+# SECTION E - INSURANCE POLICIES
 # ════════════════════════════════════════════════════════════════════════════
 INSURANCE_POLICIES = [
     {"provider_name": "United India Insurance", "insurance_type": "medical", "description": "Mediclaim Policy - Inigo Irudayaraj (United India)", "policy_holder": "Inigo Irudayaraj", "premium_frequency": "annual", "next_premium_date": "2026-04-11", "status": "active"},
@@ -914,7 +914,7 @@ async def reset_client(session) -> None:
         await session.execute(select(User).where(User.email == CLIENT["email"]))
     ).scalar_one_or_none()
     if not user:
-        print(f"  RESET: no existing user {CLIENT['email']} — nothing to delete")
+        print(f"  RESET: no existing user {CLIENT['email']} - nothing to delete")
         return
     uid = user.id
     # FK-safe order: children referencing assets/users first, user last.
@@ -942,7 +942,7 @@ async def get_or_create_user(session) -> User:
         await session.execute(select(User).where(User.email == CLIENT["email"]))
     ).scalar_one_or_none()
     if user:
-        print(f"  USER: exists — {CLIENT['email']}")
+        print(f"  USER: exists - {CLIENT['email']}")
         return user
     user = User(
         email=CLIENT["email"],
@@ -953,7 +953,7 @@ async def get_or_create_user(session) -> User:
     )
     session.add(user)
     await session.flush()
-    print(f"  USER: created — {CLIENT['email']}")
+    print(f"  USER: created - {CLIENT['email']}")
     return user
 
 
@@ -1024,7 +1024,7 @@ async def seed_taxes(session, user_id, asset_id_map: dict, counter: Counter) -> 
 
 async def seed_bills(session, user_id, counter: Counter) -> None:
     for entry in RECURRING_BILLS:
-        # No description column on the model — it lives in `notes`, which is our key.
+        # No description column on the model - it lives in `notes`, which is our key.
         existing = (
             await session.execute(
                 select(RecurringBill).where(
@@ -1096,7 +1096,7 @@ async def seed_insurance(session, user_id, counter: Counter) -> None:
 # ════════════════════════════════════════════════════════════════════════════
 def print_dry_run() -> None:
     n_alerts = len(TAX_OBLIGATIONS) + len(RECURRING_BILLS) + len(INSURANCE_POLICIES)
-    print("  DRY RUN — no changes will be written to the database")
+    print("  DRY RUN - no changes will be written to the database")
     print(f"  Would create user: {CLIENT['full_name']} ({CLIENT['email']})")
     print(f"  Would create {len(BUILDINGS)} buildings")
     print(f"  Would create {len(LAND_ASSETS)} land parcels")
@@ -1109,7 +1109,7 @@ def print_dry_run() -> None:
 def print_summary(counter: Counter) -> None:
     bar = "═" * 56
     print(bar)
-    print(" TaxVault Client Data Seeding — Complete")
+    print(" TaxVault Client Data Seeding - Complete")
     print(bar)
     print(f" User:        {CLIENT['full_name']} ({CLIENT['email']})")
     print(f" Buildings:   {len(BUILDINGS):<2} ({counter.buildings[0]} created, {counter.buildings[1]} skipped)")
@@ -1146,7 +1146,7 @@ async def run(dry_run: bool, reset: bool) -> None:
             await session.commit()
         except Exception:
             await session.rollback()
-            print("\nERROR — all changes rolled back:\n", file=sys.stderr)
+            print("\nERROR - all changes rolled back:\n", file=sys.stderr)
             traceback.print_exc()
             sys.exit(1)
         print_summary(counter)

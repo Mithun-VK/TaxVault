@@ -72,7 +72,7 @@ class Director(BaseModel):
     individual_id: uuid.UUID | None = None
     name: str
     din: str | None = None  # Director Identification Number
-    # Digital Signature Certificate — needed to sign MCA/GST/IT filings, and
+    # Digital Signature Certificate - needed to sign MCA/GST/IT filings, and
     # it expires, so the number is worth holding next to the DIN.
     dsc_number: str | None = None
     dsc_expiry: date | None = None
@@ -391,6 +391,6 @@ class CompanyDocumentUploadRequest(BaseModel):
 
 
 class AssetCompanyLink(BaseModel):
-    """Body of PATCH /assets/{id}/company — null detaches the property."""
+    """Body of PATCH /assets/{id}/company - null detaches the property."""
 
     company_id: uuid.UUID | None = None

@@ -254,7 +254,7 @@ export function PaymentCalendarGrid() {
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <span className="font-mono text-sm tabular-nums text-slate-700">
-                    {item.amount != null ? formatINR(item.amount) : '—'}
+                    {item.amount != null ? formatINR(item.amount) : '-'}
                   </span>
                   <PaidChip status={item.status} />
                 </div>

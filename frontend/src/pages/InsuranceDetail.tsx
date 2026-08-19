@@ -73,11 +73,11 @@ export function InsuranceDetail() {
   const facts: [string, React.ReactNode][] = [
     ['Policy number', policy.policy_number],
     ['Provider', policy.provider],
-    ['Sum insured', policy.sum_insured != null ? formatINR(policy.sum_insured) : '—'],
+    ['Sum insured', policy.sum_insured != null ? formatINR(policy.sum_insured) : '-'],
     ['Premium', `${formatINR(policy.premium_amount)} / ${getStatusLabel(policy.premium_frequency)}`],
     ['Start date', formatDate(policy.start_date)],
     ['End date', formatDate(policy.end_date)],
-    ['Nominee', policy.nominee || '—'],
+    ['Nominee', policy.nominee || '-'],
     ['Next premium', formatDate(policy.next_premium_date)],
     [
       'Linked property',
@@ -86,7 +86,7 @@ export function InsuranceDetail() {
           {linkedAsset.name}
         </Link>
       ) : (
-        '—'
+        '-'
       ),
     ],
   ];

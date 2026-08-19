@@ -4,8 +4,8 @@ Revision ID: 0015
 Revises: 0014
 Create Date: 2026-07-27
 
-Individuals gain two more primary government-ID fields — `driving_license_number`
-and `voter_id_number` — and three airline/travel loyalty membership numbers:
+Individuals gain two more primary government-ID fields - `driving_license_number`
+and `voter_id_number` - and three airline/travel loyalty membership numbers:
 `skywards_number` (Emirates Skywards), `maharaja_number` (Air India Maharaja
 Club) and `indigo_chip_number` (IndiGo). All are nullable free-text columns;
 purely additive, existing rows stay NULL.

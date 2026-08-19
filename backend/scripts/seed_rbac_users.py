@@ -6,8 +6,8 @@ Creates (or repairs) three accounts so each role can be exercised end to end:
     admin@taxvault.in       / Admin@123        admin
     user@taxvault.in        / User@123         user
 
-All three see the *same* vault — the one owned by the earliest-created super
-admin (see ``dependencies.get_vault_owner_id``) — so the admin and user logins
+All three see the *same* vault - the one owned by the earliest-created super
+admin (see ``dependencies.get_vault_owner_id``) - so the admin and user logins
 open onto the real data rather than an empty account. If the deployment already
 has a super admin, that account keeps ownership and the seeded super admin is
 simply another full-access login.
@@ -132,7 +132,7 @@ def main() -> None:
 
     print("Seeding RBAC test logins" + (" (dry run)" if args.dry_run else ""))
     asyncio.run(seed(args.dry_run))
-    print("\nDone." if not args.dry_run else "\nDry run complete — nothing written.")
+    print("\nDone." if not args.dry_run else "\nDry run complete - nothing written.")
 
 
 if __name__ == "__main__":

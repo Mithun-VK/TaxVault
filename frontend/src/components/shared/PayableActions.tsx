@@ -21,7 +21,7 @@ interface PayableActionsProps {
 /**
  * Edit and delete for a bill, tax or policy, adapted to what the role may do:
  * a super admin acts directly, a member's action is filed for approval, and an
- * admin — who may neither edit nor approve their own request — sees neither.
+ * admin - who may neither edit nor approve their own request - sees neither.
  */
 export function PayableActions({
   entityType,

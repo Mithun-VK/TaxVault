@@ -2,7 +2,7 @@
 
 A member may add bills, taxes and insurance policies outright, but changing or
 removing one is not theirs to do. Instead they file a change request here; an
-admin or super admin approves it, and only then is the change applied — through
+admin or super admin approves it, and only then is the change applied - through
 exactly the same service call a super admin's own edit would take, so approved
 changes cannot diverge from direct ones.
 

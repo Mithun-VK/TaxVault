@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="Personal Asset & Liability Management System — Private Deployment",
+    description="Personal Asset & Liability Management System - Private Deployment",
     docs_url="/docs" if settings.show_docs else None,
     redoc_url="/redoc" if settings.show_docs else None,
     openapi_url="/openapi.json" if settings.show_docs else None,
@@ -63,7 +63,7 @@ if settings.is_production:
     else:
         # TrustedHostMiddleware compares against the Host header with the port
         # already stripped, so an origin like http://192.168.1.50:8080 has to
-        # become "192.168.1.50" — keeping the port would reject every request.
+        # become "192.168.1.50" - keeping the port would reject every request.
         allowed_hosts = [
             origin.split("://", 1)[-1].rstrip("/").split(":", 1)[0]
             for origin in settings.CORS_ORIGINS

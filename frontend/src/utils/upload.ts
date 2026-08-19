@@ -17,7 +17,7 @@ function isSameOriginUrl(url: string): boolean {
  *
  * The local-storage fallback ("/api/v1/documents/blob/…") is an authenticated,
  * same-origin endpoint, so we attach the bearer token for those. We must NOT
- * attach it to cross-origin R2 presigned URLs — that would leak the token to
+ * attach it to cross-origin R2 presigned URLs - that would leak the token to
  * the storage provider and break the presigned signature.
  */
 export function uploadToR2(

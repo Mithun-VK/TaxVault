@@ -217,7 +217,7 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
 
   return (
     <div onKeyDown={onKeyDown}>
-      {/* Search header — suppress the global focus ring; the dialog is the focus context. */}
+      {/* Search header - suppress the global focus ring; the dialog is the focus context. */}
       <div className="flex items-center gap-3 border-b border-surface-border px-5">
         <Search className="h-[18px] w-[18px] shrink-0 text-slate-600" aria-hidden="true" />
         {/* eslint-disable-next-line jsx-a11y/no-autofocus */}

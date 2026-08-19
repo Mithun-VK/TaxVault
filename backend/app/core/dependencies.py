@@ -65,7 +65,7 @@ async def get_vault_owner_id(
     role falls back to its earliest-created account, which migration 0016
     promotes anyway.
 
-    Routes take this instead of ``current_user.id`` for data scoping — what the
+    Routes take this instead of ``current_user.id`` for data scoping - what the
     caller may *do* with that data is decided separately by ``require()``.
     """
     owner_id = await db.scalar(
@@ -76,7 +76,7 @@ async def get_vault_owner_id(
     )
     if owner_id is None:
         owner_id = await db.scalar(select(User.id).order_by(User.created_at.asc()).limit(1))
-    if owner_id is None:  # pragma: no cover — get_current_user guarantees a row
+    if owner_id is None:  # pragma: no cover - get_current_user guarantees a row
         return current_user.id
     return owner_id
 

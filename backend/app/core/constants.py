@@ -2,19 +2,19 @@ from enum import Enum
 
 
 class AssetType(str, Enum):
-    land = "land"  # legacy — split into agricultural_land / non_agricultural_land
+    land = "land"  # legacy - split into agricultural_land / non_agricultural_land
     agricultural_land = "agricultural_land"
-    vacant_land = "vacant_land"  # legacy — renamed to non_agricultural_land
+    vacant_land = "vacant_land"  # legacy - renamed to non_agricultural_land
     non_agricultural_land = "non_agricultural_land"
     vehicle = "vehicle"
-    building = "building"  # legacy — split into residential/commercial building
+    building = "building"  # legacy - split into residential/commercial building
     residential_building = "residential_building"
     commercial_building = "commercial_building"
     gold = "gold"
     other = "other"
 
 
-# asset_category is derived from asset_type — immovable is real property,
+# asset_category is derived from asset_type - immovable is real property,
 # movable is everything else (vehicles, gold, misc).
 IMMOVABLE_TYPES = frozenset(
     {
@@ -93,7 +93,7 @@ class RecurrenceRule(str, Enum):
 class BillType(str, Enum):
     """Built-in bill categories.
 
-    Not used to validate writes — `bill_type` is a free-form slug so users can
+    Not used to validate writes - `bill_type` is a free-form slug so users can
     add their own categories (the column is a plain String). This enum documents
     the categories the UI ships with.
     """

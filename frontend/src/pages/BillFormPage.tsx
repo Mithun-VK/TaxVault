@@ -18,7 +18,7 @@ export function BillFormPage() {
   const { data: bill, isLoading } = useBill(id);
   const createBill = useCreateBill();
   const updateBill = useUpdateBill();
-  // A member may add a bill outright but not change one — their edit is filed
+  // A member may add a bill outright but not change one - their edit is filed
   // for an admin to approve instead of being applied here.
   const change = usePayableChange('bill');
   const viaApproval = editing && change.editMode === 'request';

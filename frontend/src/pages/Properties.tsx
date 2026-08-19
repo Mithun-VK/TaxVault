@@ -92,7 +92,7 @@ export function Properties() {
   const isGold = scopedType === 'gold';
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState<TabKey>('all');
-  // Movable/immovable category + optional specific type — only used on the
+  // Movable/immovable category + optional specific type - only used on the
   // unscoped overview (a nav-scoped page already fixes the type).
   const [category, setCategory] = useState<CategoryKey>('all');
   const [subType, setSubType] = useState<AssetType | 'all'>('all');
@@ -202,7 +202,7 @@ export function Properties() {
   const openCreate = () => {
     navigate(categoryParam ? `/assets/new?category=${categoryParam}` : '/assets/new');
   };
-  // Add a jewel from inside a gold category — pre-selects that category.
+  // Add a jewel from inside a gold category - pre-selects that category.
   const openCreateGold = (category: string) => {
     navigate(`/assets/new?type=gold&gold_category=${encodeURIComponent(category)}`);
   };
@@ -228,7 +228,7 @@ export function Properties() {
 
   return (
     <div className="space-y-5">
-      {/* SECTION A — summary strip */}
+      {/* SECTION A - summary strip */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-surface-border bg-white px-4 py-3">
         {isLoading ? (
           <Skeleton className="h-4 w-72" />
@@ -386,7 +386,7 @@ export function Properties() {
         />
       ) : (
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {/* Left — filtered card grid */}
+        {/* Left - filtered card grid */}
         <div className="space-y-4 lg:col-span-2">
           {isLoading ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -427,7 +427,7 @@ export function Properties() {
           )}
         </div>
 
-        {/* Right — detail panel (desktop) */}
+        {/* Right - detail panel (desktop) */}
         <div className="hidden lg:block">
           <div className="sticky top-20">
             {selected ? (
@@ -526,7 +526,7 @@ function ByOwnerView({ groups, isLoading, onView }: ByOwnerViewProps) {
           <section key={owner} className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-navy text-xs font-semibold text-white">
-                {owner === 'Unassigned' ? '—' : getInitials(owner)}
+                {owner === 'Unassigned' ? '-' : getInitials(owner)}
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">{owner}</h3>

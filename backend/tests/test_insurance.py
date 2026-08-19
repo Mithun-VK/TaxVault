@@ -55,7 +55,7 @@ class TestCreateInsurance:
         self, client: AsyncClient, user_a: dict
     ):
         """insurance_type is a user-extensible category (see schemas/insurance.py)
-        — any non-empty string up to 50 chars is valid, not just the built-in
+        - any non-empty string up to 50 chars is valid, not just the built-in
         list."""
         resp = await client.post(
             "/api/v1/insurance/",

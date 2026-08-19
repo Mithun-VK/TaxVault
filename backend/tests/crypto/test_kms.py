@@ -1,7 +1,7 @@
 """Tests for the key-management providers.
 
 The Vault tests use ``httpx.MockTransport``, so they assert the exact wire
-protocol — path, body, headers, retry behaviour — with zero network access and
+protocol - path, body, headers, retry behaviour - with zero network access and
 no running Vault.
 """
 
@@ -37,7 +37,7 @@ def b64(raw: bytes) -> str:
 
 
 # --------------------------------------------------------------------------
-# Master-key parsing — a typo here is unrecoverable data loss
+# Master-key parsing - a typo here is unrecoverable data loss
 # --------------------------------------------------------------------------
 
 
@@ -133,7 +133,7 @@ async def test_local_missing_key_version_names_the_remedy() -> None:
     stale = await LocalKmsProvider({1: K1}).wrap_dek(DEK)
     with pytest.raises(KmsConfigurationError) as exc:
         await kms.unwrap_dek(stale)
-    # A clean, actionable error — never a KeyError.
+    # A clean, actionable error - never a KeyError.
     assert "version 1 is not configured" in str(exc.value)
     assert "ENCRYPTION_MASTER_KEYS" in str(exc.value)
     assert "[2]" in str(exc.value)
@@ -253,7 +253,7 @@ async def test_local_health_check_reports_derived_key() -> None:
 
 
 # --------------------------------------------------------------------------
-# PKCS#11 — refuses rather than silently wrapping in software
+# PKCS#11 - refuses rather than silently wrapping in software
 # --------------------------------------------------------------------------
 
 
@@ -263,7 +263,7 @@ def test_pkcs11_refuses_to_construct() -> None:
 
 
 # --------------------------------------------------------------------------
-# Vault Transit — exact wire protocol via MockTransport
+# Vault Transit - exact wire protocol via MockTransport
 # --------------------------------------------------------------------------
 
 
@@ -383,7 +383,7 @@ async def test_vault_401_raises_auth_error() -> None:
 
 
 async def test_vault_503_retries_once_then_reports_unavailable() -> None:
-    """Sealed Vault is a routine event, so it is retried — but it is reported as
+    """Sealed Vault is a routine event, so it is retried - but it is reported as
     'key service down', never as a corrupt document."""
     calls = []
 

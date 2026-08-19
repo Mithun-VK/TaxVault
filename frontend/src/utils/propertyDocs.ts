@@ -5,12 +5,12 @@ import type { AssetType, DocumentCategory, TaxDocument } from '@/types';
 export type DocDateInput = 'date' | 'fy_half';
 
 /**
- * Canonical property document checklist — the single source of truth for the
+ * Canonical property document checklist - the single source of truth for the
  * documents a property should keep on file, their order, and behaviour. Display,
  * upload, matching and status all derive from this list.
  */
 export interface PropertyDocSlot {
-  /** Stable slug — used as the document category and as a tag for matching. */
+  /** Stable slug - used as the document category and as a tag for matching. */
   key: string;
   label: string;
   category: DocumentCategory;
@@ -18,7 +18,7 @@ export interface PropertyDocSlot {
   keywords: string[];
   /** Allow more than one file (Parent Documents; EC keeps its 6-monthly history). */
   multiple?: boolean;
-  /** Mandatory paper — flagged prominently in the checklist when missing. */
+  /** Mandatory paper - flagged prominently in the checklist when missing. */
   required?: boolean;
   /** Recurring paper with an expiry (EC = every 6 months). */
   expiryMonths?: number;
@@ -103,7 +103,7 @@ export const PROPERTY_DOC_SLOTS: PropertyDocSlot[] = [
     dateInput: 'date',
     matchByCategory: true,
   },
-  // Recurring tax / bill receipts — keep the full history (recent first), and
+  // Recurring tax / bill receipts - keep the full history (recent first), and
   // are claimed by their explicit slot tag only (shared `tax_receipt` category).
   {
     key: 'property_tax',

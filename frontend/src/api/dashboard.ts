@@ -42,7 +42,7 @@ interface BackendActivity {
 }
 
 export const useDashboard = () => {
-  // The backend's recent-activity rows carry no entity name — resolve it
+  // The backend's recent-activity rows carry no entity name - resolve it
   // from the same shared, cached entity-info map used by payments/alerts.
   const infoMap = useEntityInfoMap();
 
@@ -84,7 +84,7 @@ export const useDashboard = () => {
           action: a.action as DashboardData['activity'][number]['action'],
           entity_type: a.entity_type,
           entity_name: entityName,
-          description: `${a.action.replace(/_/g, ' ')} — ${entityName}`,
+          description: `${a.action.replace(/_/g, ' ')} - ${entityName}`,
           timestamp: a.created_at,
         };
       }),

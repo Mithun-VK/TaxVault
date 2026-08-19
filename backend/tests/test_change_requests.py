@@ -137,7 +137,7 @@ class TestFiling:
     ):
         """The admin is the checker, never the maker: filing here and approving
         it themselves would sidestep the control entirely. (A super admin may
-        file one — but they can already edit directly, so it grants nothing.)"""
+        file one - but they can already edit directly, so it grants nothing.)"""
         resp = await client.post(
             "/api/v1/change-requests/",
             headers=auth(user_b),

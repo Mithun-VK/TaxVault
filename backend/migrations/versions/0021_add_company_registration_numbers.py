@@ -11,7 +11,7 @@ tax) each get a first-class column, because they are looked up by number
 rather than browsed as documents.
 
 Directors gain a DSC number and a share percentage, but `directors` is already
-JSONB, so those need no DDL — only the schema layer changes.
+JSONB, so those need no DDL - only the schema layer changes.
 """
 from typing import Union
 
@@ -49,7 +49,7 @@ def upgrade() -> None:
         + ")",
     )
 
-    # IEC is unique per vault among the rows that carry one — the same partial
+    # IEC is unique per vault among the rows that carry one - the same partial
     # index shape as cin/gstin from migration 0020.
     op.create_index(
         "uq_company_iec",

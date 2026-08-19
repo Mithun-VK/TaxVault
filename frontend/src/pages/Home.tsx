@@ -66,7 +66,7 @@ export function Home() {
   const { data: payments = [], isLoading: paymentsLoading } = usePayments();
   const { data: documents = [], isLoading: documentsLoading } = useDocuments();
 
-  // Primary sections — the three the workflow revolves around, shown large.
+  // Primary sections - the three the workflow revolves around, shown large.
   const featured: (SectionTile & { description: string })[] = [
     {
       label: 'Properties',
@@ -79,7 +79,7 @@ export function Home() {
       addTo: '/assets/new',
       permission: 'properties.view',
       addPermission: 'properties.create',
-      description: 'Land, buildings, gold & vehicles — with taxes and documents.',
+      description: 'Land, buildings, gold & vehicles - with taxes and documents.',
     },
     {
       label: 'Individuals',
@@ -109,7 +109,7 @@ export function Home() {
     },
   ];
 
-  // Data sections — a live count and, where the role allows it, a quick-add.
+  // Data sections - a live count and, where the role allows it, a quick-add.
   const vault: SectionTile[] = [
     {
       label: 'Bills',
@@ -171,7 +171,7 @@ export function Home() {
     },
   ];
 
-  // Tools — no counts, just wayfinding.
+  // Tools - no counts, just wayfinding.
   const tools: SectionTile[] = [
     {
       label: 'Payment Calendar',
@@ -230,7 +230,7 @@ export function Home() {
           {firstName ? `, ${firstName}` : ''}
         </h1>
         <p className="mt-1 text-sm text-slate-700">
-          Your family vault at a glance — jump to any section.
+          Your family vault at a glance - jump to any section.
         </p>
       </div>
 

@@ -1,7 +1,7 @@
 """Seed the client's known business entities.
 
 The five entities below are the ones that appear in the client's Payable
-Calendar. Registration numbers are left blank on purpose — they are filled in
+Calendar. Registration numbers are left blank on purpose - they are filled in
 from the actual certificates through the UI; what matters here is that each
 entity exists with the right legal form, so bills, taxes and properties have
 something to hang off.
@@ -81,7 +81,7 @@ COMPANIES_SEED: list[dict] = [
         ],
     },
     {
-        "legal_name": "CNI — Christhava Nalleeniya Iyakkam",
+        "legal_name": "CNI - Christhava Nalleeniya Iyakkam",
         "trade_name": "CNI",
         "company_type": "trust",
         "industry": "Religious / Charitable Trust",
@@ -107,7 +107,7 @@ def _make_engine():
 
 
 async def _vault_owner_id(db):
-    """The account every vault record hangs off — see get_vault_owner_id()."""
+    """The account every vault record hangs off - see get_vault_owner_id()."""
     owner_id = await db.scalar(
         select(User.id)
         .where(User.role == ROLE_SUPER_ADMIN, User.is_active == True)  # noqa: E712
@@ -126,7 +126,7 @@ async def run(dry_run: bool) -> None:
     async with session_factory() as db:
         user_id = await _vault_owner_id(db)
         if user_id is None:
-            print("No users found — run scripts/seed_rbac_users.py first.")
+            print("No users found - run scripts/seed_rbac_users.py first.")
             await engine.dispose()
             return
         print(f"Vault owner: {user_id}")
@@ -169,7 +169,7 @@ async def run(dry_run: bool) -> None:
         for name, ctype, status in rows:
             print(f"  · {name}  [{ctype}] {status}")
         if dry_run:
-            print("(dry-run — no changes written)")
+            print("(dry-run - no changes written)")
 
     await engine.dispose()
 

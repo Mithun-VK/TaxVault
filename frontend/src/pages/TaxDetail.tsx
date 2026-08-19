@@ -71,7 +71,7 @@ export function TaxDetail() {
   const facts: [string, string][] = [
     ['Tax type', typeMeta?.label ?? getStatusLabel(tax.tax_type)],
     ...(tax.tax_number ? ([['Tax number', tax.tax_number]] as [string, string][]) : []),
-    ['Assessment year', tax.assessment_year || '—'],
+    ['Assessment year', tax.assessment_year || '-'],
     ['Amount', formatINR(tax.total_amount)],
     ['Due date', formatDate(tax.due_date)],
     ['Status', getStatusLabel(tax.status)],

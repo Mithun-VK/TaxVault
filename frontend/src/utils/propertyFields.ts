@@ -2,7 +2,7 @@ import type { Asset } from '@/types';
 import { BUILDING_ASSET_TYPES, LAND_ASSET_TYPES } from './buildings';
 
 /**
- * Canonical "Property Details" fields — the single source of truth for their
+ * Canonical "Property Details" fields - the single source of truth for their
  * order, labels, and the underlying metadata keys. Display, form, export and
  * back-compat mapping all derive from this list, so the order is guaranteed to
  * be consistent everywhere.
@@ -32,7 +32,7 @@ export function fieldAppliesToType(field: PropertyField, assetType: string): boo
   return !field.types || field.types.includes(assetType);
 }
 
-// Ordered for the Property Details layout — five rows of three:
+// Ordered for the Property Details layout - five rows of three:
 //   1. Owner Name · Address · Deed Type
 //   2. Sale Deed Doc. No. · Sale Deed Date · Registration Office
 //   3. Survey Nos. · Land Area · Buildup Area

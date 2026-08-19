@@ -3,7 +3,7 @@
 Gated behind ``settings.ENABLE_TOKEN_BLOCKLIST`` so dev and tests (which point at
 a placeholder Redis) don't pay a network round-trip. Calls fail open: if Redis is
 unreachable we log and treat the token as not-blocklisted rather than locking
-everyone out — availability of auth is prioritised, and access tokens are short.
+everyone out - availability of auth is prioritised, and access tokens are short.
 """
 
 import logging
@@ -30,7 +30,7 @@ async def block_token(jti: str, ttl_seconds: int) -> None:
         return
     try:
         await _get_client().set(f"{_PREFIX}{jti}", "1", ex=ttl_seconds)
-    except Exception:  # noqa: BLE001 — never let revocation bookkeeping break logout
+    except Exception:  # noqa: BLE001 - never let revocation bookkeeping break logout
         logger.exception("Failed to blocklist token jti=%s", jti)
 
 
@@ -39,6 +39,6 @@ async def is_blocked(jti: str | None) -> bool:
         return False
     try:
         return await _get_client().exists(f"{_PREFIX}{jti}") == 1
-    except Exception:  # noqa: BLE001 — fail open on Redis outage
+    except Exception:  # noqa: BLE001 - fail open on Redis outage
         logger.exception("Blocklist lookup failed for jti=%s", jti)
         return False

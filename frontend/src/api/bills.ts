@@ -43,7 +43,7 @@ export const useBillTrend = (billId: string | undefined) =>
     staleTime: 5 * 60 * 1000,
   });
 
-// The backend tracks only `next_due_date` + `is_active` — there is no
+// The backend tracks only `next_due_date` + `is_active` - there is no
 // persisted "paid" state for a recurring bill, so status is derived.
 function fromBackend(bill: Bill & { is_active?: boolean }): Bill {
   return { ...bill, status: isOverdue(bill.next_due_date) ? 'overdue' : 'pending' };
@@ -131,7 +131,7 @@ export const usePayBill = () =>
       queryClient.invalidateQueries({ queryKey: ['bills'] });
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      toast.success('Bill payment recorded — next due date updated');
+      toast.success('Bill payment recorded - next due date updated');
     },
     onError: (error) => toast.error(getErrorMessage(error) || 'Could not record payment'),
   });

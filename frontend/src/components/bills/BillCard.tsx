@@ -15,7 +15,7 @@ interface BillCardProps {
   onClick: (bill: Bill) => void;
 }
 
-/** Month-on-month delta — only meaningful for variable bills. */
+/** Month-on-month delta - only meaningful for variable bills. */
 function Comparison({ diff }: { diff: number | null }) {
   if (diff === null) return <p className="text-xs text-slate-500">No comparison yet</p>;
   if (diff === 0)
@@ -67,7 +67,7 @@ export function BillCard({ bill, onClick }: BillCardProps) {
               {bill.name || bill.provider_name}
             </h3>
             <p className="truncate text-xs text-slate-600">
-              {bill.name ? bill.provider_name : bill.account_number || '—'}
+              {bill.name ? bill.provider_name : bill.account_number || '-'}
             </p>
           </div>
         </div>

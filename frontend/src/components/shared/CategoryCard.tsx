@@ -12,7 +12,7 @@ interface CategoryCardProps {
 }
 
 /**
- * A clickable category tile used by the Taxes/Bills drill-down landings —
+ * A clickable category tile used by the Taxes/Bills drill-down landings -
  * pick a category to see the items inside it (mirrors the Assets owner flow).
  */
 export function CategoryCard({

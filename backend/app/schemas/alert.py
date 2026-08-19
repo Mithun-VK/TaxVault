@@ -29,7 +29,7 @@ class AlertConfigBulkUpdate(AlertConfigUpdate):
     """Apply one setting to every rule at once.
 
     The reminder schedule and channels are a household-wide preference, not a
-    per-bill one — editing them individually across dozens of payables was the
+    per-bill one - editing them individually across dozens of payables was the
     main friction in the old settings page. `entity_type` narrows the sweep to
     one kind of payable; omit it for all.
     """
@@ -46,7 +46,7 @@ class WhatsAppStatus(BaseModel):
     ever returning the auth token."""
 
     configured: bool
-    # Masked (+91••••3210) — enough to confirm the right number, useless if leaked.
+    # Masked (+91••••3210) - enough to confirm the right number, useless if leaked.
     recipient: str | None
     sender: str | None
     # Set when `configured` is false: which env vars are still missing.

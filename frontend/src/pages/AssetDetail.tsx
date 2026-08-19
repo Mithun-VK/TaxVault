@@ -66,7 +66,7 @@ import { formatDate } from '@/utils/dates';
 import { isPropertyType } from '@/types';
 import type { TaxDocument } from '@/types';
 
-// Legacy metadata keys no longer surfaced under "Other recorded details" —
+// Legacy metadata keys no longer surfaced under "Other recorded details" -
 // superseded by dedicated Property Details fields (property/water/land tax number).
 const HIDDEN_METADATA_KEYS = new Set(['tax_ids', 'tax_id']);
 
@@ -83,7 +83,7 @@ const PREVIEWABLE = /\.(png|jpe?g|webp|gif|pdf)(\?|$)/i;
 function docWhenLabel(doc: TaxDocument, slot: PropertyDocSlot): string {
   if (slot.dateInput === 'fy_half') {
     const half = docHalf(doc);
-    const fy = doc.financial_year ? `FY ${doc.financial_year}` : 'FY —';
+    const fy = doc.financial_year ? `FY ${doc.financial_year}` : 'FY -';
     return half ? `${fy} · ${half === 'H1' ? '1st half' : '2nd half'}` : fy;
   }
   return formatDate(effectiveDocDate(doc));
@@ -122,7 +122,7 @@ export function AssetDetail() {
 
   const openAddTax = () => setTaxOpen(true);
 
-  // Upload drawer — `uploadSlot` seeds the label + tag when adding to a slot.
+  // Upload drawer - `uploadSlot` seeds the label + tag when adding to a slot.
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadSlot, setUploadSlot] = useState<PropertyDocSlot | null>(null);
 
@@ -223,7 +223,7 @@ export function AssetDetail() {
   const genericEntries = Object.entries(asset.metadata ?? {}).filter(
     ([k, v]) => k !== 'owner' && k !== 'owner_name' && v !== undefined && v !== '' && v !== null,
   );
-  // Metadata not covered by the canonical / building fields (e.g. lease_note) —
+  // Metadata not covered by the canonical / building fields (e.g. lease_note) -
   // surfaced after Property Details so nothing is hidden. Legacy keys superseded
   // by dedicated fields (tax_ids → property/water/land tax numbers) are hidden.
   const extraRows = isProperty
@@ -389,7 +389,7 @@ export function AssetDetail() {
         )}
       </Card>
 
-      {/* Tabs — Documents & Taxes are the focus for a property */}
+      {/* Tabs - Documents & Taxes are the focus for a property */}
       <Tabs defaultValue="documents">
         <TabsList>
           <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -497,12 +497,12 @@ export function AssetDetail() {
                                             ? `receipt${matches.length > 1 ? 's' : ''} · last updated ${docWhenLabel(matches[0], slot)}`
                                             : `file${matches.length > 1 ? 's' : ''} on file`
                                         }`
-                                      : 'Missing — upload one or more files'
+                                      : 'Missing - upload one or more files'
                                     : present
                                       ? `On file · ${docWhenLabel(matches[0], slot)}`
                                       : slot.required
-                                        ? 'Required — not uploaded yet'
-                                        : 'Missing — not uploaded yet'}
+                                        ? 'Required - not uploaded yet'
+                                        : 'Missing - not uploaded yet'}
                               </p>
                             </div>
                           </div>
@@ -524,7 +524,7 @@ export function AssetDetail() {
                           </Button>
                         </div>
 
-                        {/* Uploaded file(s) — Parent Docs & EC keep their full history */}
+                        {/* Uploaded file(s) - Parent Docs & EC keep their full history */}
                         {present && (
                           <div className="mt-2 space-y-1 pl-8">
                             {matches.map((doc) => {
@@ -826,7 +826,7 @@ export function AssetDetail() {
         />
       </SlideOverDrawer>
 
-      {/* Add tax — pre-linked to this property, so it also lands on /taxes and
+      {/* Add tax - pre-linked to this property, so it also lands on /taxes and
           the dashboard payment calendar (by due date). */}
       <SlideOverDrawer
         open={taxOpen}
@@ -854,7 +854,7 @@ export function AssetDetail() {
         />
       </SlideOverDrawer>
 
-      {/* Add insurance — pre-linked; shows on /insurance and the calendar
+      {/* Add insurance - pre-linked; shows on /insurance and the calendar
           (by next premium date). */}
       <SlideOverDrawer
         open={policyOpen}

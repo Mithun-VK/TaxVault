@@ -123,7 +123,7 @@ export function Reports() {
     return (id?: string | null) => (id ? map.get(id) : undefined);
   }, [assets, individualsData]);
 
-  // Current gold price per gram (₹), typed on the toolbar — drives the live
+  // Current gold price per gram (₹), typed on the toolbar - drives the live
   // "Current Gold Value" column and the active-gold valuation summary.
   const [goldPrice, setGoldPrice] = useState('');
   const goldPricePerGram = Number(goldPrice) || 0;
@@ -150,7 +150,7 @@ export function Reports() {
   const [filterValues, setFilterValues] = useState<Record<string, FilterValue>>(() =>
     Object.fromEntries(datasets[0].filters.map((f) => [f.key, defaultFilterValue(f)])),
   );
-  // User-defined column order (list of column keys) — drag-to-reorder in the
+  // User-defined column order (list of column keys) - drag-to-reorder in the
   // Columns menu. Reset to the schema order whenever the dataset changes.
   const [colOrder, setColOrder] = useState<string[]>(() => datasets[0].columns.map((c) => c.key));
 
@@ -267,7 +267,7 @@ export function Reports() {
             <TableProperties className="h-5 w-5 text-brand-navy" /> Reports
           </h1>
           <p className="mt-0.5 text-sm text-slate-700">
-            Build a spreadsheet from any part of the vault — pick the columns, filter the rows, export to Excel.
+            Build a spreadsheet from any part of the vault - pick the columns, filter the rows, export to Excel.
           </p>
         </div>
         <Button onClick={handleExport} disabled={rows.length === 0}>
@@ -410,7 +410,7 @@ export function Reports() {
                 <span>
                   Current value:{' '}
                   <span className="font-semibold text-slate-700 tabular-nums">
-                    {goldPricePerGram > 0 ? formatINR(activeGold.value) : '—'}
+                    {goldPricePerGram > 0 ? formatINR(activeGold.value) : '-'}
                   </span>
                 </span>
               </div>

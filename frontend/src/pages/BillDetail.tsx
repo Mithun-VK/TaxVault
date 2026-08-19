@@ -80,13 +80,13 @@ export function BillDetail() {
   const typeMeta = BILL_TYPES.find((t) => t.value === bill.bill_type);
 
   const facts: [string, string][] = [
-    ['Account number', bill.account_number || '—'],
+    ['Account number', bill.account_number || '-'],
     ['Bill type', typeMeta?.label ?? getStatusLabel(bill.bill_type)],
     ['Billing cycle', getStatusLabel(bill.billing_cycle)],
     [isVariable ? 'Average amount' : 'Amount', formatINR(bill.average_amount)],
     ['Next due', formatDate(bill.next_due_date)],
     ['Auto-pay', bill.auto_pay ? 'On' : 'Off'],
-    ['Amount type', isVariable ? 'Variable — changes each cycle' : 'Fixed'],
+    ['Amount type', isVariable ? 'Variable - changes each cycle' : 'Fixed'],
   ];
 
   return (

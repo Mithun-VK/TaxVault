@@ -17,7 +17,7 @@ class RecurringBill(Base):
     )
     # Human-readable label shown on the calendar / payments / reports. Falls
     # back to provider_name (then bill_type) when unset. Lets the user tell
-    # apart otherwise-identical bills — e.g. several "TNEB" electricity bills.
+    # apart otherwise-identical bills - e.g. several "TNEB" electricity bills.
     name: Mapped[str | None] = mapped_column(String)
     bill_type: Mapped[str] = mapped_column(String, nullable=False)
     provider_name: Mapped[str | None] = mapped_column(String)

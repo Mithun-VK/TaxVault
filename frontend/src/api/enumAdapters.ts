@@ -2,7 +2,7 @@
 // enum string values for a handful of fields. These helpers translate the
 // UI-friendly (mock) value to whatever the real backend expects on the way
 // out, and normalize the backend's value to a UI-known literal on the way in.
-// Both directions are additive casts — every value the backend can return is
+// Both directions are additive casts - every value the backend can return is
 // already part of the corresponding frontend union (see types/*.ts).
 
 const BILLING_CYCLE_TO_BACKEND: Record<string, string> = {

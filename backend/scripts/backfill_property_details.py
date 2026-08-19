@@ -93,7 +93,7 @@ async def run(dry_run: bool) -> None:
             patch: dict[str, str] = {}
             for col, aliases in FIELD_ALIASES.items():
                 if row[col] not in (None, ""):
-                    continue  # already set — don't clobber
+                    continue  # already set - don't clobber
                 val = _resolve(md, aliases)
                 if val is not None:
                     patch[col] = val

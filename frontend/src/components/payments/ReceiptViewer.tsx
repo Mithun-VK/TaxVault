@@ -67,7 +67,7 @@ export function ReceiptViewer({ documentId, doc, onClose }: ReceiptViewerProps) 
         if (!active) return;
         setRawUrl(url);
 
-        // Images render fine straight from the URL — no fetch/CORS needed.
+        // Images render fine straight from the URL - no fetch/CORS needed.
         if (resolveKind(doc) !== 'pdf') {
           setStatus('ready');
           return;

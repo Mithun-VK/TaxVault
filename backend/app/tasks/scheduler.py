@@ -99,7 +99,7 @@ def run_daily_scan() -> None:
     asyncio.run(_scan())
 
 
-# Terminal statuses per entity type — an entity in one of these is not "overdue".
+# Terminal statuses per entity type - an entity in one of these is not "overdue".
 _TERMINAL_STATUS = {"paid", "exempt", "surrendered", "matured", "lapsed"}
 
 

@@ -8,7 +8,7 @@ from app.core.constants import AssetStatus, AssetType
 
 
 class PropertyDetailsMixin(BaseModel):
-    """Canonical Property Details (land & building) — first-class columns."""
+    """Canonical Property Details (land & building) - first-class columns."""
 
     owner_name: str | None = Field(default=None, max_length=200)
     address: str | None = Field(default=None, max_length=2000)

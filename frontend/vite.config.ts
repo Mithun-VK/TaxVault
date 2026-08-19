@@ -5,7 +5,7 @@ import { fileURLToPath, URL } from 'node:url';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   // Use 127.0.0.1, not "localhost": Node 18+ resolves "localhost" to IPv6 (::1)
-  // first, and `uvicorn ... --reload` binds IPv4 (127.0.0.1) only — so a
+  // first, and `uvicorn ... --reload` binds IPv4 (127.0.0.1) only - so a
   // "localhost" target can miss the backend (or hit a different server that
   // happens to own ::1:8000) and 404 every route.
   const backendUrl = env.VITE_API_BACKEND_URL || 'http://127.0.0.1:8000';

@@ -1,9 +1,9 @@
 """WhatsApp alert delivery (Twilio) and the settings endpoints behind it.
 
 Twilio is never actually called: `send_whatsapp` is patched, or httpx is
-stubbed, so these assert our own behaviour — recipient resolution, the message
+stubbed, so these assert our own behaviour - recipient resolution, the message
 body, the configured/unconfigured guards, bulk updates and the RBAC on each
-endpoint — without a network round trip or real credentials.
+endpoint - without a network round trip or real credentials.
 """
 from datetime import date
 from unittest.mock import AsyncMock, patch
@@ -69,7 +69,7 @@ class TestAddressNormalisation:
             ("919876543210", "whatsapp:+919876543210"),
             ("+91 98765 43210", "whatsapp:+919876543210"),
             ("+91-98765-43210", "whatsapp:+919876543210"),
-            # Already prefixed — must not be double-prefixed.
+            # Already prefixed - must not be double-prefixed.
             ("whatsapp:+919876543210", "whatsapp:+919876543210"),
             ("", ""),
         ],
@@ -97,7 +97,7 @@ class TestMessageBody:
         body = build_whatsapp_body("bill", "TNEB electricity", date(2026, 9, 30), 1850.0, 3)
         assert "*Bill due in 3 days*" in body
         assert "*TNEB electricity*" in body
-        # Grouped, no stray decimal — this is read on a phone.
+        # Grouped, no stray decimal - this is read on a phone.
         assert "₹1,850" in body
         assert "30 Sep 2026" in body
 
@@ -107,7 +107,7 @@ class TestMessageBody:
 
     def test_missing_amount_and_date_do_not_break_it(self):
         body = build_whatsapp_body("insurance", "LIC", None, None, 1)
-        assert "—" in body
+        assert "-" in body
         assert "LIC" in body
 
 
@@ -123,7 +123,7 @@ class TestChannelSend:
         assert send.await_args.args[0] == "+919876543210"
 
     async def test_refuses_when_not_configured(self, twilio_unconfigured):
-        """No credentials means no request — a guaranteed 401 is not worth sending."""
+        """No credentials means no request - a guaranteed 401 is not worth sending."""
         with patch(
             "app.notifications.channels.whatsapp.send_whatsapp", new_callable=AsyncMock
         ) as send:
@@ -177,7 +177,7 @@ class TestWhatsAppStatusEndpoint:
     async def test_member_cannot_read_status(
         self, client: AsyncClient, member: dict, twilio_configured
     ):
-        """Members are the payables desk and hold no alerts.view — the whole
+        """Members are the payables desk and hold no alerts.view - the whole
         alerts surface, delivery settings included, is withheld from them."""
         resp = await client.get("/api/v1/alerts/whatsapp", headers=auth(member))
         assert resp.status_code == 403
@@ -221,7 +221,7 @@ class TestWhatsAppTestEndpoint:
         assert "not configured" in resp.json()["detail"].lower()
 
     async def test_admin_cannot_send(self, client: AsyncClient, user_b: dict, twilio_configured):
-        """Sending is a write — admins read alert settings but do not change them."""
+        """Sending is a write - admins read alert settings but do not change them."""
         resp = await client.post("/api/v1/alerts/whatsapp/test", headers=auth(user_b))
         assert resp.status_code == 403
 

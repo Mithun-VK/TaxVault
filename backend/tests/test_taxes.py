@@ -68,7 +68,7 @@ class TestCreateTax:
 
     async def test_custom_tax_type_is_accepted(self, client: AsyncClient, user_a: dict):
         """tax_type is a user-extensible category (see schemas/tax_obligation.py)
-        — any non-empty string up to 50 chars is valid, not just the built-in
+        - any non-empty string up to 50 chars is valid, not just the built-in
         list."""
         resp = await client.post(
             "/api/v1/taxes/",

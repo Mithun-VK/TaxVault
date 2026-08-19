@@ -1,10 +1,10 @@
-# TaxVault v3 — Frontend Prompt (Claude Code)
+# TaxVault v3 - Frontend Prompt (Claude Code)
 
 > Paste this entire prompt into Claude Code while inside the `taxvault/frontend/` directory.
 
 ---
 
-You are building the complete frontend for TaxVault v3 — a personal asset & liability management system. The project is scaffolded at `./`. Build the entire frontend from scratch: every page, every component, every utility — production-ready, no placeholders, no TODOs.
+You are building the complete frontend for TaxVault v3 - a personal asset & liability management system. The project is scaffolded at `./`. Build the entire frontend from scratch: every page, every component, every utility - production-ready, no placeholders, no TODOs.
 
 ---
 
@@ -39,20 +39,20 @@ npx msw init public/
 
 ## DESIGN LANGUAGE
 
-This software handles personal financial data. The visual tone must communicate institutional trust and calm authority — think private banking, not a startup app.
+This software handles personal financial data. The visual tone must communicate institutional trust and calm authority - think private banking, not a startup app.
 
 ### Colors (extend in tailwind.config.ts):
 ```
-brand-navy:    #1A3C6E   — primary actions, headings
-brand-teal:    #0F6E56   — success, secondary actions
-brand-warning: #92400E   — amber, upcoming deadlines ≤30 days
-brand-danger:  #991B1B   — overdue, destructive actions
-brand-success: #14532D   — paid/completed status
-surface-page:  #F8F9FB   — page background
-surface-card:  #FFFFFF   — card surfaces
-surface-border:#E2E6ED   — all borders
-text-primary:  #0F172A   — headings, key data
-text-muted:    #64748B   — descriptions, secondary text
+brand-navy:    #1A3C6E   - primary actions, headings
+brand-teal:    #0F6E56   - success, secondary actions
+brand-warning: #92400E   - amber, upcoming deadlines ≤30 days
+brand-danger:  #991B1B   - overdue, destructive actions
+brand-success: #14532D   - paid/completed status
+surface-page:  #F8F9FB   - page background
+surface-card:  #FFFFFF   - card surfaces
+surface-border:#E2E6ED   - all borders
+text-primary:  #0F172A   - headings, key data
+text-muted:    #64748B   - descriptions, secondary text
 ```
 
 ### Typography:
@@ -100,7 +100,7 @@ Shell: fixed sidebar (260px wide) + main content area with top header.
 ## PAGES (12 pages, all fully functional)
 
 ### 1. LOGIN (/login)
-Full-page split layout. Left: large navy panel — TaxVault logo, tagline "Your assets. Your finances. Always on time.", three trust signals (bank-grade encryption, deadline alerts, document vault). Right: login form. Toggle to register. Forgot password flow. React Hook Form + Zod validation. Loading spinner on submit. On success: store tokens in localStorage, redirect to /.
+Full-page split layout. Left: large navy panel - TaxVault logo, tagline "Your assets. Your finances. Always on time.", three trust signals (bank-grade encryption, deadline alerts, document vault). Right: login form. Toggle to register. Forgot password flow. React Hook Form + Zod validation. Loading spinner on submit. On success: store tokens in localStorage, redirect to /.
 
 ### 2. DASHBOARD (/)
 - 4 stat cards: Total asset value (₹, formatted), Due this month, Overdue (red if >0), Paid this FY
@@ -158,11 +158,11 @@ Full-page split layout. Left: large navy panel — TaxVault logo, tagline "Your 
 
 ### 11. ALERT SETTINGS (/alerts)
 - List of all payables grouped by type (taxes, insurance premiums, bills) with their alert config
-- Each row: entity name, type badge, due date, channel toggles (email/SMS/push — colored chips), days-before pills (30/15/7/3/1 — toggle each)
+- Each row: entity name, type badge, due date, channel toggles (email/SMS/push - colored chips), days-before pills (30/15/7/3/1 - toggle each)
 - Alert history accordion per entity: last 10 sent alerts with timestamp, channel icon, status
 
 ### 12. PROFILE (/profile)
-- Two columns: left = personal info card (name, email, phone — editable), right = settings
+- Two columns: left = personal info card (name, email, phone - editable), right = settings
 - Change password section with strength meter
 - Notification preferences: global toggles per channel + test button
 - Push device list with remove button
@@ -240,7 +240,7 @@ Protected route: check localStorage for access_token → redirect /login if miss
 
 ---
 
-## FORMS — Zod schemas for everything
+## FORMS - Zod schemas for everything
 
 AssetForm: tax_type enum, name min 2, current_value positive number, metadata fields conditional on type
 InsuranceForm: policy_number required, premium_amount positive, premium_frequency enum, dates validated
@@ -259,11 +259,11 @@ DocumentMetaForm: label min 1, category enum, tags max 5
 
 `upload.ts`: uploadToR2(presignedUrl, file, onProgress) using XMLHttpRequest for progress
 
-`constants.ts`: ASSET_TYPES, BILL_TYPES, TAX_TYPES, INSURANCE_TYPES, PAYMENT_METHODS, DOCUMENT_CATEGORIES — each with label, value, color, icon
+`constants.ts`: ASSET_TYPES, BILL_TYPES, TAX_TYPES, INSURANCE_TYPES, PAYMENT_METHODS, DOCUMENT_CATEGORIES - each with label, value, color, icon
 
 ---
 
-## MOCK DATA (critical — build this first)
+## MOCK DATA (critical - build this first)
 
 `mocks/data.ts`: Realistic Indian data:
 - 6 assets: 2 land plots (Chennai), 1 Honda City, 1 Maruti Swift, 1 apartment, 1 gold holding

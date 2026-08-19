@@ -54,7 +54,7 @@ class TestDashboardSummary:
     async def test_admin_sees_the_same_summary(
         self, client: AsyncClient, user_a: dict, user_b: dict, building: dict, tax: dict
     ):
-        """The summary describes the vault, not the caller — both roles match."""
+        """The summary describes the vault, not the caller - both roles match."""
         resp_a = await client.get("/api/v1/dashboard/summary", headers=auth(user_a))
         resp_b = await client.get("/api/v1/dashboard/summary", headers=auth(user_b))
         assert resp_b.status_code == 200
@@ -114,7 +114,7 @@ class TestDashboardRecentActivity:
     async def test_reflects_recent_payment(
         self, client: AsyncClient, user_a: dict, tax: dict
     ):
-        # Make a payment — should show in recent activity
+        # Make a payment - should show in recent activity
         await client.post(
             f"/api/v1/taxes/{tax['id']}/pay",
             headers=auth(user_a),

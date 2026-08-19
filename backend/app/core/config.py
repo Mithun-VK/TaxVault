@@ -83,7 +83,7 @@ class Settings(BaseSettings):
     # The primary alert channel. TWILIO_WHATSAPP_FROM is the Twilio sender (the
     # sandbox number during testing); TWILIO_WHATSAPP_TO is the household number
     # every reminder goes to. Leave TO blank to fall back to each user's own
-    # phone_number instead. Numbers are plain E.164 here (+919876543210) — the
+    # phone_number instead. Numbers are plain E.164 here (+919876543210) - the
     # "whatsapp:" prefix Twilio wants is added by the channel.
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
@@ -200,7 +200,7 @@ class Settings(BaseSettings):
         """
         if self.KMS_PROVIDER not in ("local", "vault_transit", "pkcs11"):
             raise ValueError(
-                f"KMS_PROVIDER must be one of local, vault_transit, pkcs11 — "
+                f"KMS_PROVIDER must be one of local, vault_transit, pkcs11 - "
                 f"got {self.KMS_PROVIDER!r}."
             )
         if self.KMS_PROVIDER == "pkcs11":
@@ -236,7 +236,7 @@ class Settings(BaseSettings):
                 raise ValueError("VAULT_VERIFY_TLS cannot be disabled in production.")
             if self.VAULT_ADDR.startswith("http://"):
                 raise ValueError(
-                    "VAULT_ADDR must use https in production — a plaintext Vault "
+                    "VAULT_ADDR must use https in production - a plaintext Vault "
                     "connection carries unwrapped DEKs over the network."
                 )
         return self

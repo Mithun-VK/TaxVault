@@ -10,7 +10,7 @@ export function useRole(): UserRole | null {
 /**
  * True when the signed-in user's role grants `permission`.
  *
- * Drives every UI gate — hidden buttons, filtered nav, route guards. The
+ * Drives every UI gate - hidden buttons, filtered nav, route guards. The
  * backend enforces the same table independently, so a stale or tampered role
  * here changes what is *shown*, never what is *allowed*.
  */
@@ -26,9 +26,9 @@ export function useIsSuperAdmin(): boolean {
 /**
  * How this role gets an edit or delete done on a payable.
  *
- * `direct` — the role changes the record itself.
- * `request` — it files a change request for an admin to approve.
- * `none` — the control should not be offered at all.
+ * `direct` - the role changes the record itself.
+ * `request` - it files a change request for an admin to approve.
+ * `none` - the control should not be offered at all.
  */
 export type ChangeMode = 'direct' | 'request' | 'none';
 

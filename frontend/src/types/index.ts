@@ -42,7 +42,7 @@ export interface RegisterRequest {
   password: string;
 }
 
-/** Login/register only return tokens — the profile is fetched separately via /users/me. */
+/** Login/register only return tokens - the profile is fetched separately via /users/me. */
 export interface AuthResponse {
   access_token: string;
   refresh_token: string;

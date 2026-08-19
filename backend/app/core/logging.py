@@ -11,7 +11,7 @@ from app.core.config import settings
 
 
 def setup_logging() -> None:
-    # Sentry — init before anything else
+    # Sentry - init before anything else
     if settings.SENTRY_DSN:
         sentry_sdk.init(
             dsn=settings.SENTRY_DSN,

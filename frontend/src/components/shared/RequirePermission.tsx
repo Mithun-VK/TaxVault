@@ -9,12 +9,12 @@ interface RequirePermissionProps {
 
 /**
  * Wraps routes that a role must hold a permission to open. Sits inside
- * ProtectedRoute, so the visitor is already authenticated — this only checks
+ * ProtectedRoute, so the visitor is already authenticated - this only checks
  * the role, and sends anyone without it back to the home hub (reachable by
  * every role). The backend refuses the same calls regardless, so this is a
  * wayfinding gate, not the security boundary.
  *
- * Passing several permissions means "any of these" — the edit form pages use it
+ * Passing several permissions means "any of these" - the edit form pages use it
  * so a member holding only `*.request_change` can open the same form and submit
  * it for approval.
  *

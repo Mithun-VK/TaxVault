@@ -139,7 +139,7 @@ export const RELATIONSHIP_OPTIONS: Option[] = [
   { label: 'Other', value: 'Other' },
 ];
 
-/** Built-in bill categories. Users can add their own — see customBillTypes(). */
+/** Built-in bill categories. Users can add their own - see customBillTypes(). */
 export const BILL_TYPES: Option<BillType>[] = [
   { label: 'Phone', value: 'phone', color: '#7C3AED', icon: Phone },
   { label: 'Electricity', value: 'electricity', color: '#D97706', icon: Zap },
@@ -199,7 +199,7 @@ function prettifySlug(value: string): string {
  * Every insurance category to show: the built-ins plus any custom slug the user
  * created (`customLabels`, from localStorage) or already used on a policy
  * (`usedTypes`, from data), so user-created categories appear on the Insurance
- * page — not just inside the form's picker. Custom labels win over a prettified
+ * page - not just inside the form's picker. Custom labels win over a prettified
  * slug; data-derived customs cover policies created on another device.
  */
 export function allInsuranceCategories(
@@ -286,7 +286,7 @@ export const DOCUMENT_GROUP_LABELS: Record<string, string> = {
 };
 
 export const DOCUMENT_CATEGORIES: Option<DocumentCategory>[] = [
-  // Property documents — canonical checklist (see utils/propertyDocs.ts)
+  // Property documents - canonical checklist (see utils/propertyDocs.ts)
   { value: 'patta', label: 'Patta', group: 'property', color: '#0369A1' },
   { value: 'chitta', label: 'Chitta', group: 'property', color: '#0369A1' },
   { value: 'adangal', label: 'Adangal', group: 'property', color: '#0369A1' },
@@ -296,11 +296,11 @@ export const DOCUMENT_CATEGORIES: Option<DocumentCategory>[] = [
   { value: 'a1_registration', label: 'A1 Registration', group: 'property', color: '#0369A1' },
   { value: 'sale_deed', label: 'Sale Deed', group: 'property', color: '#0369A1' },
   { value: 'fssai', label: 'FSSAI Registration', group: 'property', color: '#0369A1' },
-  // Vehicle documents — canonical checklist (see utils/propertyDocs.ts)
+  // Vehicle documents - canonical checklist (see utils/propertyDocs.ts)
   { value: 'rc', label: 'RC (Registration Certificate)', group: 'vehicle', color: '#0369A1' },
   { value: 'hypothecation', label: 'Hypothecation Document', group: 'vehicle', color: '#0369A1' },
   { value: 'transfer_form', label: 'Transfer Form', group: 'vehicle', color: '#0369A1' },
-  // Gold documents — canonical checklist (see utils/propertyDocs.ts)
+  // Gold documents - canonical checklist (see utils/propertyDocs.ts)
   { value: 'jewel_photo', label: 'Jewel Photo', group: 'gold', color: '#C8860D' },
   { value: 'purchase_bill', label: 'Purchase Bill', group: 'gold', color: '#C8860D' },
   // Tax documents
@@ -322,16 +322,16 @@ export const DOCUMENT_CATEGORIES: Option<DocumentCategory>[] = [
   { value: 'other', label: 'Other Document', group: 'other', color: '#475569' },
 ];
 
-/** Bill classification (UI-only) — variable bills change month-on-month. */
+/** Bill classification (UI-only) - variable bills change month-on-month. */
 export const VARIABLE_BILL_TYPES = ['electricity', 'phone'] as const;
 export const FIXED_BILL_TYPES = ['wifi', 'dth', 'dubai', 'other'] as const;
 
 export const BILL_PRIORITY: Record<string, 'variable' | 'fixed'> = {
-  electricity: 'variable', // EB bill — amount changes monthly
-  phone: 'variable', // mobile bill — data usage varies
+  electricity: 'variable', // EB bill - amount changes monthly
+  phone: 'variable', // mobile bill - data usage varies
   wifi: 'fixed', // fixed monthly plan
-  dth: 'fixed', // DTH / cable — fixed plan
-  dubai: 'fixed', // Dubai — fixed
+  dth: 'fixed', // DTH / cable - fixed plan
+  dubai: 'fixed', // Dubai - fixed
   other: 'fixed', // EMI, etc.
 };
 
@@ -341,7 +341,7 @@ export function billPriority(type: string): 'variable' | 'fixed' {
 
 // ── Company module ───────────────────────────────────────────────────────────
 // Mirrors CompanyType / CompanyStatus / CompanyDocumentCategory in the backend
-// (app/models/company.py, app/models/company_document.py). Keep in sync — the
+// (app/models/company.py, app/models/company_document.py). Keep in sync - the
 // API rejects any value not in its own enum.
 
 export const COMPANY_TYPES: Option[] = [
@@ -414,7 +414,7 @@ export const COMPANY_DOCUMENT_CATEGORIES: Option[] = [
   { value: 'other', label: 'Other Document', group: 'other' },
 ];
 
-/** Categories that recur each financial year — these prompt for an FY. */
+/** Categories that recur each financial year - these prompt for an FY. */
 export const COMPANY_FILING_CATEGORIES = [
   'annual_return',
   'financial_stmt',
@@ -432,24 +432,27 @@ export const EXPORTER_TYPES: Option[] = [
 ];
 
 /**
- * The identifiers shown in the hero strip at the top of a company page —
- * the numbers people actually get asked for on a call, in the order they
- * tend to be asked. `always` entries show a dash when unset; the rest only
- * appear once the company has one.
+ * Every registration number a company can hold, shown in the hero strip at the
+ * top of the company page.
+ *
+ * All of them render whether or not they are filled in: the blanks are the
+ * point, since the section doubles as a checklist of what still needs
+ * collecting. Order runs identity → tax → export → statutory → foreign.
  */
-export const COMPANY_KEY_NUMBERS: { key: string; label: string; always?: boolean }[] = [
-  { key: 'cin', label: 'CIN', always: true },
+export const COMPANY_KEY_NUMBERS: { key: string; label: string }[] = [
+  { key: 'cin', label: 'CIN' },
   { key: 'llpin', label: 'LLPIN' },
-  { key: 'pan_number', label: 'PAN', always: true },
-  { key: 'tan_number', label: 'TAN', always: true },
-  { key: 'gstin', label: 'GSTIN', always: true },
+  { key: 'pan_number', label: 'PAN' },
+  { key: 'tan_number', label: 'TAN' },
+  { key: 'gstin', label: 'GSTIN' },
   { key: 'iec_code', label: 'IE Code' },
-  { key: 'msme_number', label: 'MSME / Udyam' },
   { key: 'aepc_code', label: 'AEPC Code' },
   { key: 'textile_committee_code', label: 'Textile Committee' },
+  { key: 'msme_number', label: 'MSME / Udyam' },
   { key: 'epf_number', label: 'EPF No.' },
   { key: 'esi_number', label: 'ESI No.' },
   { key: 'professional_tax_number', label: 'Professional Tax No.' },
+  { key: 'income_tax_ward', label: 'Income Tax Ward' },
   { key: 'foreign_registration_number', label: 'Foreign Reg. No.' },
 ];
 

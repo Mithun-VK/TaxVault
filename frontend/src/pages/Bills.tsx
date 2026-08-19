@@ -23,7 +23,7 @@ export function Bills() {
   // Selected category lives in the URL so the view is shareable / refresh-safe.
   const [searchParams, setSearchParams] = useSearchParams();
   const rawType = searchParams.get('type');
-  // Any slug is valid — categories can be user-created.
+  // Any slug is valid - categories can be user-created.
   const selectedType = rawType ? (rawType as BillType) : null;
   const selectCategory = (t: BillType) => setSearchParams({ type: t });
   const clearCategory = () => setSearchParams({});

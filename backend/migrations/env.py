@@ -22,7 +22,7 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
-# Read the migration connection URL from the environment — never hardcode
+# Read the migration connection URL from the environment - never hardcode
 # credentials in tracked files. Prefer the direct (non-pooler) URL, since DDL
 # and prepared-statement-heavy migrations should not run through pgBouncer.
 # make_url handles any '@' in the password without string-parsing issues.

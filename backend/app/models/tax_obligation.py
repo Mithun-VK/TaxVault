@@ -30,7 +30,7 @@ class TaxObligation(Base):
     # back to description (then tax_type) when unset.
     name: Mapped[str | None] = mapped_column(String)
     tax_type: Mapped[str] = mapped_column(String, nullable=False)
-    # Assessment / property / land / consumer number issued by the authority —
+    # Assessment / property / land / consumer number issued by the authority -
     # e.g. a property-tax assessment ID. Distinct from the internal `id`.
     tax_number: Mapped[str | None] = mapped_column(String)
     jurisdiction: Mapped[str | None] = mapped_column(String)

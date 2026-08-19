@@ -66,7 +66,7 @@ async def run() -> None:
 
         print()
         print(_bar())
-        print(f" TaxVault Data Verification — {CLIENT_EMAIL}")
+        print(f" TaxVault Data Verification - {CLIENT_EMAIL}")
         print(_bar())
         print(f" User:               {user.full_name}  ({user.email})")
         print(f" Assets:             {n_assets}")

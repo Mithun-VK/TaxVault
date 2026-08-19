@@ -1,7 +1,7 @@
 """WhatsApp alert delivery (Twilio) and the alert-settings endpoints.
 
 The channel is exercised against a stubbed Twilio so the tests assert what we
-actually send — recipient resolution, the `whatsapp:` addressing Twilio
+actually send - recipient resolution, the `whatsapp:` addressing Twilio
 requires, and that a non-2xx is reported as a failure rather than swallowed.
 No test ever reaches the network.
 """
@@ -61,7 +61,7 @@ class TestAddressing:
             ("919876543210", "whatsapp:+919876543210"),
             ("+91 98765 43210", "whatsapp:+919876543210"),
             ("+91-98765-43210", "whatsapp:+919876543210"),
-            # Already addressed — must not be double-prefixed.
+            # Already addressed - must not be double-prefixed.
             ("whatsapp:+919876543210", "whatsapp:+919876543210"),
             ("", ""),
         ],
@@ -141,7 +141,7 @@ class TestMessageBody:
     def test_missing_amount_does_not_print_none(self):
         body = build_whatsapp_body("bill", "Water", None, None, 3)
         assert "None" not in body
-        assert "—" in body
+        assert "-" in body
 
 
 class TestWhatsAppStatusEndpoint:
@@ -177,7 +177,7 @@ class TestWhatsAppStatusEndpoint:
     async def test_members_cannot_read_the_status(
         self, client: AsyncClient, member: dict, twilio_env
     ):
-        """alerts.view is not a member permission — the payables desk has no
+        """alerts.view is not a member permission - the payables desk has no
         business seeing the delivery setup."""
         resp = await client.get("/api/v1/alerts/whatsapp", headers=auth(member))
         assert resp.status_code == 403
@@ -206,7 +206,7 @@ class TestWhatsAppTestEndpoint:
         assert "not configured" in resp.json()["detail"].lower()
 
     async def test_admin_cannot_send_a_test(self, client: AsyncClient, user_b: dict, twilio_env):
-        """Sending is an alerts.edit action — super admin only."""
+        """Sending is an alerts.edit action - super admin only."""
         resp = await client.post("/api/v1/alerts/whatsapp/test", headers=auth(user_b))
         assert resp.status_code == 403
 

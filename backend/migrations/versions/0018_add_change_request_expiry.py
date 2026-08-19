@@ -7,7 +7,7 @@ Create Date: 2026-07-31
 A member's edit or delete now carries a deadline (CHANGE_REQUEST_TTL_MINUTES,
 15 by default). Past it the request lapses to status "expired" rather than
 sitting in the queue where an admin could approve a stale change long after the
-record has moved on. The sweep runs whenever the queue is read or reviewed —
+record has moved on. The sweep runs whenever the queue is read or reviewed -
 see change_request_service._expire_stale.
 
 Rows already in flight get a deadline measured from when they were filed, so
@@ -42,7 +42,7 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    # Anything already lapsed goes back to pending — the column that justified
+    # Anything already lapsed goes back to pending - the column that justified
     # the status is going away.
     op.execute("UPDATE change_requests SET status = 'pending' WHERE status = 'expired'")
     op.drop_index("ix_change_requests_expires_at", table_name="change_requests")

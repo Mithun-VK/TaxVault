@@ -198,7 +198,7 @@ class TestUpdateAlertConfig:
     async def test_admin_cannot_change_alert_rules(
         self, client: AsyncClient, user_a: dict, user_b: dict
     ):
-        """Alert rules are super-admin territory — admins only read them."""
+        """Alert rules are super-admin territory - admins only read them."""
         config = await _get_first_config(client, user_a)
         resp = await client.patch(
             f"/api/v1/alerts/configs/{config['id']}",

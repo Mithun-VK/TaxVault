@@ -1,11 +1,11 @@
 # Self-hosting TaxVault with Docker
 
-Runs the whole app — Postgres, Redis, API, Celery worker, Celery beat, and the
-SPA behind nginx — as six containers on one machine. No Supabase, no Upstash,
+Runs the whole app - Postgres, Redis, API, Celery worker, Celery beat, and the
+SPA behind nginx - as six containers on one machine. No Supabase, no Upstash,
 no R2, no Netlify.
 
 The same `docker-compose.selfhost.yml` runs on a rented server later. Moving
-there is an env-file change plus a database restore, not a rewrite — see
+there is an env-file change plus a database restore, not a rewrite - see
 [Moving to a rented server](#moving-to-a-rented-server).
 
 ---
@@ -30,7 +30,7 @@ there is an env-file change plus a database restore, not a rewrite — see
 ```
 
 Everything on one origin means no CORS, and the browser never learns the API's
-address — it just calls `/api/v1/...` on whatever host it loaded the page from.
+address - it just calls `/api/v1/...` on whatever host it loaded the page from.
 
 **Three docker volumes hold all your state.** Lose them and you lose everything:
 
@@ -42,7 +42,7 @@ address — it just calls `/api/v1/...` on whatever host it loaded the page from
 
 ---
 
-## Step 0 — Free up disk first (you will hit this)
+## Step 0 - Free up disk first (you will hit this)
 
 Right now:
 
@@ -62,10 +62,10 @@ docker system df
 ```
 
 At last look that reported **42.5 GB of reclaimable images** and **14.5 GB of
-build cache** — about 57 GB of images and layers from other projects.
+build cache** - about 57 GB of images and layers from other projects.
 
 ```powershell
-# Build cache only — always safe, always rebuildable.
+# Build cache only - always safe, always rebuildable.
 docker builder prune -af
 
 # Stopped containers (you have ~41 of them).
@@ -97,7 +97,7 @@ Aim for **20 GB free on C:** before continuing.
 
 ---
 
-## Step 1 — Create the config
+## Step 1 - Create the config
 
 ```bash
 cp backend/.env.selfhost.example backend/.env.selfhost
@@ -112,21 +112,21 @@ python -c "import secrets; print('POSTGRES_PASSWORD =', secrets.token_urlsafe(24
 
 Open `backend/.env.selfhost` and set:
 
-- `SECRET_KEY` — the 64-hex value. Changing it later logs everyone out.
-- `POSTGRES_PASSWORD` — **no `$` characters**; docker compose reads this file
+- `SECRET_KEY` - the 64-hex value. Changing it later logs everyone out.
+- `POSTGRES_PASSWORD` - **no `$` characters**; docker compose reads this file
   for `${...}` interpolation and would eat them.
-- `DATABASE_URL` and `DIRECT_DATABASE_URL` — paste the same password into both.
+- `DATABASE_URL` and `DIRECT_DATABASE_URL` - paste the same password into both.
 
 Leave `R2_*` blank. That is deliberate: with R2 unconfigured the backend falls
 back to local-disk storage (`app/core/config.py:120`), which is exactly what you
 want when self-hosting. Documents land in the `uploads` volume.
 
 > `backend/.env.selfhost` is gitignored. It is the one file not reproducible
-> from the repo — keep a copy with your backups.
+> from the repo - keep a copy with your backups.
 
 ---
 
-## Step 2 — Build the images
+## Step 2 - Build the images
 
 ```powershell
 docker compose -f docker-compose.selfhost.yml --env-file backend/.env.selfhost build
@@ -147,7 +147,7 @@ Add it to `$PROFILE` to keep it. Everything below is written out in full, but
 
 ---
 
-## Step 3 — Start Postgres alone
+## Step 3 - Start Postgres alone
 
 Before the API touches it, so you can load your existing data first.
 
@@ -160,14 +160,14 @@ Wait for `tv-postgres` to read `healthy` (about 15 seconds).
 
 ---
 
-## Step 4 — Bring your Supabase data across
+## Step 4 - Bring your Supabase data across
 
 Your live data is in Supabase (`db.arzylkwqmafifyswpaia.supabase.co`). This
-copies it into the local Postgres. It reads from Supabase and writes locally —
+copies it into the local Postgres. It reads from Supabase and writes locally -
 Supabase is untouched, so you can keep it as a fallback until you are confident.
 
 ```bash
-# Git Bash — the script needs bash, not PowerShell
+# Git Bash - the script needs bash, not PowerShell
 ./scripts/import-from-supabase.sh
 ```
 
@@ -186,7 +186,7 @@ Two things worth knowing:
   transfers with the data and step 5's `alembic upgrade head` is a no-op.
 
 **Starting fresh instead?** Skip this step. Alembic creates the schema in step
-5, and the first user you register becomes the **super admin** — the account
+5, and the first user you register becomes the **super admin** - the account
 that owns the vault every other login reads.
 
 **Roles.** TaxVault holds one shared vault; the role decides what a login may
@@ -195,7 +195,7 @@ do with it:
 | Role | Sees | Can add | Can edit / delete | Manages users |
 | --- | --- | --- | --- | --- |
 | `super_admin` | everything | everything | yes | yes |
-| `admin` | everything | properties, individuals, bills, taxes, insurance, documents, payments | no — but approves members' requests | no |
+| `admin` | everything | properties, individuals, bills, taxes, insurance, documents, payments | no - but approves members' requests | no |
 | `user` | calendar, bills, taxes, insurance, payments | bills, taxes, insurance, payments | only via approval | no |
 
 Promote or demote from **Users** in the sidebar (super admin only). The full
@@ -212,14 +212,14 @@ the same code path a super admin's own edit takes.
 Admins deliberately hold no `*.request_change` permission: they are the
 checker, never the maker, so an admin cannot file a request and then approve it
 to sidestep their own read-only limit. A super admin can file one, but has no
-reason to — they can simply make the edit.
+reason to - they can simply make the edit.
 
 The **Approvals** tab itself is reviewer-only (admin and super admin). Members
 get a confirmation when they submit, but no queue of their own.
 
 **Requests expire.** A request nobody reviews within
 `CHANGE_REQUEST_TTL_MINUTES` (default **15**) lapses to `expired` and can no
-longer be approved — a stale edit should not land on a record that has moved on
+longer be approved - a stale edit should not land on a record that has moved on
 since. Expiry is evaluated whenever the queue is read or reviewed rather than
 by a background job, so it is exact at the moment it matters and needs no
 worker running. Change the window in `backend/.env`:
@@ -239,11 +239,11 @@ docker compose -f docker-compose.selfhost.yml exec api python scripts/seed_rbac_
 It creates `super.admin@taxvault.in` / `SuperAdmin@123`,
 `admin@taxvault.in` / `Admin@123` and `user@taxvault.in` / `User@123`, and is
 idempotent (re-running just resets those three). Delete them before the
-deployment goes anywhere real — the passwords are in source control.
+deployment goes anywhere real - the passwords are in source control.
 
 ---
 
-## Step 5 — Start everything
+## Step 5 - Start everything
 
 ```powershell
 docker compose -f docker-compose.selfhost.yml --env-file backend/.env.selfhost up -d
@@ -257,7 +257,7 @@ docker compose -f docker-compose.selfhost.yml --env-file backend/.env.selfhost p
 docker compose -f docker-compose.selfhost.yml --env-file backend/.env.selfhost logs -f api
 ```
 
-`tv-migrate` showing `Exited (0)` is correct — it is a one-shot job, not a
+`tv-migrate` showing `Exited (0)` is correct - it is a one-shot job, not a
 crash.
 
 Then check:
@@ -268,12 +268,12 @@ Then check:
 | http://localhost:8001/health | `{"status":"ok","version":"1.0.0"}` |
 | http://localhost:8001/health/ready | `{"status":"ready","db":"ok","redis":"ok"}` |
 
-`/health/ready` is the one that matters — it proves the API reached both
+`/health/ready` is the one that matters - it proves the API reached both
 Postgres and Redis. `/docs` is off because `ENVIRONMENT=production`.
 
 ---
 
-## Step 6 — Reach it from your phone and laptop
+## Step 6 - Reach it from your phone and laptop
 
 Find this machine's LAN address:
 
@@ -290,7 +290,7 @@ FRONTEND_URL=http://192.168.1.50:8080
 
 `CORS_ORIGINS` does double duty in production: it also seeds the trusted-Host
 allowlist (`backend/app/main.py:60`). Miss this and the API answers
-`Invalid host header` to every LAN request while localhost keeps working — a
+`Invalid host header` to every LAN request while localhost keeps working - a
 confusing failure worth recognising.
 
 Restart the API and open the firewall:
@@ -304,7 +304,7 @@ New-NetFirewallRule -DisplayName "TaxVault web" -Direction Inbound `
 ```
 
 `-Profile Private` matters. On a Public network profile Windows treats your home
-LAN as hostile and this rule will not apply — check with `Get-NetConnectionProfile`
+LAN as hostile and this rule will not apply - check with `Get-NetConnectionProfile`
 and set it to Private if needed.
 
 Then browse to `http://192.168.1.50:8080` from any device on the network.
@@ -314,15 +314,15 @@ Then browse to `http://192.168.1.50:8080` from any device on the network.
 
 ---
 
-## Step 6.5 — Turn on WhatsApp reminders
+## Step 6.5 - Turn on WhatsApp reminders
 
 Payment reminders go out over WhatsApp via Twilio. Nothing else needs
-configuring — email needs SES credentials and push needs a Firebase service
+configuring - email needs SES credentials and push needs a Firebase service
 account, so on a stock self-hosted install WhatsApp is the channel that works.
 
 **Get the credentials.** In the [Twilio console](https://console.twilio.com):
 Account SID and Auth Token are on the dashboard. For the sender, use
-**Messaging → Try it out → Send a WhatsApp message** — the sandbox gives you a
+**Messaging → Try it out → Send a WhatsApp message** - the sandbox gives you a
 number (`+14155238886`) and a `join <code>` message. Send that message from the
 phone that should receive alerts; the sandbox only delivers to numbers that
 have opted in this way. For production, register your own sender under
@@ -337,7 +337,7 @@ TWILIO_WHATSAPP_FROM=+14155238886
 TWILIO_WHATSAPP_TO=+919876543210
 ```
 
-`TWILIO_WHATSAPP_TO` is the one number every reminder goes to — the household
+`TWILIO_WHATSAPP_TO` is the one number every reminder goes to - the household
 number. Leave it blank to send to each user's own `phone_number` instead.
 Numbers are plain E.164; the `whatsapp:` prefix Twilio wants is added for you.
 
@@ -349,14 +349,14 @@ docker compose -f docker-compose.selfhost.yml --env-file backend/.env.selfhost u
 
 **Verify it.** Open **Alerts** in the sidebar. The card at the top says either
 *Sending to +91••••3210* or exactly which variable is still missing. Hit **Send
-test message** — it goes down the same code path a real reminder takes, so if
+test message** - it goes down the same code path a real reminder takes, so if
 it arrives, reminders will too.
 
 **When they fire.** A Celery beat job scans every morning at 08:00 IST and
 sends a reminder for anything due in 15, 7 or 1 day; a second job at 09:00
 chases anything already overdue. Change the schedule for every payable at once
 on the Alerts page, or switch individual ones off there. Alerts are idempotent
-— the same reminder is never sent twice on the same day, even if the worker
+- the same reminder is never sent twice on the same day, even if the worker
 restarts.
 
 Note the `worker` and `beat` containers must both be running: `beat` decides
@@ -364,7 +364,7 @@ Note the `worker` and `beat` containers must both be running: `beat` decides
 
 ---
 
-## Step 7 — Survive a reboot
+## Step 7 - Survive a reboot
 
 Every service is `restart: unless-stopped`, so Docker restarts them. Docker
 itself needs to start first:
@@ -375,12 +375,12 @@ The catch: that fires at *login*, not at boot. If the machine reboots and nobody
 logs in, TaxVault is down. If it needs to be reachable unattended, that is the
 signal to move to a rented server.
 
-Verify by rebooting and checking `docker ps` — all six containers back, with
+Verify by rebooting and checking `docker ps` - all six containers back, with
 `tv-migrate` exited 0.
 
 ---
 
-## Step 8 — Back up, for real
+## Step 8 - Back up, for real
 
 Supabase was doing this for you. Now you are.
 
@@ -392,7 +392,7 @@ Writes `backups/taxvault-<stamp>.dump` (compressed `pg_dump`) and
 `backups/uploads-<stamp>.tar.gz` (every document), and prunes anything older
 than 30 days (`BACKUP_KEEP_DAYS` to change).
 
-Schedule it daily — elevated PowerShell, once:
+Schedule it daily - elevated PowerShell, once:
 
 ```powershell
 $action  = New-ScheduledTaskAction -Execute "C:\Program Files\Git\bin\bash.exe" `
@@ -402,7 +402,7 @@ Register-ScheduledTask -TaskName "TaxVault backup" -Action $action -Trigger $tri
   -Description "pg_dump + uploads archive"
 ```
 
-Then get the files **off this machine** — external drive, OneDrive, rclone to
+Then get the files **off this machine** - external drive, OneDrive, rclone to
 B2/R2, anything. A backup sitting on the disk that dies with the database is not
 a backup. Also copy `backend/.env.selfhost`; it is the only unreproducible file.
 
@@ -448,7 +448,7 @@ Downtime is a few seconds while `api` and `web` swap over.
 docker exec -it tv-postgres psql -U taxvault -d taxvault
 ```
 
-**A new migration** — write it against the running database:
+**A new migration** - write it against the running database:
 
 ```powershell
 tv run --rm migrate alembic revision --autogenerate -m "add whatever"
@@ -464,7 +464,7 @@ tv up -d` once it is committed.
 ## When something is wrong
 
 **`tv-migrate` exits non-zero and nothing else starts.**
-`tv logs migrate`. Usually `DATABASE_URL` disagrees with `POSTGRES_PASSWORD` —
+`tv logs migrate`. Usually `DATABASE_URL` disagrees with `POSTGRES_PASSWORD` -
 they are set in two places in `.env.selfhost` and must match.
 
 **API container restarts in a loop.**
@@ -473,7 +473,7 @@ is missing or `SECRET_KEY` failed the production check (needs ≥32 chars and mu
 not start with `change`).
 
 **Browser loads the app, every API call 500s or hangs.**
-`curl http://localhost:8001/health/ready` — if `db` or `redis` is not `ok`, the
+`curl http://localhost:8001/health/ready` - if `db` or `redis` is not `ok`, the
 problem is below the API. If the API is healthy but nginx is not passing
 through, `tv logs web`.
 
@@ -486,12 +486,12 @@ Set `WEB_PORT=9090` in `.env.selfhost` and `tv up -d web`. Same for
 
 **Uploads fail with 413.**
 nginx caps bodies at 25 MB and the backend at `MAX_UPLOAD_SIZE_MB=20`. Raise
-both — `client_max_body_size` in `frontend/nginx.conf` needs a `tv build web`.
+both - `client_max_body_size` in `frontend/nginx.conf` needs a `tv build web`.
 
 **Everything looks fine but scheduled alerts never fire.**
 `tv logs beat` should show the two entries from `app/tasks/celery_app.py`
 (`daily-alert-scan` at 08:00, `overdue-check` at 09:00, Asia/Kolkata). If beat
-is scheduling but nothing runs, the worker is not consuming — `tv logs worker`.
+is scheduling but nothing runs, the worker is not consuming - `tv logs worker`.
 
 ---
 
@@ -499,16 +499,16 @@ is scheduling but nothing runs, the worker is not consuming — `tv logs worker`
 
 Nothing about the stack changes. The steps:
 
-1. **Provision** — 2 vCPU / 4 GB RAM handles this comfortably. Install Docker
+1. **Provision** - 2 vCPU / 4 GB RAM handles this comfortably. Install Docker
    Engine and the compose plugin.
 2. **Copy the repo and `.env.selfhost`** to the server.
-3. **Edit the origins** — `CORS_ORIGINS=https://taxvault.yourdomain.in`,
+3. **Edit the origins** - `CORS_ORIGINS=https://taxvault.yourdomain.in`,
    `FRONTEND_URL` to match. Generate a **fresh** `SECRET_KEY` and
    `POSTGRES_PASSWORD` rather than reusing the workstation's.
 4. **Restore your latest backup** with `scripts/restore-db.sh`.
 5. **Terminate TLS in front of nginx.** Put Caddy on :80/:443 proxying to the
    `web` container and change `web`'s port mapping to `127.0.0.1:8080:80`. Caddy
-   gets Let's Encrypt certificates automatically from a two-line Caddyfile —
+   gets Let's Encrypt certificates automatically from a two-line Caddyfile -
    simpler than certbot here.
 6. **Point DNS** at the server.
 
@@ -519,7 +519,7 @@ useful thing to keep.
 
 If what you actually want is *access from anywhere* rather than *a server*, a
 [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
-gives you `https://taxvault.yourdomain.in` pointed at this machine — real
+gives you `https://taxvault.yourdomain.in` pointed at this machine - real
 certificate, no ports opened on your router, no monthly server bill. Add
 `cloudflared` as a seventh container targeting `http://web:80` and put the
 hostname in `CORS_ORIGINS`.

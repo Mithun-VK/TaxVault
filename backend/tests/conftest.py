@@ -65,7 +65,7 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
 #
 # TaxVault holds one shared vault owned by the earliest-created super admin, and
 # the first account to register takes that role. So `user_a` is the vault owner
-# and every other account reads the *same* data through a narrower role — what
+# and every other account reads the *same* data through a narrower role - what
 # differs between fixtures is what they are allowed to do, not what they can see.
 
 
@@ -106,7 +106,7 @@ async def _set_role(
 
 @pytest_asyncio.fixture
 async def user_a(client: AsyncClient) -> dict[str, Any]:
-    """The vault owner — first to register, so `super_admin`: full CRUD."""
+    """The vault owner - first to register, so `super_admin`: full CRUD."""
     user = await _create_user(client, "user_a@test.com", "Password123!", "User Alpha")
     user["role"] = "super_admin"
     return user
@@ -123,7 +123,7 @@ async def user_b(client: AsyncClient, user_a: dict) -> dict[str, Any]:
 @pytest_asyncio.fixture
 async def member(client: AsyncClient, user_a: dict) -> dict[str, Any]:
     """A `user`-role account: the payables desk. Bills, taxes, insurance,
-    payments and the calendar — and it may add bills and log payments."""
+    payments and the calendar - and it may add bills and log payments."""
     user = await _create_user(client, "member@test.com", "Password123!", "Member Gamma")
     return await _set_role(client, user_a, user, "user")
 

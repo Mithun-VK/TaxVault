@@ -58,7 +58,7 @@ EXPORTER_TYPES: tuple[str, ...] = tuple(e.value for e in ExporterType)
 class Company(Base):
     """A business entity in the vault: registrations, filings, linked assets.
 
-    The Individual profile's sibling — a company holds statutory registrations
+    The Individual profile's sibling - a company holds statutory registrations
     (CIN/GSTIN/PAN/TAN) instead of identity documents, and its paperwork is a
     real table (``company_documents``) rather than a fixed set of key columns,
     because annual filings recur every financial year.
@@ -91,7 +91,7 @@ class Company(Base):
     # ── Incorporation ────────────────────────────────────────────────────────
     incorporation_date: Mapped[date | None] = mapped_column(Date)
     incorporation_state: Mapped[str | None] = mapped_column(String(100))
-    # Corporate Identity Number — U12345MH2020PTC123456
+    # Corporate Identity Number - U12345MH2020PTC123456
     cin: Mapped[str | None] = mapped_column(String(21))
     # LLP Identification Number (LLPs carry this instead of a CIN)
     llpin: Mapped[str | None] = mapped_column(String(15))
@@ -108,7 +108,7 @@ class Company(Base):
     # Import Export Code. Since 2017 the IEC is the entity's PAN, but it is
     # kept separate: a company can hold a PAN long before it starts exporting.
     iec_code: Mapped[str | None] = mapped_column(String(10))
-    # merchant | manufacturer | both — decides which export incentives and
+    # merchant | manufacturer | both - decides which export incentives and
     # which AEPC/Textile Committee registrations actually apply.
     exporter_type: Mapped[str | None] = mapped_column(String(20))
     # Apparel Export Promotion Council registration.
@@ -129,7 +129,7 @@ class Company(Base):
     foreign_registration_expiry: Mapped[date | None] = mapped_column(Date)
 
     # ── Other registrations ──────────────────────────────────────────────────
-    # [{name, number, issuing_authority, issue_date, expiry_date, notes}] —
+    # [{name, number, issuing_authority, issue_date, expiry_date, notes}] -
     # FSSAI, Spice Board, AEPC, IEC, Textiles Committee, and anything else.
     other_registrations: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
 
@@ -185,7 +185,7 @@ class Company(Base):
         lazy="noload",
     )
 
-    # CIN and GSTIN are unique per vault, but only among rows that carry one —
+    # CIN and GSTIN are unique per vault, but only among rows that carry one -
     # partial unique indexes, so any number of companies may leave them NULL
     # (the same shape as `uq_individual_pan`).
     __table_args__ = (

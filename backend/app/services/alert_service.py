@@ -78,8 +78,8 @@ async def bulk_update_configs(
 ) -> AlertBulkUpdateResult:
     """Apply one change across every rule in the vault (optionally one type).
 
-    The settings page uses this for the household-wide controls — reminder
-    schedule, channels, all-on/all-off — so a change is one request rather than
+    The settings page uses this for the household-wide controls - reminder
+    schedule, channels, all-on/all-off - so a change is one request rather than
     one per payable.
     """
     q = select(AlertConfig).where(AlertConfig.user_id == user_id)
@@ -149,7 +149,7 @@ async def send_whatsapp_test(user_phone: str | None) -> WhatsAppTestResult:
     body = (
         "*TaxVault test message*\n\n"
         "WhatsApp alerts are working. Payment reminders will arrive here.\n\n"
-        "— TaxVault"
+        "- TaxVault"
     )
     ok = await send_whatsapp(recipient, body)
     return WhatsAppTestResult(

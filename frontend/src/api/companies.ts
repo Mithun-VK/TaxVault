@@ -25,7 +25,7 @@ export interface CompanyListResponse {
   total: number;
 }
 
-// Skipped entirely for roles without `company.view` — the sidebar renders this
+// Skipped entirely for roles without `company.view` - the sidebar renders this
 // list on every page, so an unauthorised call would fire constantly.
 export function useCompanies() {
   const canView = useCan('company.view');

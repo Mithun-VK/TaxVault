@@ -1,5 +1,5 @@
 """
-Asset endpoint tests — CRUD, RBAC, filtering, pagination.
+Asset endpoint tests - CRUD, RBAC, filtering, pagination.
 
 AssetType: land | vehicle | building | other
 AssetStatus: active | sold | transferred

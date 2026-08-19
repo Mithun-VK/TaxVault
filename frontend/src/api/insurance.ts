@@ -158,7 +158,7 @@ export const usePayPremium = () =>
       queryClient.invalidateQueries({ queryKey: ['insurance'] });
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      toast.success(`Premium paid — next due date: ${policy.next_premium_date}`);
+      toast.success(`Premium paid - next due date: ${policy.next_premium_date}`);
     },
     onError: (error) => toast.error(getErrorMessage(error) || 'Could not record payment'),
   });

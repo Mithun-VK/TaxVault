@@ -6,7 +6,7 @@ import type { AssetFormValues } from './AssetForm';
 /**
  * Valuation field for immovable properties (buildings + land): the editable
  * `Current Value`. The "as-of" date is recorded automatically (current
- * date-time) on save — see valuationMetadata — so there is no date input here.
+ * date-time) on save - see valuationMetadata - so there is no date input here.
  * (Buildup area now lives in the main Property Details grid.)
  */
 export function BuildingFields({ register }: { register: UseFormRegister<AssetFormValues> }) {

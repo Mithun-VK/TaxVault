@@ -30,7 +30,7 @@ def _init_firebase() -> None:
         cred = credentials.Certificate(settings.FIREBASE_SERVICE_ACCOUNT_PATH)
         firebase_admin.initialize_app(cred)
         logger.info("firebase_initialized")
-    except Exception as exc:  # noqa: BLE001 — never block app startup on FCM
+    except Exception as exc:  # noqa: BLE001 - never block app startup on FCM
         logger.error("firebase_init_failed: %s", exc)
 
 

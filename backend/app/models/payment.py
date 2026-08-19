@@ -21,11 +21,11 @@ class Payment(Base):
     payment_date: Mapped[date] = mapped_column(Date, nullable=False)
     payment_method: Mapped[str | None] = mapped_column(String)
     reference_number: Mapped[str | None] = mapped_column(String)
-    # Free-text period this payment covers, entered manually — e.g. "2026-27"
+    # Free-text period this payment covers, entered manually - e.g. "2026-27"
     # for an annual insurance premium, or "Mar-May 2026" for a bi-monthly EB bill.
     period: Mapped[str | None] = mapped_column(String)
     notes: Mapped[str | None] = mapped_column(String)
-    # Soft reference to documents.id — the receipt uploaded for this payment.
+    # Soft reference to documents.id - the receipt uploaded for this payment.
     # Kept as a plain nullable column (no hard FK) in line with the polymorphic
     # entity_type/entity_id style used across payments/documents/alerts.
     receipt_document_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)

@@ -7,7 +7,7 @@ dependency.
 
 Recipient resolution, in order:
 
-1. ``TWILIO_WHATSAPP_TO`` — the household number the deployment sends to. This
+1. ``TWILIO_WHATSAPP_TO`` - the household number the deployment sends to. This
    is the normal setup: one vault, one WhatsApp number, regardless of which
    account owns the record that triggered the alert.
 2. the user's own ``phone_number``, when that setting is left blank.
@@ -69,8 +69,8 @@ class WhatsAppChannel(BaseChannel):
 async def send_whatsapp(to_number: str, body: str) -> bool:
     """POST one message to Twilio. Returns True only on a 2xx.
 
-    Takes a plain number and normalises it here, so every caller — the alert
-    channel and the settings "send test message" action — goes down one path.
+    Takes a plain number and normalises it here, so every caller - the alert
+    channel and the settings "send test message" action - goes down one path.
     A passing test therefore cannot mean anything other than that alerts will
     deliver.
     """
@@ -92,12 +92,12 @@ async def send_whatsapp(to_number: str, body: str) -> bool:
             )
         if resp.status_code >= 400:
             # Twilio puts the actionable reason in the JSON body, not the status
-            # line — surface it so the cause is in the log, not just "failed".
+            # line - surface it so the cause is in the log, not just "failed".
             logger.error(
                 "whatsapp_send_failed status=%s body=%s", resp.status_code, resp.text[:500]
             )
             return False
         return True
-    except Exception as exc:  # noqa: BLE001 — a send must never break the caller
+    except Exception as exc:  # noqa: BLE001 - a send must never break the caller
         logger.error("whatsapp_send_error: %s", exc)
         return False

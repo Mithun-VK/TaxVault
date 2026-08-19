@@ -5,7 +5,7 @@ import { applySearch } from '@/utils/search';
 import { useCan } from '@/hooks/usePermissions';
 import type { Asset, AssetCreate, AssetFilters, AssetType, AssetUpdate } from '@/types';
 
-// The backend has no full-text search param — it's applied client-side
+// The backend has no full-text search param - it's applied client-side
 // against the (small, personal-scale) result set fetched per page.
 function searchAssets(items: Asset[], term?: string): Asset[] {
   return applySearch(items, term, (a) => [a.name, a.description]);
@@ -30,7 +30,7 @@ function withDerivedStatus(asset: Asset & { is_archived?: boolean }): Asset {
 }
 
 // Roles without `properties.view` (members) get a 403 from /assets, and the
-// hook is called from shared surfaces they *can* reach — the home hub, the
+// hook is called from shared surfaces they *can* reach - the home hub, the
 // command palette. Skipping the request there keeps those pages clean rather
 // than papering over an error; callers already default to an empty list.
 export const useAssets = (filters?: AssetFilters) => {

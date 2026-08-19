@@ -47,7 +47,7 @@ class ChangeRequest(Base):
     action: Mapped[str] = mapped_column(String(10), nullable=False)
     # The requested patch (empty for a delete), stored as submitted.
     payload: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
-    # Why the member wants the change — shown to the reviewer.
+    # Why the member wants the change - shown to the reviewer.
     reason: Mapped[str | None] = mapped_column(Text)
 
     # "pending" | "approved" | "rejected" | "cancelled" | "expired"

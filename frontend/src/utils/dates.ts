@@ -30,19 +30,19 @@ export function isOverdue(date: string | Date): boolean {
 /** "12 Jun 2025" */
 export function formatDate(date: string | Date | null | undefined): string {
   const d = toDate(date);
-  return isValid(d) ? format(d, 'dd MMM yyyy') : '—';
+  return isValid(d) ? format(d, 'dd MMM yyyy') : '-';
 }
 
 /** "12 Jun" */
 export function formatDateShort(date: string | Date | null | undefined): string {
   const d = toDate(date);
-  return isValid(d) ? format(d, 'dd MMM') : '—';
+  return isValid(d) ? format(d, 'dd MMM') : '-';
 }
 
 /** "12 Jun 2025, 4:30 PM" */
 export function formatDateTime(date: string | Date | null | undefined): string {
   const d = toDate(date);
-  return isValid(d) ? format(d, 'dd MMM yyyy, h:mm a') : '—';
+  return isValid(d) ? format(d, 'dd MMM yyyy, h:mm a') : '-';
 }
 
 /** ISO yyyy-MM-dd for form inputs. */
@@ -53,7 +53,7 @@ export function toInputDate(date: string | Date | null | undefined): string {
 
 export function formatRelative(date: string | Date | null | undefined): string {
   const d = toDate(date);
-  return isValid(d) ? formatDistanceToNow(d, { addSuffix: true }) : '—';
+  return isValid(d) ? formatDistanceToNow(d, { addSuffix: true }) : '-';
 }
 
 export function urgencyLevel(date: string | Date): UrgencyLevel {

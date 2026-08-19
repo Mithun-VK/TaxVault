@@ -8,7 +8,7 @@ and differ only in what they may do with it:
     user         payables desk: calendar, bills, taxes, insurance, payments;
                  may add bills and log payments
 
-`user_a` is the vault owner, `user_b` the admin and `member` the user role —
+`user_a` is the vault owner, `user_b` the admin and `member` the user role -
 see conftest.py. The permission table itself lives in app/core/permissions.py.
 """
 import pytest
@@ -25,7 +25,7 @@ from tests.conftest import auth
 
 
 class TestPermissionTable:
-    """Pure-table invariants — no HTTP, so a bad edit fails loudly and fast."""
+    """Pure-table invariants - no HTTP, so a bad edit fails loudly and fast."""
 
     def test_super_admin_is_a_superset_of_admin(self):
         assert ROLE_PERMISSIONS[ROLE_ADMIN] < ROLE_PERMISSIONS[ROLE_SUPER_ADMIN]
@@ -90,7 +90,7 @@ class TestPermissionTable:
         assert not has_permission(ROLE_USER, "change_requests.review")
 
     def test_admin_cannot_file_a_request_it_could_approve(self):
-        """The admin is the checker, never the maker — otherwise it could file
+        """The admin is the checker, never the maker - otherwise it could file
         and approve its own edit, which its role otherwise forbids."""
         for resource in ("bills", "taxes", "insurance"):
             assert has_permission(ROLE_ADMIN, f"{resource}.request_change") is False

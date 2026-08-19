@@ -20,7 +20,7 @@ class AlertConfig(Base):
     days_before: Mapped[list] = mapped_column(
         ARRAY(Integer), nullable=False, default=lambda: [30, 15, 7, 3, 1]
     )
-    # WhatsApp is the deployment's working channel — email needs SES and push
+    # WhatsApp is the deployment's working channel - email needs SES and push
     # needs a Firebase service account, neither of which a self-hosted install
     # has by default. See app/notifications/channels/whatsapp.py.
     channels: Mapped[list] = mapped_column(

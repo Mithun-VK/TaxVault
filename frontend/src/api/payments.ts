@@ -18,7 +18,7 @@ function inCurrentFY(dateStr: string): boolean {
 }
 
 export const usePayments = (filters?: PaymentFilters) => {
-  // Shared, cached entity-info lookup (see entityInfo.ts) — the backend's
+  // Shared, cached entity-info lookup (see entityInfo.ts) - the backend's
   // PaymentOut has no `entity_name`, and this resolver is deduped across
   // every caller (payments, dashboard, alerts) via a single query key.
   const infoMap = useEntityInfoMap();

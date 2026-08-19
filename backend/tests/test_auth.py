@@ -1,5 +1,5 @@
 """
-Comprehensive auth tests — every endpoint, every edge case.
+Comprehensive auth tests - every endpoint, every edge case.
 
 API facts:
   POST /auth/register  → 201, returns {access_token, refresh_token, token_type}
@@ -83,7 +83,7 @@ class TestRegister:
         assert resp.status_code == 422
 
     async def test_sql_injection_email_is_safe(self, client: AsyncClient):
-        """SQL injection in email must not cause a 500 — validation rejects it."""
+        """SQL injection in email must not cause a 500 - validation rejects it."""
         resp = await client.post("/api/v1/auth/register", json={
             "email": "'; DROP TABLE users; --@evil.com",
             "password": "Password123!",

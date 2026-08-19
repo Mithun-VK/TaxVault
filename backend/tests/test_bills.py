@@ -51,7 +51,7 @@ class TestCreateBill:
 
     async def test_custom_bill_type_is_accepted(self, client: AsyncClient, user_a: dict):
         """bill_type is a user-extensible category (see schemas/recurring_bill.py)
-        — any lowercase slug is valid, not just the built-in list."""
+        - any lowercase slug is valid, not just the built-in list."""
         resp = await client.post(
             "/api/v1/bills/", headers=auth(user_a), json={**_BILL, "bill_type": "cable_tv"}
         )
@@ -111,7 +111,7 @@ class TestListBills:
     async def test_admin_sees_the_shared_vault(
         self, client: AsyncClient, user_a: dict, user_b: dict, bill: dict
     ):
-        """One vault, many logins — an admin reads the owner's bills."""
+        """One vault, many logins - an admin reads the owner's bills."""
         resp = await client.get("/api/v1/bills/", headers=auth(user_b))
         ids = [i["id"] for i in resp.json()["items"]]
         assert bill["id"] in ids
@@ -249,7 +249,7 @@ class TestPayBill:
     async def test_admin_can_log_a_payment(
         self, client: AsyncClient, user_a: dict, user_b: dict, bill: dict
     ):
-        """Logging a payment is an add, not an edit — admins may do it."""
+        """Logging a payment is an add, not an edit - admins may do it."""
         resp = await client.post(
             f"/api/v1/bills/{bill['id']}/pay",
             headers=auth(user_b),
@@ -269,7 +269,7 @@ class TestDeactivateBill:
     async def test_bill_still_accessible_after_deactivate(
         self, client: AsyncClient, user_a: dict
     ):
-        """Deactivate sets is_active=False but does not archive — GET still returns 200."""
+        """Deactivate sets is_active=False but does not archive - GET still returns 200."""
         create = await client.post("/api/v1/bills/", headers=auth(user_a), json=_BILL)
         bill_id = create.json()["id"]
         await client.delete(f"/api/v1/bills/{bill_id}", headers=auth(user_a))

@@ -39,7 +39,7 @@ export interface InsurancePolicy {
   policy_number: string;
   provider: string;
   insurance_type: InsuranceType;
-  // null means "not specified" — distinct from a policy with zero coverage.
+  // null means "not specified" - distinct from a policy with zero coverage.
   sum_insured: number | null;
   premium_amount: number;
   premium_frequency: PremiumFrequency;

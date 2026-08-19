@@ -1,7 +1,7 @@
 """The key-management provider interface.
 
-Every backend — the local AES-KW provider, HashiCorp Vault Transit, a PKCS#11
-HSM, or a cloud KMS — implements this and nothing else. Application code
+Every backend - the local AES-KW provider, HashiCorp Vault Transit, a PKCS#11
+HSM, or a cloud KMS - implements this and nothing else. Application code
 resolves a provider through ``app.crypto.kms.factory.get_kms()`` and never
 imports a concrete class, so swapping backends is a configuration change rather
 than a code change. That is the portability requirement, honoured by keeping the
@@ -10,7 +10,7 @@ interface small enough that every backend can implement it honestly.
 WHY THE INTERFACE IS ASYNC
 --------------------------
 Vault Transit makes an HTTP round-trip on every wrap and unwrap, and unwrap sits
-on the download hot path — it must not occupy the event loop. The local provider
+on the download hot path - it must not occupy the event loop. The local provider
 is pure CPU (AES-KW of 32 bytes is microseconds) and simply declares ``async
 def`` with no awaits, which costs nothing. Making the interface synchronous
 would force a thread-pool bridge around Vault, which is strictly worse.
@@ -20,7 +20,7 @@ WHY THERE IS NO ``aad`` PARAMETER
 AES-KW (RFC 3394) has no AAD slot at all, and Vault Transit's ``context`` field
 is for derived/convergent encryption keys, not additional authenticated data. An
 ``aad=`` argument that two of three providers silently ignore would be a lie in
-the type signature — the kind that reads as a security control and provides
+the type signature - the kind that reads as a security control and provides
 none. The binding callers actually want lives one layer up, in the envelope's
 AAD (see ``app.crypto.envelope``), where every backend honours it uniformly
 because it never reaches the backend at all.
@@ -47,7 +47,7 @@ class WrappedKey:
     """Provider name, e.g. "local" | "vault_transit" | "pkcs11"."""
 
     key_id: str
-    """Provider-side key identifier — a master-key version, a Vault key name."""
+    """Provider-side key identifier - a master-key version, a Vault key name."""
 
     key_version: int
     """The version of that key in force at wrap time. Drives re-wrap on rotation."""
@@ -111,8 +111,8 @@ class KeyManagementProvider(ABC):
     async def rotate(self) -> tuple[str, int]:
         """Create a new key version and return it.
 
-        Not every backend supports rotation through this API — a local provider
-        rotates by editing configuration, an HSM by an operator ceremony — so
+        Not every backend supports rotation through this API - a local provider
+        rotates by editing configuration, an HSM by an operator ceremony - so
         the default refuses rather than pretending.
         """
         raise NotImplementedError(f"{self.name} does not support rotation through this API.")

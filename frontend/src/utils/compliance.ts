@@ -5,10 +5,10 @@ import type { Bill, Company, CompanyDocument, Tax } from '@/types';
  * Turns a company + its documents into the Compliance tab's checklist.
  *
  * Three sources feed the table:
- *   1. `COMPLIANCE_RULES` — the statutory calendar, with annual dates derived
+ *   1. `COMPLIANCE_RULES` - the statutory calendar, with annual dates derived
  *      from the company's own financial-year end.
- *   2. `company_documents` carrying an expiry date — license renewals.
- *   3. Tax obligations and recurring bills whose name mentions the company —
+ *   2. `company_documents` carrying an expiry date - license renewals.
+ *   3. Tax obligations and recurring bills whose name mentions the company -
  *      the payables the client already tracks by hand.
  *
  * A filing counts as done when a document of the matching category exists for
@@ -47,7 +47,7 @@ export const STATUS_LABELS: Record<ComplianceStatus, string> = {
   expired: 'Expired',
 };
 
-/** Tailwind classes per status — green/red/amber/blue/orange, as specified. */
+/** Tailwind classes per status - green/red/amber/blue/orange, as specified. */
 export const STATUS_TONES: Record<ComplianceStatus, string> = {
   done: 'bg-emerald-50 text-emerald-700',
   overdue: 'bg-red-50 text-brand-danger',
@@ -59,8 +59,8 @@ export const STATUS_TONES: Record<ComplianceStatus, string> = {
 
 /**
  * Local-time ISO date. `toISOString()` would convert local midnight to the
- * previous day everywhere east of UTC — in IST every deadline landed a day
- * early — so the parts are read off the local calendar instead.
+ * previous day everywhere east of UTC - in IST every deadline landed a day
+ * early - so the parts are read off the local calendar instead.
  */
 const iso = (d: Date): string =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
@@ -192,7 +192,7 @@ export function buildComplianceRows({
 
   // 1. Statutory calendar.
   for (const rule of COMPLIANCE_RULES) {
-    // Skip what the company isn't registered for — no GSTIN, no GST return;
+    // Skip what the company isn't registered for - no GSTIN, no GST return;
     // no EPF code, no EPF return. Keeps the table to real obligations.
     const held: Record<string, string | undefined> = {
       gstin: company.gstin,
@@ -228,7 +228,7 @@ export function buildComplianceRows({
     });
   }
 
-  // 2. License renewals — anything on file with an expiry date.
+  // 2. License renewals - anything on file with an expiry date.
   for (const doc of documents) {
     if (!doc.expiry_date) continue;
     const expiry = parseDate(doc.expiry_date);
@@ -306,7 +306,7 @@ export function buildComplianceRows({
   return rows.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 }
 
-/** Rows that need attention now — drives the "N items need attention" strip. */
+/** Rows that need attention now - drives the "N items need attention" strip. */
 export function needsAttention(rows: ComplianceRow[]): ComplianceRow[] {
   return rows.filter((r) =>
     ['overdue', 'due_soon', 'expiring', 'expired'].includes(r.status),

@@ -44,7 +44,7 @@ function dayLabel(day: AlertDays): string {
 
 /**
  * The reminder schedule shared by every rule, or null when rules disagree.
- * Days are a household-wide preference, so the page shows a single control —
+ * Days are a household-wide preference, so the page shows a single control -
  * but it must not silently claim an agreement that isn't there.
  */
 function sharedSchedule(configs: AlertConfig[]): AlertDays[] | null {
@@ -89,7 +89,7 @@ function DeliveryCard({ canEdit }: { canEdit: boolean }) {
               <p className="mt-0.5 text-sm text-slate-700">
                 {status.configured
                   ? 'Connected, but no recipient number is set.'
-                  : 'Not connected — reminders cannot be delivered yet.'}
+                  : 'Not connected - reminders cannot be delivered yet.'}
               </p>
             )}
           </div>
@@ -271,11 +271,11 @@ export function AlertSettings() {
         <EmptyState
           icon={Bell}
           title="Nothing to remind you about yet"
-          description="Add a bill, tax or insurance policy — a reminder rule is created for it automatically."
+          description="Add a bill, tax or insurance policy - a reminder rule is created for it automatically."
         />
       ) : (
         <>
-          {/* Reminder schedule — one control governing every rule */}
+          {/* Reminder schedule - one control governing every rule */}
           <Card className="p-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -283,7 +283,7 @@ export function AlertSettings() {
                 <p className="mt-0.5 text-xs text-slate-600">
                   {schedule
                     ? 'Applies to every reminder.'
-                    : 'Your reminders currently use different schedules — pick one to apply to all.'}
+                    : 'Your reminders currently use different schedules - pick one to apply to all.'}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -324,7 +324,7 @@ export function AlertSettings() {
             </div>
           </Card>
 
-          {/* What gets reminders — collapsed by default, switch only */}
+          {/* What gets reminders - collapsed by default, switch only */}
           <div className="space-y-3">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-600">
               What gets reminders

@@ -125,7 +125,7 @@ export function AssetCard({
         {asset.name}
       </h3>
 
-      {/* TIER 1 — Land & Buildings: patta / deed / location + linked counts */}
+      {/* TIER 1 - Land & Buildings: patta / deed / location + linked counts */}
       {tier === 1 && (
         <>
           {location && <p className="mt-0.5 line-clamp-1 text-sm text-slate-700">{location}</p>}
@@ -158,7 +158,7 @@ export function AssetCard({
         </>
       )}
 
-      {/* TIER 2 — Vehicles: registration / make / model */}
+      {/* TIER 2 - Vehicles: registration / make / model */}
       {tier === 2 && (
         <dl className="mt-2 space-y-1 text-xs text-slate-700">
           {meta(asset, 'registration_number') && (
@@ -181,7 +181,7 @@ export function AssetCard({
       {tier !== 3 && (
         <div className="mt-3 flex items-center justify-between">
           <span className="text-xs text-slate-600">
-            Acquired {asset.acquisition_date ? formatDate(asset.acquisition_date) : '—'}
+            Acquired {asset.acquisition_date ? formatDate(asset.acquisition_date) : '-'}
           </span>
           <StatusBadge status={asset.status} />
         </div>

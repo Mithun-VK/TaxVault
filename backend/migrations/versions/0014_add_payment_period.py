@@ -4,7 +4,7 @@ Revision ID: 0014
 Revises: 0013
 Create Date: 2026-07-27
 
-Payments gain a nullable `period` column — a manually entered, free-text label
+Payments gain a nullable `period` column - a manually entered, free-text label
 describing the period the payment covers. It has no fixed format: an annual
 insurance premium is recorded as e.g. "2026-27", while a bi-monthly electricity
 (EB) bill is recorded as e.g. "Mar-May 2026". Purely additive; existing rows

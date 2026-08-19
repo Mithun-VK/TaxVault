@@ -86,7 +86,7 @@ export function GoldVault({
   const [addCatOpen, setAddCatOpen] = useState(false);
 
   const defs = useMemo(() => allGoldCategories(assets, custom), [assets, custom]);
-  // Only user-created (DB-backed) categories can be deleted — map slug → id.
+  // Only user-created (DB-backed) categories can be deleted - map slug → id.
   const deletableId = useMemo(
     () => new Map(custom.map((c) => [c.value, c.id])),
     [custom],
@@ -112,7 +112,7 @@ export function GoldVault({
 
   const activeCat = active ? categories.find((c) => c.key === active) : null;
 
-  // ── Single category — detailed jewel list ──
+  // ── Single category - detailed jewel list ──
   if (activeCat) {
     const items = [...activeCat.items].sort((a, b) => goldGrams(b) - goldGrams(a));
     return (
@@ -189,7 +189,7 @@ export function GoldVault({
     );
   }
 
-  // ── Landing — totals + category buttons ──
+  // ── Landing - totals + category buttons ──
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -204,7 +204,7 @@ export function GoldVault({
         />
         <SummaryStatCard
           label="Est. value"
-          value={totals.value ? formatINR(totals.value) : '—'}
+          value={totals.value ? formatINR(totals.value) : '-'}
           icon={Wallet}
           accent="slate"
         />
@@ -340,15 +340,15 @@ function JewelCard({
   const billDate = goldBillDate(asset);
 
   const rows: { label: string; value: string }[] = [
-    { label: 'Reference No.', value: goldReference(asset) ?? '—' },
-    { label: 'Shop', value: goldShop(asset) ?? '—' },
-    { label: 'Bill No.', value: goldBillNumber(asset) ?? '—' },
-    { label: 'Bill Date', value: billDate ? formatDate(billDate) : '—' },
+    { label: 'Reference No.', value: goldReference(asset) ?? '-' },
+    { label: 'Shop', value: goldShop(asset) ?? '-' },
+    { label: 'Bill No.', value: goldBillNumber(asset) ?? '-' },
+    { label: 'Bill Date', value: billDate ? formatDate(billDate) : '-' },
     { label: 'Weight', value: `${grams.toFixed(2)} g` },
     { label: 'Sovereign', value: `${gramsToSovereigns(grams).toFixed(3)} sov` },
-    { label: 'Purchased Value', value: goldValue(asset) ? formatINR(goldValue(asset)) : '—' },
-    { label: 'Located At', value: goldLocatedAt(asset) ?? '—' },
-    { label: 'Purity', value: goldPurity(asset) ?? '—' },
+    { label: 'Purchased Value', value: goldValue(asset) ? formatINR(goldValue(asset)) : '-' },
+    { label: 'Located At', value: goldLocatedAt(asset) ?? '-' },
+    { label: 'Purity', value: goldPurity(asset) ?? '-' },
     { label: 'Pieces', value: String(goldCount(asset)) },
   ];
 

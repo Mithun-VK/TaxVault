@@ -51,7 +51,7 @@ const assetSchema = z.object({
   acquisition_date: z.string().optional(),
   acquisition_cost: z.coerce.number().optional(),
   notes: z.string().optional(),
-  // Property (land & building) — canonical Property Details fields, in order.
+  // Property (land & building) - canonical Property Details fields, in order.
   address: z.string().optional(),
   deed_type: z.string().optional(),
   deed_number: z.string().optional(),
@@ -67,7 +67,7 @@ const assetSchema = z.object({
   water_tax_number: z.string().optional(),
   land_tax_number: z.string().optional(),
   eb_numbers: z.string().optional(),
-  // Valuation — `current_value` is a first-class column; its as-of date is
+  // Valuation - `current_value` is a first-class column; its as-of date is
   // auto-stamped on save.
   current_value: z.coerce.number().optional(),
   vehicle_type: z.string().optional(),
@@ -194,7 +194,7 @@ export function AssetForm({
       acquisition_date: asset ? toInputDate(asset.acquisition_date) : toInputDate(new Date()),
       acquisition_cost: asset?.acquisition_cost || undefined,
       notes: asset?.notes ?? '',
-      // Property Details (land & building), in canonical order — column or
+      // Property Details (land & building), in canonical order - column or
       // metadata, resolved by field().
       address: field('address'),
       deed_type: field('deed_type'),
@@ -292,7 +292,7 @@ export function AssetForm({
       name: values.name,
       description: values.description,
       asset_type: values.asset_type,
-      // Empty string must become undefined — the backend field is `date | None`
+      // Empty string must become undefined - the backend field is `date | None`
       // and cannot parse '' (assets with no acquisition date would 422 on save).
       acquisition_date: nz(values.acquisition_date),
       acquisition_cost: values.acquisition_cost || undefined,

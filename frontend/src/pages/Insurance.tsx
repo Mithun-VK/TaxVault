@@ -40,8 +40,8 @@ export function Insurance() {
   // derived client-side (mirrors Taxes/Bills).
   const { data: policies = [], isLoading } = useInsurancePolicies();
 
-  // Built-in categories plus any the user has added — from localStorage (created
-  // in the form) or already used on a policy — so a new category shows here, not
+  // Built-in categories plus any the user has added - from localStorage (created
+  // in the form) or already used on a policy - so a new category shows here, not
   // only inside the form's picker.
   const categoryDefs = useMemo(
     () =>
@@ -109,14 +109,14 @@ export function Insurance() {
           <SummaryStatCard label="Active" value={String(stats.active)} icon={ShieldCheck} accent="teal" loading={isLoading} />
           <SummaryStatCard
             label="Sum insured"
-            value={stats.sumInsured ? formatINRCompact(stats.sumInsured) : '—'}
+            value={stats.sumInsured ? formatINRCompact(stats.sumInsured) : '-'}
             icon={CheckCircle2}
             accent="slate"
             loading={isLoading}
           />
           <SummaryStatCard
             label="Premiums"
-            value={stats.premiums ? formatINRCompact(stats.premiums) : '—'}
+            value={stats.premiums ? formatINRCompact(stats.premiums) : '-'}
             icon={Wallet}
             accent="warning"
             sublabel="Per cycle, all policies"

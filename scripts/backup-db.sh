@@ -5,7 +5,7 @@
 #
 # Once you self-host, this script is the only thing standing between you and
 # total data loss. Schedule it (Task Scheduler / cron) and copy the output off
-# this machine — a backup on the same disk as the database is not a backup.
+# this machine - a backup on the same disk as the database is not a backup.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -45,4 +45,4 @@ echo
 echo "Done:"
 ls -lh "$DUMP" "$FILES"
 echo
-echo "Copy these off this machine (external drive / cloud) — that is the backup."
+echo "Copy these off this machine (external drive / cloud) - that is the backup."

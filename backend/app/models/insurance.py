@@ -27,7 +27,7 @@ class InsurancePolicy(Base):
     )
     # Human-readable label shown on the calendar / payments / reports. Falls
     # back to "provider_name - policy_number" when unset. Lets the user name a
-    # policy for what it covers — e.g. "Ciaz Car Insurance".
+    # policy for what it covers - e.g. "Ciaz Car Insurance".
     name: Mapped[str | None] = mapped_column(String)
     policy_number: Mapped[str] = mapped_column(String, nullable=False)
     provider_name: Mapped[str] = mapped_column(String, nullable=False)

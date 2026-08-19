@@ -91,13 +91,13 @@ const GROUP_ASSET_TYPES: Record<string, string[]> = {
 /**
  * True if a column is relevant to the selected asset types. With no type filter
  * every column is available; once one or more types are chosen, type-specific
- * groups (Gold/Vehicle/Property) are hidden unless a matching type is selected —
+ * groups (Gold/Vehicle/Property) are hidden unless a matching type is selected -
  * so a "Building" report drops the gold/vehicle columns entirely.
  */
 export function columnAppliesToTypes(c: ReportColumn, selectedTypes: string[]): boolean {
   if (selectedTypes.length === 0) return true;
   const groupTypes = GROUP_ASSET_TYPES[c.group];
-  if (!groupTypes) return true; // Core / Meta — always relevant
+  if (!groupTypes) return true; // Core / Meta - always relevant
   return groupTypes.some((t) => selectedTypes.includes(t));
 }
 
@@ -143,7 +143,7 @@ type LinkedNameFn = (id?: string | null) => string | undefined;
 // ── Cell formatting (shared by the grid and the Excel export) ────────────────
 export function formatCell(type: ColumnType, value: Cell): string {
   if (type === 'bool') return value ? 'Yes' : 'No';
-  if (value === null || value === undefined || value === '') return '—';
+  if (value === null || value === undefined || value === '') return '-';
   switch (type) {
     case 'money':
       return formatINR(Number(value));
@@ -237,7 +237,7 @@ function propertiesDataset(assets: Asset[], goldPricePerGram = 0): ReportDataset
     // above. The current value lives in the Core `current_value` column; its
     // auto-stamped as-of date is in metadata.
     { key: 'current_value_at', label: 'Value As Of', group: 'Valuation', type: 'date', defaultHidden: true, get: (a) => meta(a, 'current_value_at') },
-    // Gold — full jewel detail (only populated for gold assets).
+    // Gold - full jewel detail (only populated for gold assets).
     { key: 'gold_category', label: 'Gold Category', group: 'Gold', type: 'label', defaultHidden: true, get: (a) => (a.asset_type === 'gold' ? goldCategory(a) : undefined) },
     { key: 'gold_reference', label: 'Reference No.', group: 'Gold', type: 'text', defaultHidden: true, get: (a) => (a.asset_type === 'gold' ? goldReference(a) : undefined) },
     { key: 'gold_shop', label: 'Shop Name', group: 'Gold', type: 'text', defaultHidden: true, get: (a) => (a.asset_type === 'gold' ? goldShop(a) : undefined) },

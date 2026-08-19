@@ -20,7 +20,7 @@ class CryptoError(Exception):
 class UnsupportedFormatError(CryptoError):
     """The object is not a TaxVault envelope, or is a version we cannot read.
 
-    Raised before any key material is touched — bad magic bytes, an unknown
+    Raised before any key material is touched - bad magic bytes, an unknown
     format version or algorithm id, a truncated header, or reserved bits set.
     """
 
@@ -32,7 +32,7 @@ class IntegrityError(CryptoError):
     mismatch, and length fields that disagree with the actual object size.
 
     This is a security event. It never carries detail about *which* check failed
-    in its client-facing form — see the route layer — but the log line should.
+    in its client-facing form - see the route layer - but the log line should.
     """
 
 
@@ -51,13 +51,13 @@ class KmsAuthError(KmsError):
 class KmsUnavailableError(KmsError):
     """The provider is unreachable, sealed, or timed out.
 
-    Retryable, and — crucially — *not* a data-integrity problem. The ciphertext
+    Retryable, and - crucially - *not* a data-integrity problem. The ciphertext
     is fine; we simply cannot unwrap the key right now.
     """
 
 
 class KmsConfigurationError(KmsError):
-    """The provider is misconfigured — bad master key, unknown key version, missing setting.
+    """The provider is misconfigured - bad master key, unknown key version, missing setting.
 
     Raised at construction time wherever possible, so a misconfigured deployment
     fails at startup rather than on the first user download.

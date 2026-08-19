@@ -22,7 +22,7 @@ until reallocation, so a freed heap block holding a DEK stays readable to
 anything with ``ptrace``, ``/proc/<pid>/mem``, or a core dump. ``gunicorn``
 forks, so a child can inherit parent pages. All of it is moot against swap
 unless pages are ``mlock``ed, and moot against a compromised application
-server — which is the residual risk this architecture already accepts.
+server - which is the residual risk this architecture already accepts.
 
 WHAT THIS DOES DO
 -----------------
@@ -52,7 +52,7 @@ DEK_LENGTH = 32
 def secure_zero(buf: bytearray | memoryview | None) -> None:
     """Overwrite a writable buffer with zeroes, in place.
 
-    Accepts ``bytearray`` or a writable ``memoryview`` — never ``bytes``, which
+    Accepts ``bytearray`` or a writable ``memoryview`` - never ``bytes``, which
     cannot be zeroed safely (see the module docstring). Passing ``None`` is a
     no-op so callers can zero optional state without branching.
 
@@ -73,7 +73,7 @@ def secure_zero(buf: bytearray | memoryview | None) -> None:
         # writable. Slice assignment still clears a bytearray.
         try:
             buf[:] = b"\x00" * n
-        except (TypeError, ValueError):  # pragma: no cover — read-only view
+        except (TypeError, ValueError):  # pragma: no cover - read-only view
             pass
 
 
@@ -85,7 +85,7 @@ def random_dek(length: int = DEK_LENGTH) -> bytearray:
     we copy into the bytearray, and that original copy lands in the allocator's
     free list where we cannot reach it. The window is short but non-zero.
 
-    Uses ``os.urandom`` (via ``secrets``' underlying source) — the OS CSPRNG.
+    Uses ``os.urandom`` (via ``secrets``' underlying source) - the OS CSPRNG.
     """
     import os
 

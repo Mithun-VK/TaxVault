@@ -11,7 +11,7 @@ const config: Config = {
     },
     extend: {
       screens: {
-        // Ultra-wide / iMac 5K tier — lets dense grids reclaim space that
+        // Ultra-wide / iMac 5K tier - lets dense grids reclaim space that
         // otherwise strands as dead margin beyond the laptop breakpoints.
         '3xl': '1920px',
       },

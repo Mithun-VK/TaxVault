@@ -93,8 +93,8 @@ FILING_CATEGORIES: frozenset[str] = frozenset(
 class CompanyDocument(Base):
     """One filed document belonging to a company.
 
-    Unlike an Individual's identity documents — a fixed handful of key columns
-    on the profile row — a company accumulates a new set of filings every
+    Unlike an Individual's identity documents - a fixed handful of key columns
+    on the profile row - a company accumulates a new set of filings every
     financial year, so each document is its own row with a category, an
     optional financial year, and an optional expiry for renewable licenses.
     """

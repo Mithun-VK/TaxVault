@@ -46,7 +46,7 @@ export function PolicyCard({ policy, onClick }: PolicyCardProps) {
         <div>
           <p className="text-xs text-slate-600">Sum insured</p>
           <p className="font-mono text-sm font-semibold tabular-nums text-slate-900">
-            {policy.sum_insured != null ? formatINR(policy.sum_insured) : '—'}
+            {policy.sum_insured != null ? formatINR(policy.sum_insured) : '-'}
           </p>
         </div>
         <div>

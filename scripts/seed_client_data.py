@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-TaxVault v3 — Client Data Seeding Script
+TaxVault v3 - Client Data Seeding Script
 Seeds all real client data from Property_Details.xlsx and Payable_Calender.xlsx
-Source: Inigo Irudayaraj — Chennai
+Source: Inigo Irudayaraj - Chennai
 
 Usage:
   python scripts/seed_client_data.py              # Seed all data
@@ -113,7 +113,7 @@ BUILDINGS = [
     },
     {
         "name": "St. Thomas Mount Property",
-        "description": "Property at St. Thomas Mount — Chingleput Diocese Lease",
+        "description": "Property at St. Thomas Mount - Chingleput Diocese Lease",
         "asset_type": "building",
         "status": "active",
         "metadata": {
@@ -125,16 +125,16 @@ BUILDINGS = [
             "sro": "SRO Joint-2, Saidapet",
             "tneb_numbers": ["092 420 74213", "092 420 74245"],
             "water_tax_id": "P01835/PSTMWD-2BLOCK-05000386",
-            "lease_note": "Chingleput Diocese Property — Lease paid till May 2027",
+            "lease_note": "Chingleput Diocese Property - Lease paid till May 2027",
         }
     },
 ]
 
 # ─── LAND PARCELS (25) ────────────────────────────────────────────────────────
 LANDS = [
-    # S.No 5 — Fencing Thopu
+    # S.No 5 - Fencing Thopu
     {
-        "name": "Fencing Thopu Land — Manaparai",
+        "name": "Fencing Thopu Land - Manaparai",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "Fencing Thopu, Manaparai",
@@ -143,9 +143,9 @@ LANDS = [
             "deed_date": "2016-02-18", "sro": "SRO, Manaparai",
         }
     },
-    # S.No 6 — JR Layout
+    # S.No 6 - JR Layout
     {
-        "name": "JR Layout Land — Kulathur",
+        "name": "JR Layout Land - Kulathur",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "JR Layout, Kulathur",
@@ -153,9 +153,9 @@ LANDS = [
             "deed_date": "2008-06-27", "sro": "SRO, Kulathur",
         }
     },
-    # S.No 7 — Country Gift Land, Andhra
+    # S.No 7 - Country Gift Land, Andhra
     {
-        "name": "Country Gift Land — Nagari, Andhra Pradesh",
+        "name": "Country Gift Land - Nagari, Andhra Pradesh",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "Nagari, Andhra Pradesh",
@@ -163,9 +163,9 @@ LANDS = [
             "deed_date": "2008-06-27", "sro": "SRO, Nagari",
         }
     },
-    # S.No 8 — Alwin Villa, Tambaram (Felci Rajam)
+    # S.No 8 - Alwin Villa, Tambaram (Felci Rajam)
     {
-        "name": "Alwin Villa — Tambaram (Felci Rajam)",
+        "name": "Alwin Villa - Tambaram (Felci Rajam)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Felci Rajam", "location": "Alwin Villa, Tambaram",
@@ -179,7 +179,7 @@ LANDS = [
     },
     # S.No 9
     {
-        "name": "Sirugudi Village Land — Patta 1190",
+        "name": "Sirugudi Village Land - Patta 1190",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "Sirugudi Village, Sivagangai",
@@ -190,7 +190,7 @@ LANDS = [
     },
     # S.No 10
     {
-        "name": "Sirugudi Village Land — Patta 1191",
+        "name": "Sirugudi Village Land - Patta 1191",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "Sirugudi Village, Sivagangai",
@@ -201,7 +201,7 @@ LANDS = [
     },
     # S.No 11
     {
-        "name": "Sirugudi Village Land — Patta 1199 (Deed 3519/2018)",
+        "name": "Sirugudi Village Land - Patta 1199 (Deed 3519/2018)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "Sirugudi Village, Sivagangai",
@@ -212,7 +212,7 @@ LANDS = [
     },
     # S.No 12 (Felci Rajam)
     {
-        "name": "Sirugudi Village Land — Patta 1200 (Felci Rajam)",
+        "name": "Sirugudi Village Land - Patta 1200 (Felci Rajam)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Felci Rajam", "location": "Sirugudi Village, Sivagangai",
@@ -223,7 +223,7 @@ LANDS = [
     },
     # S.No 13
     {
-        "name": "Sirugudi Village Land — Patta 1199 (Deed 54/2019)",
+        "name": "Sirugudi Village Land - Patta 1199 (Deed 54/2019)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "Sirugudi Village, Sivagangai",
@@ -234,7 +234,7 @@ LANDS = [
     },
     # S.No 14
     {
-        "name": "V.Pudukulam Land — Patta 1587 (Deed 744/2019)",
+        "name": "V.Pudukulam Land - Patta 1587 (Deed 744/2019)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "V.Pudukulam, Sivagangai",
@@ -246,7 +246,7 @@ LANDS = [
     },
     # S.No 15
     {
-        "name": "V.Pudukulam Periyakottai Land — Patta 1587 (Deed 743/2019)",
+        "name": "V.Pudukulam Periyakottai Land - Patta 1587 (Deed 743/2019)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj",
@@ -259,7 +259,7 @@ LANDS = [
     },
     # S.No 16
     {
-        "name": "V.Pudukulam Land — Patta 1587 (Deed 745/2019)",
+        "name": "V.Pudukulam Land - Patta 1587 (Deed 745/2019)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "V.Pudukulam, Sivagangai",
@@ -271,7 +271,7 @@ LANDS = [
     },
     # S.No 17 (Allwyn Tony)
     {
-        "name": "V.Pudukulam Land — Patta 1609 (Allwyn Tony, Deed 2850/2019)",
+        "name": "V.Pudukulam Land - Patta 1609 (Allwyn Tony, Deed 2850/2019)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Allwyn Tony", "location": "V.Pudukulam, Sivagangai",
@@ -282,7 +282,7 @@ LANDS = [
     },
     # S.No 18 (Allwyn Tony)
     {
-        "name": "V.Pudukulam Land — Patta 1609 (Allwyn Tony, Deed 2853/2019)",
+        "name": "V.Pudukulam Land - Patta 1609 (Allwyn Tony, Deed 2853/2019)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Allwyn Tony", "location": "V.Pudukulam, Sivagangai",
@@ -293,7 +293,7 @@ LANDS = [
     },
     # S.No 19 (Allwyn Tony)
     {
-        "name": "V.Pudukulam Land — Patta 1222 (Allwyn Tony, Deed 2851/2019)",
+        "name": "V.Pudukulam Land - Patta 1222 (Allwyn Tony, Deed 2851/2019)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Allwyn Tony", "location": "V.Pudukulam, Sivagangai",
@@ -304,7 +304,7 @@ LANDS = [
     },
     # S.No 20
     {
-        "name": "V.Pudukulam Land — Patta 1587 (Deed 2854/2019)",
+        "name": "V.Pudukulam Land - Patta 1587 (Deed 2854/2019)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "V.Pudukulam, Sivagangai",
@@ -316,7 +316,7 @@ LANDS = [
     },
     # S.No 21
     {
-        "name": "Sirugudi Village Land — Patta 1199 (Deed 2730/2020)",
+        "name": "Sirugudi Village Land - Patta 1199 (Deed 2730/2020)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "Sirugudi Village, Sivagangai",
@@ -327,7 +327,7 @@ LANDS = [
     },
     # S.No 22
     {
-        "name": "V.Pudukulam Land — Old Patta 1915 (Deed 961/2025)",
+        "name": "V.Pudukulam Land - Old Patta 1915 (Deed 961/2025)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "V.Pudukulam, Sivagangai",
@@ -338,7 +338,7 @@ LANDS = [
     },
     # S.No 23
     {
-        "name": "V.Pudukulam Land — Old Patta 1905 (Deed 962/2025)",
+        "name": "V.Pudukulam Land - Old Patta 1905 (Deed 962/2025)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj", "location": "V.Pudukulam, Sivagangai",
@@ -349,7 +349,7 @@ LANDS = [
     },
     # S.No 24
     {
-        "name": "Sirugudi Chettikulam Land — Patta 1357 (Deed 3938/2025)",
+        "name": "Sirugudi Chettikulam Land - Patta 1357 (Deed 3938/2025)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj",
@@ -361,7 +361,7 @@ LANDS = [
     },
     # S.No 25
     {
-        "name": "Sirugudi Chettikulam Land — Patta 1357 (Deed 3939/2025)",
+        "name": "Sirugudi Chettikulam Land - Patta 1357 (Deed 3939/2025)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Inigo Irudayaraj",
@@ -373,7 +373,7 @@ LANDS = [
     },
     # S.No 26 (Jesurajan)
     {
-        "name": "V.Pudukulam Land — Patta 1724 (Jesurajan)",
+        "name": "V.Pudukulam Land - Patta 1724 (Jesurajan)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Jesurajan", "location": "V.Pudukulam, Sivagangai",
@@ -384,7 +384,7 @@ LANDS = [
     },
     # S.No 27 (Jesurajan)
     {
-        "name": "V.Pudukulam Land — Old Patta 782 (Jesurajan, Deed 2627/2022)",
+        "name": "V.Pudukulam Land - Old Patta 782 (Jesurajan, Deed 2627/2022)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Jesurajan", "location": "V.Pudukulam, Sivagangai",
@@ -395,7 +395,7 @@ LANDS = [
     },
     # S.No 28 (Jesurajan)
     {
-        "name": "V.Pudukulam Land — Patta 1746/1809/1914 (Jesurajan)",
+        "name": "V.Pudukulam Land - Patta 1746/1809/1914 (Jesurajan)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Jesurajan", "location": "V.Pudukulam, Sivagangai",
@@ -406,7 +406,7 @@ LANDS = [
     },
     # S.No 29 (Jesurajan)
     {
-        "name": "Sirugudi Village Land — Patta 3116 (Jesurajan)",
+        "name": "Sirugudi Village Land - Patta 3116 (Jesurajan)",
         "asset_type": "land", "status": "active",
         "metadata": {
             "owner_name": "Jesurajan", "location": "Sirugudi Village, Sivagangai",
@@ -426,7 +426,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": "Neelangari House",
             "tax_type": "property_tax",
-            "description": "Neelangari House Property Tax — ID: 15 192 003226",
+            "description": "Neelangari House Property Tax - ID: 15 192 003226",
             "jurisdiction": "Neelankarai Corporation, Chennai",
             "assessment_year": "2025-26",
             "total_amount": None,
@@ -437,7 +437,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": "Neelangari House",
             "tax_type": "water_tax",
-            "description": "Neelangari Water Tax — ID: 15 192 003226",
+            "description": "Neelangari Water Tax - ID: 15 192 003226",
             "jurisdiction": "Neelankarai Corporation, Chennai",
             "total_amount": None,
             "due_date": date(2026, 11, 30),
@@ -448,7 +448,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": "Trichy Karumandam House",
             "tax_type": "property_tax",
-            "description": "Trichy Karumandam Property Tax 1 — ID: 086/056/903516",
+            "description": "Trichy Karumandam Property Tax 1 - ID: 086/056/903516",
             "jurisdiction": "Trichy Corporation",
             "total_amount": None,
             "due_date": date(2026, 11, 14),
@@ -458,7 +458,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": "Trichy Karumandam House",
             "tax_type": "property_tax",
-            "description": "Trichy Karumandam Property Tax 2 — ID: 086/056/903517",
+            "description": "Trichy Karumandam Property Tax 2 - ID: 086/056/903517",
             "jurisdiction": "Trichy Corporation",
             "total_amount": None,
             "due_date": date(2026, 11, 14),
@@ -468,7 +468,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": "Trichy Karumandam House",
             "tax_type": "water_tax",
-            "description": "Trichy Karumandam Water Tax 1 — ID: 086/056/901136",
+            "description": "Trichy Karumandam Water Tax 1 - ID: 086/056/901136",
             "jurisdiction": "Trichy Corporation",
             "total_amount": None,
             "due_date": date(2026, 11, 14),
@@ -478,7 +478,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": "Trichy Karumandam House",
             "tax_type": "water_tax",
-            "description": "Trichy Karumandam Water Tax 2 — ID: 086/056/901136",
+            "description": "Trichy Karumandam Water Tax 2 - ID: 086/056/901136",
             "jurisdiction": "Trichy Corporation",
             "total_amount": None,
             "due_date": date(2026, 11, 14),
@@ -489,7 +489,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": "Idaikattur Guest House",
             "tax_type": "property_tax",
-            "description": "Idaikattur Guest House Tax — ID: 891",
+            "description": "Idaikattur Guest House Tax - ID: 891",
             "jurisdiction": "Idaikattur, Sivagangai",
             "total_amount": None,
             "due_date": date(2026, 9, 20),
@@ -499,7 +499,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": "Idaikattur Guest House",
             "tax_type": "property_tax",
-            "description": "Idaikattur Guest House Tax — ID: 892",
+            "description": "Idaikattur Guest House Tax - ID: 892",
             "jurisdiction": "Idaikattur, Sivagangai",
             "total_amount": None,
             "due_date": date(2026, 9, 20),
@@ -510,7 +510,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": "St. Thomas Mount Property",
             "tax_type": "other",
-            "description": "PSTMWD Water Tax — ID: P01835/PSTMWD-2BLOCK-05000386",
+            "description": "PSTMWD Water Tax - ID: P01835/PSTMWD-2BLOCK-05000386",
             "jurisdiction": "St. Thomas Mount, Chennai",
             "total_amount": None,
             "due_date": date(2027, 5, 30),
@@ -521,7 +521,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": None,
             "tax_type": "property_tax",
-            "description": "Mudichur House Property Tax — 2nd Half",
+            "description": "Mudichur House Property Tax - 2nd Half",
             "jurisdiction": "Mudichur",
             "total_amount": None,
             "due_date": date(2026, 9, 18),
@@ -532,7 +532,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": None,
             "tax_type": "land_tax",
-            "description": "Sirugudi Land Tax — Inigo Irudayaraj Properties",
+            "description": "Sirugudi Land Tax - Inigo Irudayaraj Properties",
             "jurisdiction": "Sirugudi Village, Sivagangai",
             "total_amount": None,
             "due_date": date(2027, 3, 18),
@@ -542,7 +542,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": None,
             "tax_type": "land_tax",
-            "description": "Sirugudi Land Tax — Felci Rajam Properties",
+            "description": "Sirugudi Land Tax - Felci Rajam Properties",
             "jurisdiction": "Sirugudi Village, Sivagangai",
             "total_amount": None,
             "due_date": date(2027, 3, 18),
@@ -551,9 +551,9 @@ def TAXES(asset_id_map: dict) -> list:
         },
         # ── V.PUDUKULAM LAND TAXES ──
         {
-            "asset_name": "V.Pudukulam Land — Patta 1587 (Deed 744/2019)",
+            "asset_name": "V.Pudukulam Land - Patta 1587 (Deed 744/2019)",
             "tax_type": "land_tax",
-            "description": "V.Pudukulam Land Tax — Tax ID: 749 (Inigo Irudayaraj)",
+            "description": "V.Pudukulam Land Tax - Tax ID: 749 (Inigo Irudayaraj)",
             "jurisdiction": "V.Pudukulam, Sivagangai",
             "total_amount": None,
             "due_date": date(2027, 3, 18),
@@ -563,7 +563,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": None,
             "tax_type": "land_tax",
-            "description": "V.Pudukulam Land Tax — Allwyn Tony Properties",
+            "description": "V.Pudukulam Land Tax - Allwyn Tony Properties",
             "jurisdiction": "V.Pudukulam, Sivagangai",
             "total_amount": None,
             "due_date": date(2027, 3, 18),
@@ -573,7 +573,7 @@ def TAXES(asset_id_map: dict) -> list:
         {
             "asset_name": None,
             "tax_type": "land_tax",
-            "description": "V.Pudukulam Land Tax — Jesurajan Properties",
+            "description": "V.Pudukulam Land Tax - Jesurajan Properties",
             "jurisdiction": "V.Pudukulam, Sivagangai",
             "total_amount": None,
             "due_date": date(2027, 3, 18),
@@ -582,7 +582,7 @@ def TAXES(asset_id_map: dict) -> list:
         },
         # ── FENCING THOPU ──
         {
-            "asset_name": "Fencing Thopu Land — Manaparai",
+            "asset_name": "Fencing Thopu Land - Manaparai",
             "tax_type": "land_tax",
             "description": "Manaparai Fencing Thopu Land Tax",
             "jurisdiction": "Manaparai",
@@ -593,9 +593,9 @@ def TAXES(asset_id_map: dict) -> list:
         },
         # ── ALWIN VILLA ──
         {
-            "asset_name": "Alwin Villa — Tambaram (Felci Rajam)",
+            "asset_name": "Alwin Villa - Tambaram (Felci Rajam)",
             "tax_type": "property_tax",
-            "description": "Alwin Villa Property Tax — ID: 3443",
+            "description": "Alwin Villa Property Tax - ID: 3443",
             "jurisdiction": "Tambaram, Chennai",
             "total_amount": None,
             "due_date": date(2026, 9, 1),
@@ -604,9 +604,9 @@ def TAXES(asset_id_map: dict) -> list:
         },
         # ── JESURAJAN SIRUGUDI ──
         {
-            "asset_name": "Sirugudi Village Land — Patta 3116 (Jesurajan)",
+            "asset_name": "Sirugudi Village Land - Patta 3116 (Jesurajan)",
             "tax_type": "land_tax",
-            "description": "Sirugudi Jesurajan Land Tax — ID: 483",
+            "description": "Sirugudi Jesurajan Land Tax - ID: 483",
             "jurisdiction": "Sirugudi Village, Sivagangai",
             "total_amount": None,
             "due_date": date(2026, 9, 1),
@@ -718,45 +718,45 @@ def TAXES(asset_id_map: dict) -> list:
 
 # ─── RECURRING BILLS (from Payable_Calender.xlsx) ─────────────────────────────
 BILLS = [
-    # Monthly — 4th
+    # Monthly - 4th
     {"bill_type": "other",       "provider_name": "Dubai Property",   "description": "Dubai Rent Amount (Monthly 4th)",      "billing_cycle": "monthly",   "next_due_date": date(2026, 7, 4),  "is_active": True},
     {"bill_type": "phone",       "provider_name": "Vodafone",          "description": "Vodafone Monthly Payable (4th)",       "billing_cycle": "monthly",   "next_due_date": date(2026, 7, 4),  "is_active": True},
-    # Monthly — 5th
+    # Monthly - 5th
     {"bill_type": "other",       "provider_name": "Dubai Office",      "description": "Dubai MD Salary (Monthly 5th)",        "billing_cycle": "monthly",   "next_due_date": date(2026, 7, 5),  "is_active": True},
     {"bill_type": "phone",       "provider_name": "Dubai Mobile",      "description": "Dubai Mobile Bill (Monthly 5th)",      "billing_cycle": "monthly",   "next_due_date": date(2026, 7, 5),  "is_active": True},
     {"bill_type": "other",       "provider_name": "Axis Bank",         "description": "Axis Bank Loan EMI (Monthly 5th)",     "billing_cycle": "monthly",   "next_due_date": date(2026, 7, 5),  "is_active": True},
     {"bill_type": "wifi",        "provider_name": "Hathway",           "description": "Hathway Broadband (Monthly 5th)",      "billing_cycle": "monthly",   "next_due_date": date(2026, 7, 5),  "is_active": True},
-    # Monthly — 7th
+    # Monthly - 7th
     # (TDS Payable handled in tax_obligations)
-    # Monthly — 10th
+    # Monthly - 10th
     {"bill_type": "other",       "provider_name": "ICICI Bank",        "description": "ICICI Bank Credit Card (Monthly 10th)","billing_cycle": "monthly",   "next_due_date": date(2026, 7, 10), "is_active": True},
     {"bill_type": "other",       "provider_name": "Innova Car Finance", "description": "Innova Car Loan EMI (Monthly 10th, from Apr)", "billing_cycle": "monthly", "next_due_date": date(2026, 7, 10), "is_active": True},
-    # Monthly — 11th (GST handled in taxes)
-    # Monthly — 12th
+    # Monthly - 11th (GST handled in taxes)
+    # Monthly - 12th
     {"bill_type": "other",       "provider_name": "Axis Bank",         "description": "Axis Credit Card (Monthly 12th)",      "billing_cycle": "monthly",   "next_due_date": date(2026, 7, 12), "is_active": True},
-    # Monthly — 14th (EPF/ESI handled in taxes)
-    # Monthly — 15th (EPF/ESI Online handled in taxes)
-    # Electricity bills — alternating months
-    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB — Fashion Profiles (15th, odd months Jan/Mar/May/Jul/Sep/Nov)", "billing_cycle": "bimonthly", "next_due_date": date(2026, 7, 15), "is_active": True},
-    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB — Guest House (15th, even months Feb/Apr/Jun/Aug/Oct/Dec)",     "billing_cycle": "bimonthly", "next_due_date": date(2026, 8, 15), "is_active": True},
-    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB — Idaikattur Guest House (18th, June 2026)",                     "billing_cycle": "bimonthly", "next_due_date": date(2026, 7, 18), "is_active": True},
-    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB — Trichy House (18th, Jul/Sep/Nov/Jan)",                         "billing_cycle": "bimonthly", "next_due_date": date(2026, 7, 18), "is_active": True},
-    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB — Godown (19th, bimonthly Feb/Apr/Jun/Aug/Oct/Dec)",             "billing_cycle": "bimonthly", "next_due_date": date(2026, 8, 19), "is_active": True},
-    # Monthly — 30th (from July)
+    # Monthly - 14th (EPF/ESI handled in taxes)
+    # Monthly - 15th (EPF/ESI Online handled in taxes)
+    # Electricity bills - alternating months
+    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB - Fashion Profiles (15th, odd months Jan/Mar/May/Jul/Sep/Nov)", "billing_cycle": "bimonthly", "next_due_date": date(2026, 7, 15), "is_active": True},
+    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB - Guest House (15th, even months Feb/Apr/Jun/Aug/Oct/Dec)",     "billing_cycle": "bimonthly", "next_due_date": date(2026, 8, 15), "is_active": True},
+    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB - Idaikattur Guest House (18th, June 2026)",                     "billing_cycle": "bimonthly", "next_due_date": date(2026, 7, 18), "is_active": True},
+    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB - Trichy House (18th, Jul/Sep/Nov/Jan)",                         "billing_cycle": "bimonthly", "next_due_date": date(2026, 7, 18), "is_active": True},
+    {"bill_type": "electricity", "provider_name": "TNEB",              "description": "EB - Godown (19th, bimonthly Feb/Apr/Jun/Aug/Oct/Dec)",             "billing_cycle": "bimonthly", "next_due_date": date(2026, 8, 19), "is_active": True},
+    # Monthly - 30th (from July)
     {"bill_type": "phone",       "provider_name": "Airtel",            "description": "Airtel Mobile Bill (Monthly 30th, from July)", "billing_cycle": "monthly",  "next_due_date": date(2026, 7, 30), "is_active": True},
     # July 19
     {"bill_type": "phone",       "provider_name": "BSNL",              "description": "BSNL Landline (July 19 annual)",               "billing_cycle": "monthly",  "next_due_date": date(2026, 7, 19), "is_active": True},
     # Annual renewals / licenses
     {"bill_type": "other",       "provider_name": "Zoho",              "description": "Zoho Subscription (Nov 1 annual)",             "billing_cycle": "quarterly", "next_due_date": date(2026, 11, 1),  "is_active": True},
     {"bill_type": "other",       "provider_name": "Textiles Committee","description": "Textiles Committee Renewal (Jun 6)",           "billing_cycle": "quarterly", "next_due_date": date(2027, 6, 6),   "is_active": True},
-    {"bill_type": "other",       "provider_name": "Textiles Committee","description": "Textiles Committee — Causeway Bay Renewal (Jul 23)", "billing_cycle": "quarterly", "next_due_date": date(2027, 7, 23), "is_active": True},
+    {"bill_type": "other",       "provider_name": "Textiles Committee","description": "Textiles Committee - Causeway Bay Renewal (Jul 23)", "billing_cycle": "quarterly", "next_due_date": date(2027, 7, 23), "is_active": True},
     {"bill_type": "other",       "provider_name": "FSSAI",             "description": "FSSAI License Renewal (Nov 24)",               "billing_cycle": "quarterly", "next_due_date": date(2026, 11, 24), "is_active": True},
     {"bill_type": "other",       "provider_name": "Spice Board",       "description": "Spice Board Renewal (Nov 25)",                 "billing_cycle": "quarterly", "next_due_date": date(2026, 11, 25), "is_active": True},
-    {"bill_type": "other",       "provider_name": "AEPC",              "description": "AEPC Renewal — Fashion Profiles (May 31)",     "billing_cycle": "quarterly", "next_due_date": date(2027, 5, 31),  "is_active": True},
-    {"bill_type": "other",       "provider_name": "AEPC",              "description": "AEPC Renewal — Causeway Bay (Jun 30)",         "billing_cycle": "quarterly", "next_due_date": date(2027, 6, 30),  "is_active": True},
+    {"bill_type": "other",       "provider_name": "AEPC",              "description": "AEPC Renewal - Fashion Profiles (May 31)",     "billing_cycle": "quarterly", "next_due_date": date(2027, 5, 31),  "is_active": True},
+    {"bill_type": "other",       "provider_name": "AEPC",              "description": "AEPC Renewal - Causeway Bay (Jun 30)",         "billing_cycle": "quarterly", "next_due_date": date(2027, 6, 30),  "is_active": True},
     {"bill_type": "other",       "provider_name": "Import Export Code","description": "Import Export Code Renewal (Jun 30)",          "billing_cycle": "quarterly", "next_due_date": date(2027, 6, 30),  "is_active": True},
     {"bill_type": "other",       "provider_name": "CNI",               "description": "CNI Domain Renewal (Jun 16)",                  "billing_cycle": "quarterly", "next_due_date": date(2027, 6, 16),  "is_active": True},
-    {"bill_type": "other",       "provider_name": "All Domains",       "description": "Domain Renewal — All (Aug 16)",               "billing_cycle": "quarterly", "next_due_date": date(2026, 8, 16),  "is_active": True},
+    {"bill_type": "other",       "provider_name": "All Domains",       "description": "Domain Renewal - All (Aug 16)",               "billing_cycle": "quarterly", "next_due_date": date(2026, 8, 16),  "is_active": True},
     {"bill_type": "other",       "provider_name": "Dubai Domain",      "description": "Dubai Domain Renewal (Sep 13)",               "billing_cycle": "quarterly", "next_due_date": date(2026, 9, 13),  "is_active": True},
     {"bill_type": "other",       "provider_name": "JAFZA",             "description": "JAFZA Trading License Renewal (Sep 5)",        "billing_cycle": "quarterly", "next_due_date": date(2026, 9, 5),   "is_active": True},
     {"bill_type": "other",       "provider_name": "CNI",               "description": "CNI 12A Registration Renewal (Sep 18)",        "billing_cycle": "quarterly", "next_due_date": date(2026, 9, 18),  "is_active": True},
@@ -769,7 +769,7 @@ INSURANCE = [
         "policy_number":       "UNITED-INDIA-INIGO",
         "provider_name":       "United India Insurance",
         "insurance_type":      "medical",
-        "description":         "Mediclaim Policy — Inigo Irudayaraj (United India)",
+        "description":         "Mediclaim Policy - Inigo Irudayaraj (United India)",
         "premium_frequency":   "annual",
         "next_premium_date":   date(2027, 4, 11),
         "status":              "active",
@@ -787,7 +787,7 @@ INSURANCE = [
         "policy_number":       "LIC-FELCI-RAJAM",
         "provider_name":       "LIC",
         "insurance_type":      "life",
-        "description":         "LIC Policy — Felci Rajam (Quarterly: Feb 28, Jul 28, Sep 28)",
+        "description":         "LIC Policy - Felci Rajam (Quarterly: Feb 28, Jul 28, Sep 28)",
         "premium_frequency":   "quarterly",
         "next_premium_date":   date(2026, 9, 28),
         "status":              "active",
@@ -796,7 +796,7 @@ INSURANCE = [
         "policy_number":       "LIC-ALLWYN-TONY",
         "provider_name":       "LIC",
         "insurance_type":      "life",
-        "description":         "LIC Policy — Allwyn Tony (Annual: Nov 28)",
+        "description":         "LIC Policy - Allwyn Tony (Annual: Nov 28)",
         "premium_frequency":   "annual",
         "next_premium_date":   date(2026, 11, 28),
         "status":              "active",
@@ -832,11 +832,11 @@ INSURANCE = [
         "policy_number":       "INNOVA-ALLWYN-2028",
         "provider_name":       "Insurance Company",
         "insurance_type":      "vehicle",
-        "description":         "Innova Car (Allwyn) Insurance — Valid till Jun 2028",
+        "description":         "Innova Car (Allwyn) Insurance - Valid till Jun 2028",
         "premium_frequency":   "annual",
         "next_premium_date":   date(2028, 6, 12),
         "status":              "active",
-        "notes":               "Renewed till 2028 — no action needed until June 2028",
+        "notes":               "Renewed till 2028 - no action needed until June 2028",
     },
     {
         "policy_number":       "CIAZ-INS-001",
@@ -892,7 +892,7 @@ async def seed_all(dry_run: bool = False, reset: bool = False):
     async with SessionLocal() as db:
         # ── RESET if requested ─────────────────────────────────────────────
         if reset:
-            print("⚠  RESET mode — deleting all existing data...")
+            print("⚠  RESET mode - deleting all existing data...")
             if not dry_run:
                 # Delete in FK-safe order
                 for model in [AlertConfig, InsurancePolicy, RecurringBill,
@@ -1097,7 +1097,7 @@ async def verify_seed():
         user = user_result.scalar_one_or_none()
 
         if not user:
-            print(f"\n✗  User {CLIENT['email']} not found — run seeding first\n")
+            print(f"\n✗  User {CLIENT['email']} not found - run seeding first\n")
             return
 
         # Count each entity type
@@ -1107,7 +1107,7 @@ async def verify_seed():
             return len(result.scalars().all())
 
         print(f"\n{'='*52}")
-        print(f"  TaxVault Database — Current State")
+        print(f"  TaxVault Database - Current State")
         print(f"{'='*52}")
         print(f"  User:         {user.full_name} ({user.email})")
         print(f"  User ID:      {user.id}")
@@ -1148,7 +1148,7 @@ async def main():
 
         mode = "[DRY RUN] Would create" if args.dry_run else "Created"
         print(f"\n{'='*52}")
-        print(f"  TaxVault — Seeding Complete")
+        print(f"  TaxVault - Seeding Complete")
         print(f"{'='*52}")
         print(f"  {mode}: {counts['user']} user")
         print(f"  {mode}: {counts['assets']} assets")

@@ -1,6 +1,6 @@
-# TaxVault v3 — Complete Project Specification
+# TaxVault v3 - Complete Project Specification
 
-> **CONFIDENTIAL** — Personal Asset & Liability Management System
+> **CONFIDENTIAL** - Personal Asset & Liability Management System
 > Private single-client deployment · June 2026
 
 ---
@@ -27,7 +27,7 @@ This is NOT a commercial SaaS product. It is built exclusively for one client's 
 | Notifications | AWS SES (email) + MSG91 (SMS) + Firebase FCM (push) | Multi-channel via single service abstraction |
 | File storage | Cloudflare R2 + presigned URLs | Zero egress fees, S3-compatible API |
 | Infrastructure | AWS EC2 t3.micro (ap-south-1) + Nginx | Mumbai region, production-grade |
-| CDN/DNS/SSL | Cloudflare (free) | CDN, DNS, TLS — all free |
+| CDN/DNS/SSL | Cloudflare (free) | CDN, DNS, TLS - all free |
 | Monitoring | Sentry + CloudWatch | Error tracking + infra health |
 | CI/CD | GitHub Actions | Auto-deploy on push to main |
 
@@ -55,11 +55,11 @@ AWS Free Tier ($200 credit on new account) covers ~4 months of infra at zero cos
 
 ```
 users
-├── assets              (land, vehicle, building, other — JSONB metadata)
-├── insurance_policies  (medical, life, vehicle — premium schedule)
-├── tax_obligations     (land tax, water tax, property tax — linked to assets)
-├── recurring_bills     (phone, electricity, WiFi, gas — billing cycle)
-├── payments            (unified ledger — polymorphic: entity_type + entity_id)
+├── assets              (land, vehicle, building, other - JSONB metadata)
+├── insurance_policies  (medical, life, vehicle - premium schedule)
+├── tax_obligations     (land tax, water tax, property tax - linked to assets)
+├── recurring_bills     (phone, electricity, WiFi, gas - billing cycle)
+├── payments            (unified ledger - polymorphic: entity_type + entity_id)
 ├── documents           (polymorphic: linked to any entity or standalone)
 ├── alert_configs       (per-payable: days_before thresholds + channel selection)
 ├── alert_logs          (idempotency-keyed dispatch log)
@@ -87,18 +87,18 @@ users
 ## Design system
 
 ```
-Primary:     #1A3C6E  (deep navy — authority, trust)
-Accent:      #0F6E56  (forest teal — calm action states)
-Warning:     #92400E  (amber-brown — upcoming deadlines)
-Danger:      #991B1B  (deep red — overdue)
-Success:     #14532D  (deep green — paid/completed)
+Primary:     #1A3C6E  (deep navy - authority, trust)
+Accent:      #0F6E56  (forest teal - calm action states)
+Warning:     #92400E  (amber-brown - upcoming deadlines)
+Danger:      #991B1B  (deep red - overdue)
+Success:     #14532D  (deep green - paid/completed)
 Background:  #F8F9FB  (off-white page bg)
 Surface:     #FFFFFF  (cards)
 Border:      #E2E6ED  (subtle dividers)
 Text:        #0F172A  (primary)
 Muted:       #64748B  (secondary)
 
-Font: Inter — headings 600 weight, body 400, tabular-nums for all amounts
+Font: Inter - headings 600 weight, body 400, tabular-nums for all amounts
 Cards: white bg, 1px #E2E6ED border, 12px radius, subtle shadow
 Buttons: 8px radius, 150ms transition, scale-[0.98] active
 Status badges: pill shape (9999px radius)

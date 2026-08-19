@@ -64,7 +64,7 @@ async def _entity_index(
 async def payables_report(
     db: AsyncSession, user_id: uuid.UUID, entity_type: str, year: int
 ) -> PayablesReport:
-    """Month-by-month spend per payable for a year — the pivot behind the
+    """Month-by-month spend per payable for a year - the pivot behind the
     Bills / Taxes / Insurance report tabs and their variance columns."""
     index = await _entity_index(db, user_id, entity_type)
 

@@ -6,14 +6,14 @@ Create Date: 2026-08-02
 
 Alerts now deliver over WhatsApp (Twilio). Existing alert_configs were created
 with the old default of {email, push}, neither of which a self-hosted install
-can actually send — email needs SES credentials, push needs a Firebase service
-account — so every existing rule would keep silently failing until each one was
+can actually send - email needs SES credentials, push needs a Firebase service
+account - so every existing rule would keep silently failing until each one was
 edited by hand.
 
 This adds "whatsapp" to every existing config that lacks it, leaving any other
 channels the user chose in place. Idempotent: re-running changes nothing.
 
-No schema change — `channels` is already a text[].
+No schema change - `channels` is already a text[].
 """
 from typing import Union
 

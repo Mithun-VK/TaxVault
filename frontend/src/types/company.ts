@@ -12,7 +12,7 @@ export interface Director {
   /** Optional link to an Individual profile, when the director is also a family member. */
   individual_id?: string;
   name: string;
-  /** Director Identification Number — 8 digits. */
+  /** Director Identification Number - 8 digits. */
   din?: string;
   /** Digital Signature Certificate used to sign MCA/GST/IT filings. */
   dsc_number?: string;

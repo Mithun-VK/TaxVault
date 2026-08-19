@@ -60,6 +60,6 @@ async def permission_handler(request: Request, exc: PermissionDeniedError) -> JS
 
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     # Last line of defence: log the full trace (Sentry captures it if configured)
-    # and return a generic, conformant body — never leak internals to the client.
+    # and return a generic, conformant body - never leak internals to the client.
     logger.exception("Unhandled error on %s %s", request.method, request.url.path)
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})

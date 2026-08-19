@@ -2,7 +2,7 @@
 export type KnownBillType = 'phone' | 'electricity' | 'wifi' | 'dth' | 'dubai' | 'other';
 
 /**
- * A bill's category. Users can add their own, so any slug is valid — the
+ * A bill's category. Users can add their own, so any slug is valid - the
  * `(string & {})` keeps autocomplete for the known ones while allowing custom.
  */
 export type BillType = KnownBillType | (string & {});

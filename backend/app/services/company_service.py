@@ -42,7 +42,7 @@ def _parse_iso(value) -> date | None:
 
 
 def _state_code_from(gstin: str | None) -> str | None:
-    """The GST state code is the GSTIN's first two digits — derived, not typed."""
+    """The GST state code is the GSTIN's first two digits - derived, not typed."""
     if gstin and len(gstin) >= 2 and gstin[:2].isdigit():
         return gstin[:2]
     return None
@@ -52,7 +52,7 @@ def last_closed_financial_year(fy_end: str | None, today: date | None = None) ->
     """The most recent financial year whose books have closed, as "2025-26".
 
     Filing deadlines trail the year end by months, so "closed" here means the
-    year that ended before the current one — a company is not delinquent for
+    year that ended before the current one - a company is not delinquent for
     not yet having filed a return for a year that ended last week.
     """
     today = today or date.today()
@@ -97,7 +97,7 @@ async def _counts(
         or 0
     )
 
-    # Documents whose expiry falls inside the warning window — already-expired
+    # Documents whose expiry falls inside the warning window - already-expired
     # rows count too, since they are the most urgent thing on the card.
     expiring_docs = (
         await db.scalar(
@@ -120,7 +120,7 @@ async def _counts(
         expiring_docs += 1
 
     # Compliance gap: nothing filed at all for the last closed financial year.
-    # Dormant and closed entities are exempt — they have nothing to file.
+    # Dormant and closed entities are exempt - they have nothing to file.
     has_gap = False
     if company.status == "active":
         fy = last_closed_financial_year(company.financial_year_end)

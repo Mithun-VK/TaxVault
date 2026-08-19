@@ -15,7 +15,7 @@ import { useGoldCategories, useCreateGoldCategory } from '@/api/goldCategories';
 interface AddGoldCategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Called after a category is created — receives its slug + label. */
+  /** Called after a category is created - receives its slug + label. */
   onAdded: (slug: string, label: string) => void;
 }
 

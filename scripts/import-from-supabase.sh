@@ -5,7 +5,7 @@
 #
 # Reads DIRECT_DATABASE_URL from backend/.env (the existing Supabase config) and
 # loads it into the tv-postgres container. Run this ONCE, before the first
-# `up -d` of the full stack — see SELFHOSTING.md step 5.
+# `up -d` of the full stack - see SELFHOSTING.md step 5.
 #
 # Read-only against Supabase. Destructive against the local database.
 set -euo pipefail
@@ -18,12 +18,12 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 DUMP="$OUT_DIR/supabase-$STAMP.dump"
 
 [ -f "$SRC_ENV" ] || { echo "missing $SRC_ENV (source Supabase config)" >&2; exit 1; }
-[ -f "$DST_ENV" ] || { echo "missing $DST_ENV — copy .env.selfhost.example first" >&2; exit 1; }
+[ -f "$DST_ENV" ] || { echo "missing $DST_ENV - copy .env.selfhost.example first" >&2; exit 1; }
 
 # Prefer the direct (non-pooler) URL: pgBouncer at :6543 breaks pg_dump.
 SRC_URL="$(grep -E '^DIRECT_DATABASE_URL=' "$SRC_ENV" | tail -1 | cut -d= -f2-)"
 [ -n "$SRC_URL" ] || { echo "DIRECT_DATABASE_URL not set in $SRC_ENV" >&2; exit 1; }
-# pg_dump is libpq — it does not understand SQLAlchemy's '+asyncpg' suffix.
+# pg_dump is libpq - it does not understand SQLAlchemy's '+asyncpg' suffix.
 SRC_URL="${SRC_URL/+asyncpg/}"
 
 # shellcheck disable=SC2046

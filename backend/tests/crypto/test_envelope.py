@@ -1,8 +1,8 @@
 """Tests for the TaxVault envelope format.
 
 The golden-vector test is the important one: it pins the exact 96 header bytes
-for a fixed input, so any accidental change to the format — a reordered field, a
-widened integer, a different AAD construction — fails loudly instead of silently
+for a fixed input, so any accidental change to the format - a reordered field, a
+widened integer, a different AAD construction - fails loudly instead of silently
 producing objects the previous build cannot open.
 """
 
@@ -52,7 +52,7 @@ def make(
 
 
 # --------------------------------------------------------------------------
-# Golden vector — the format-change tripwire
+# Golden vector - the format-change tripwire
 # --------------------------------------------------------------------------
 
 GOLDEN_PLAINTEXT = b"TaxVault golden vector"
@@ -141,7 +141,7 @@ def test_roundtrip_property_seeded() -> None:
 
     A seeded loop rather than Hypothesis, which is not installed here. Add
     `hypothesis` as a dev dependency and replace this with
-    `@given(st.binary(max_size=100_000))` when convenient — it is strictly
+    `@given(st.binary(max_size=100_000))` when convenient - it is strictly
     better at finding boundary cases.
     """
     rng = random.Random(0xC0FFEE)
@@ -190,8 +190,8 @@ _TAMPER_OFFSETS = [
 def test_single_flipped_bit_is_always_detected(offset: int) -> None:
     """No byte of the object may be changed without a raise.
 
-    Both error types are acceptable outcomes — a corrupt magic byte is an
-    UnsupportedFormatError, a corrupt nonce is an IntegrityError — but returning
+    Both error types are acceptable outcomes - a corrupt magic byte is an
+    UnsupportedFormatError, a corrupt nonce is an IntegrityError - but returning
     plaintext never is.
     """
     obj = bytearray(make(_PLAINTEXT_FOR_TAMPER))
@@ -258,7 +258,7 @@ def test_missing_header_is_unsupported_not_integrity() -> None:
 
 
 def test_plaintext_object_is_rejected_as_unsupported() -> None:
-    """Legacy plaintext objects have no header at all — the dual-read path must
+    """Legacy plaintext objects have no header at all - the dual-read path must
     distinguish 'not one of ours' from 'corrupt'."""
     with pytest.raises(UnsupportedFormatError, match="Bad magic"):
         parse_header(b"%PDF-1.7" + b"\x00" * 200)

@@ -36,7 +36,7 @@ def upgrade() -> None:
         )
         """
     )
-    # Fallback for a deployment with zero admins — the vault needs an owner.
+    # Fallback for a deployment with zero admins - the vault needs an owner.
     op.execute(
         """
         UPDATE users

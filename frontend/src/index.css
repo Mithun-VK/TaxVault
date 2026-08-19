@@ -37,7 +37,7 @@
 
   html {
     -webkit-text-size-adjust: 100%;
-    /* Fluid root — every rem-based size (type, spacing, max-widths) scales
+    /* Fluid root - every rem-based size (type, spacing, max-widths) scales
        with the viewport so the dense UI stays proportional from phone to 5K.
        Clamped so it never balloons or collapses past comfortable bounds. */
     font-size: clamp(15px, 12.6px + 0.25vw, 19px);

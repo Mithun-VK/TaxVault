@@ -19,9 +19,9 @@ def _days_label(days: int) -> str:
 
 
 def _amount_label(amount: float | None) -> str:
-    """₹12,000 rather than ₹12000.0 — these are read on a phone."""
+    """₹12,000 rather than ₹12000.0 - these are read on a phone."""
     if amount in (None, ""):
-        return "—"
+        return "-"
     try:
         return f"₹{float(amount):,.0f}"
     except (TypeError, ValueError):
@@ -33,7 +33,7 @@ def build_whatsapp_body(
 ) -> str:
     """A WhatsApp reminder: the payable, the money, the date, in that order.
 
-    Deliberately short and unformatted beyond WhatsApp's own *bold* — this is
+    Deliberately short and unformatted beyond WhatsApp's own *bold* - this is
     read on a lock screen, so the first line has to carry the whole message.
     """
     label = _days_label(days_before)
@@ -43,9 +43,9 @@ def build_whatsapp_body(
         "",
         f"*{name}*",
         f"Amount: {_amount_label(amount)}",
-        f"Due: {due_date.strftime('%d %b %Y') if due_date else '—'}",
+        f"Due: {due_date.strftime('%d %b %Y') if due_date else '-'}",
         "",
-        "— TaxVault",
+        "- TaxVault",
     ]
     return "\n".join(lines)
 

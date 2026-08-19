@@ -114,7 +114,7 @@ const statusOption = (v: string) => COMPANY_STATUSES.find((s) => s.value === v);
 const categoryLabel = (v: string) =>
   COMPANY_DOCUMENT_CATEGORIES.find((c) => c.value === v)?.label ?? v;
 const fyEndLabel = (v?: string) =>
-  FINANCIAL_YEAR_ENDS.find((f) => f.value === v)?.label ?? v ?? '—';
+  FINANCIAL_YEAR_ENDS.find((f) => f.value === v)?.label ?? v ?? '-';
 
 /** Share capital exists only for bodies corporate. */
 const HAS_SHARE_CAPITAL = ['private_limited', 'public_limited', 'one_person'];
@@ -282,7 +282,7 @@ function toFields(c?: Company): CompanyFields {
   };
 }
 
-/** Blank strings become undefined — the API's identifier validators reject "". */
+/** Blank strings become undefined - the API's identifier validators reject "". */
 function cleanPayload(f: CompanyFields): CompanyCreate {
   const num = (v: string) => (v.trim() === '' ? undefined : Number(v));
   const str = (v: string) => v.trim() || undefined;
@@ -551,7 +551,7 @@ function CompanyForm({
             label="IE Code"
             hint={
               <p className="text-xs text-slate-600">
-                Import Export Code — since 2017 this is the entity's PAN.
+                Import Export Code - since 2017 this is the entity's PAN.
               </p>
             }
           >
@@ -634,7 +634,7 @@ function CompanyForm({
         </div>
         <p className="mt-3 text-xs text-slate-600">
           EPF, ESI and professional tax numbers switch on their monthly rows in the Compliance
-          tab — a company with no EPF code is not asked for an EPF return.
+          tab - a company with no EPF code is not asked for an EPF return.
         </p>
       </Section>
 
@@ -809,17 +809,20 @@ function CompanyLogo({
 /**
  * The registration numbers, front and centre on the company page.
  *
- * These are what someone is actually asked for on a call — GSTIN, IEC, EPF —
+ * These are what someone is actually asked for on a call - GSTIN, IEC, EPF -
  * so they sit in the hero rather than behind the Overview tab. Each is
  * click-to-copy, because the next thing anyone does with a number is paste it.
  */
 function KeyNumbers({ company }: { company: Company }) {
   const [copied, setCopied] = useState<string | null>(null);
 
+  // Every number is listed, filled in or not - the blanks show at a glance
+  // what is still missing for this company.
   const entries = COMPANY_KEY_NUMBERS.map((spec) => ({
     ...spec,
     value: (company as unknown as Record<string, string | undefined>)[spec.key],
-  })).filter((e) => e.always || !!e.value);
+  }));
+  const onFile = entries.filter((e) => !!e.value).length;
 
   const copy = async (label: string, value: string) => {
     try {
@@ -833,9 +836,14 @@ function KeyNumbers({ company }: { company: Company }) {
 
   return (
     <div className="mt-5 border-t border-surface-border pt-5">
-      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-600">
-        Registration numbers
-      </p>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+          Registration numbers
+        </p>
+        <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-600">
+          {onFile} of {entries.length} on file
+        </span>
+      </div>
       <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
         {entries.map((entry) => (
           <div key={entry.key} className="min-w-0">
@@ -860,7 +868,7 @@ function KeyNumbers({ company }: { company: Company }) {
                 )}
               </button>
             ) : (
-              <p className="mt-0.5 text-sm font-medium text-slate-500">—</p>
+              <p className="mt-0.5 text-sm font-medium text-slate-500">-</p>
             )}
             {entry.key === 'gstin' && gstStateName(company.gstin_state_code) && (
               <p className="text-[11px] text-slate-600">
@@ -879,14 +887,14 @@ function CompanyHero({ company }: { company: Company }) {
   const exporter = EXPORTER_TYPES.find((e) => e.value === company.exporter_type)?.label;
   const rows = [
     { label: 'Company type', value: typeLabel(company.company_type) },
-    { label: 'Industry', value: company.industry ?? '—' },
+    { label: 'Industry', value: company.industry ?? '-' },
     {
       label: 'Incorporated',
-      value: company.incorporation_date ? formatDate(company.incorporation_date) : '—',
+      value: company.incorporation_date ? formatDate(company.incorporation_date) : '-',
     },
-    { label: 'Exporter type', value: exporter ?? '—' },
-    { label: 'Phone', value: company.phone_number ?? '—' },
-    { label: 'Email', value: company.email ?? '—' },
+    { label: 'Exporter type', value: exporter ?? '-' },
+    { label: 'Phone', value: company.phone_number ?? '-' },
+    { label: 'Email', value: company.email ?? '-' },
   ];
 
   return (
@@ -966,7 +974,7 @@ function OverviewTab({
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      {/* Left third — identity card. */}
+      {/* Left third - identity card. */}
       <div className="space-y-4 lg:col-span-1">
         <Card className="flex flex-col items-center p-6 text-center">
           <CompanyLogo company={company} readOnly={readOnly} />
@@ -1032,7 +1040,7 @@ function OverviewTab({
         )}
       </div>
 
-      {/* Right two-thirds — the editable field groups. */}
+      {/* Right two-thirds - the editable field groups. */}
       <div className="space-y-4 lg:col-span-2">
         <fieldset disabled={readOnly} className="space-y-4">
           <CompanyForm
@@ -1056,7 +1064,7 @@ function OverviewTab({
   );
 }
 
-/** The `other_registrations` JSON array — FSSAI, AEPC, IEC, and the rest. */
+/** The `other_registrations` JSON array - FSSAI, AEPC, IEC, and the rest. */
 function OtherRegistrationsSection({
   company,
   readOnly,
@@ -1091,7 +1099,7 @@ function OtherRegistrationsSection({
     >
       {(company.other_registrations ?? []).length === 0 ? (
         <p className="py-1 text-sm text-slate-600">
-          None recorded — FSSAI, IEC, AEPC and similar go here.
+          None recorded - FSSAI, IEC, AEPC and similar go here.
         </p>
       ) : (
         <ul className="divide-y divide-surface-border">
@@ -1509,7 +1517,7 @@ function DirectorsTab({ company, readOnly }: { company: Company; readOnly: boole
   const selected = individuals.find((i) => i.id === draft.individual_id);
 
   // Allocated shareholding across everyone on record, plus whatever is being
-  // typed — a stake that pushes the company over 100% should be obvious.
+  // typed - a stake that pushes the company over 100% should be obvious.
   const shareTotal = useMemo(() => {
     const existing = directors.reduce((sum, d) => sum + (d.share_percentage ?? 0), 0);
     return Math.round((existing + (draft.share_percentage ?? 0)) * 100) / 100;
@@ -1555,7 +1563,7 @@ function DirectorsTab({ company, readOnly }: { company: Company; readOnly: boole
         <EmptyState
           icon={Users}
           title="No directors recorded"
-          description="Add directors, partners or trustees below — link them to an Individual profile where one exists."
+          description="Add directors, partners or trustees below - link them to an Individual profile where one exists."
         />
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -1716,7 +1724,7 @@ function DirectorsTab({ company, readOnly }: { company: Company; readOnly: boole
               hint={
                 shareTotal > 100 ? (
                   <p className="text-xs font-medium text-brand-danger">
-                    Shareholding totals {shareTotal}% — over 100%
+                    Shareholding totals {shareTotal}% - over 100%
                   </p>
                 ) : undefined
               }
@@ -1989,7 +1997,7 @@ function ComplianceTab({ company, readOnly }: { company: Company; readOnly: bool
 
   return (
     <div className="space-y-4">
-      {/* Upcoming strip — what needs doing, as quick chips. */}
+      {/* Upcoming strip - what needs doing, as quick chips. */}
       <Card
         className={cn(
           'p-4',
@@ -2010,7 +2018,7 @@ function ComplianceTab({ company, readOnly }: { company: Company; readOnly: bool
                 STATUS_TONES[row.status],
               )}
             >
-              {row.label} — {formatDate(row.dueDate)}
+              {row.label} - {formatDate(row.dueDate)}
             </span>
           ))}
         </div>
@@ -2035,7 +2043,7 @@ function ComplianceTab({ company, readOnly }: { company: Company; readOnly: bool
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-600">
-                    Nothing to track yet — add a GSTIN or TAN, or upload a license with an expiry
+                    Nothing to track yet - add a GSTIN or TAN, or upload a license with an expiry
                     date.
                   </td>
                 </tr>
@@ -2066,7 +2074,7 @@ function ComplianceTab({ company, readOnly }: { company: Company; readOnly: bool
                     </td>
                     <td className="px-4 py-2.5">
                       {row.status === 'done' || readOnly ? (
-                        <span className="text-xs text-slate-600">—</span>
+                        <span className="text-xs text-slate-600">-</span>
                       ) : (
                         <button
                           type="button"
@@ -2086,7 +2094,7 @@ function ComplianceTab({ company, readOnly }: { company: Company; readOnly: bool
       </Card>
 
       <p className="text-xs text-slate-600">
-        A filing counts as done once a document of that type is on file for the year — uploading
+        A filing counts as done once a document of that type is on file for the year - uploading
         the proof is what marks it complete. Monthly rows show the next occurrence.
       </p>
 
@@ -2367,7 +2375,7 @@ function BankingTab({ company, readOnly }: { company: Company; readOnly: boolean
               required
               hint={
                 <p className="text-xs text-slate-600">
-                  Format ABCD0123456 — the 5th character is always zero.
+                  Format ABCD0123456 - the 5th character is always zero.
                 </p>
               }
             >
@@ -2424,7 +2432,7 @@ function BankingTab({ company, readOnly }: { company: Company; readOnly: boolean
         title="Delete bank account?"
         description={
           deleteIndex !== null
-            ? `${accounts[deleteIndex]?.bank_name} — ${maskAccount(
+            ? `${accounts[deleteIndex]?.bank_name} - ${maskAccount(
                 accounts[deleteIndex]?.account_number ?? '',
               )} will be removed.`
             : ''
@@ -2453,7 +2461,7 @@ function CreateCompany() {
       <div>
         <h2 className="text-lg font-semibold tracking-tight text-slate-900">Add a company</h2>
         <p className="mt-0.5 text-sm text-slate-700">
-          Registrations and filings can be filled in later — only the legal name is required.
+          Registrations and filings can be filled in later - only the legal name is required.
         </p>
       </div>
       <CompanyForm

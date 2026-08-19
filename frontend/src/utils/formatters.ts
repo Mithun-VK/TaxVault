@@ -29,7 +29,7 @@ const inrFormatterPaise = new Intl.NumberFormat('en-IN', {
   maximumFractionDigits: 2,
 });
 
-/** ₹1,25,000 — Indian digit grouping. */
+/** ₹1,25,000 - Indian digit grouping. */
 export function formatINR(amount: number, withPaise = false): string {
   if (Number.isNaN(amount)) return '₹0';
   return withPaise ? inrFormatterPaise.format(amount) : inrFormatter.format(amount);

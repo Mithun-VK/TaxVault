@@ -30,7 +30,7 @@ WHY SINGLE-SHOT AND NOT CHUNKED
 -------------------------------
 Chunk framing solves two problems: bounding memory for objects too large to
 hold, and emitting plaintext before the whole object is authenticated. Neither
-applies at a 20 MB cap — and the second is a security *downgrade*. With
+applies at a 20 MB cap - and the second is a security *downgrade*. With
 single-shot GCM the tag is verified before one plaintext byte reaches the
 client; with chunking you are by construction releasing data that has not been
 authenticated in aggregate. There is also a structural reason: plaintext_sha256
@@ -168,7 +168,7 @@ class EnvelopeHeader:
         """Exact total object length implied by this header."""
         return object_size_for(self.plaintext_len, signed=self.is_signed)
 
-    def __repr__(self) -> str:  # pragma: no cover — debugging aid
+    def __repr__(self) -> str:  # pragma: no cover - debugging aid
         return (
             f"EnvelopeHeader(v{self.format_version}, alg={self.alg_id:#04x}, "
             f"plaintext_len={self.plaintext_len}, signed={self.is_signed}, "
@@ -233,7 +233,7 @@ def _pack_header(
         plaintext_sha256,
         key_ref,
         created_at_unix,
-        0,  # aad_ctx_len — context is reconstructed by the caller, never stored
+        0,  # aad_ctx_len - context is reconstructed by the caller, never stored
         0,  # reserved
     )
 
@@ -326,14 +326,14 @@ def seal(
 ) -> bytes:
     """Encrypt ``plaintext`` into a complete envelope object.
 
-    ``dek`` must be exactly 32 bytes and must never have been used before — the
+    ``dek`` must be exactly 32 bytes and must never have been used before - the
     format's whole nonce story depends on one key encrypting one message.
 
     ``wrapped_dek_ciphertext`` is the KMS-wrapped form of that DEK; only its
     fingerprint is stored, so callers must wrap *before* sealing.
 
     ``signing_key`` is optional but strongly recommended. The signature does not
-    defend against a compromised application server — that server holds both the
+    defend against a compromised application server - that server holds both the
     signing key and the KEK, a residual risk this architecture accepts. It
     defends against a compromised storage provider or stolen bucket credentials:
     an attacker with write access cannot plant an object we will serve, not even
@@ -411,7 +411,7 @@ def open_(
       6. only now return plaintext
 
     Step 4's tag already catches ciphertext truncation, but step 2 catches file
-    truncation earlier, more cheaply, and with an error an operator can act on —
+    truncation earlier, more cheaply, and with an error an operator can act on -
     and it stops us handing a short buffer to the AEAD.
     """
     header = parse_header(obj)
@@ -455,7 +455,7 @@ def open_(
             _build_aad(header.raw, storage_key),
         )
     except InvalidTag as exc:
-        # InvalidTag is a sibling of InvalidSignature, not a subclass — catching
+        # InvalidTag is a sibling of InvalidSignature, not a subclass - catching
         # the latter here would let every tamper case escape as an unhandled
         # exception. This is the single most important failure in the module: it
         # means the ciphertext, the header, the storage key, or the DEK does not
@@ -467,7 +467,7 @@ def open_(
     if header.flags & FLAG_HAS_SHA256 and not hmac.compare_digest(
         hashlib.sha256(plaintext).digest(), header.plaintext_sha256
     ):
-        # Unreachable through GCM alone — the tag covers the ciphertext and the
+        # Unreachable through GCM alone - the tag covers the ciphertext and the
         # header carries the hash. Kept as a belt-and-braces check against a
         # future format change that decouples them.
         raise IntegrityError("Plaintext SHA-256 does not match the value recorded at seal time.")

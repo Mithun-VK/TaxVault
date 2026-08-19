@@ -111,7 +111,7 @@ async def update_insurance(
 
     # The asset link and the individual link are mutually exclusive and are sent
     # together by the form. Apply both explicitly (even when null) so switching a
-    # policy's type also clears the previous link — the exclude_none loop above
+    # policy's type also clears the previous link - the exclude_none loop above
     # would otherwise skip the null and leave a stale reference.
     if payload.insurance_type is not None:
         policy.asset_id = payload.asset_id

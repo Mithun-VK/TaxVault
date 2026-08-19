@@ -22,7 +22,7 @@ export interface IndividualList {
   total: number;
 }
 
-// Skipped entirely for roles without `individuals.view` — the sidebar renders
+// Skipped entirely for roles without `individuals.view` - the sidebar renders
 // this list on every page, so an unauthorised call would fire constantly.
 export function useIndividuals() {
   const canView = useCan('individuals.view');

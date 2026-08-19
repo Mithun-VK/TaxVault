@@ -9,7 +9,7 @@ class PayableReportRow(BaseModel):
     entity_id: uuid.UUID
     entity_name: str
     entity_type: str
-    # bill_type / tax_type / insurance_type — lets the client carve out
+    # bill_type / tax_type / insurance_type - lets the client carve out
     # "other payables" and group by kind.
     subtype: str | None = None
     # month number (1-12) -> total amount paid that month

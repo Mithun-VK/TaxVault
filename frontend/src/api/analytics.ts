@@ -54,7 +54,7 @@ function periodStart(period: AnalyticsPeriod): string {
   return `${fyYear}-04-01`;
 }
 
-/** First month (YYYY-MM) included in a period — used to slice monthly series. */
+/** First month (YYYY-MM) included in a period - used to slice monthly series. */
 export function analyticsPeriodStartMonth(period: AnalyticsPeriod): string {
   return periodStart(period).slice(0, 7);
 }

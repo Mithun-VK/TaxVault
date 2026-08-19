@@ -32,7 +32,7 @@ async def verify_entity_ownership(
 ) -> None:
     """Verify the entity exists AND belongs to this user.
 
-    Always raises NotFoundError (404) on failure — never 403 — so the response
+    Always raises NotFoundError (404) on failure - never 403 - so the response
     does not reveal whether a resource owned by someone else exists.
     """
     model = _get_model_for_entity(entity_type)

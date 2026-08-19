@@ -1,7 +1,7 @@
 """Human-readable labels for payables (bills / taxes / insurance).
 
-Every surface that lists a payable — the payment calendar, the payments feed,
-the reports — shows the same label through these helpers. They prefer the
+Every surface that lists a payable - the payment calendar, the payments feed,
+the reports - shows the same label through these helpers. They prefer the
 stored ``name`` column and fall back to the historical derivation so rows
 created before the column existed (or left unnamed) still read sensibly.
 """

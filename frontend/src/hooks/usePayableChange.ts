@@ -9,9 +9,9 @@ import {
 /**
  * How the signed-in role gets an edit or delete done on a bill, tax or policy.
  *
- * `direct`  — it changes the record itself (super admin).
- * `request` — it files a change request for an admin to approve (member).
- * `none`    — the control should not be offered at all (admin: no edit rights,
+ * `direct`  - it changes the record itself (super admin).
+ * `request` - it files a change request for an admin to approve (member).
+ * `none`    - the control should not be offered at all (admin: no edit rights,
  *             and it must not be able to file a request it could then approve).
  */
 export type ChangeMode = 'direct' | 'request' | 'none';
@@ -30,8 +30,8 @@ const DELETE_PERMISSION: Record<ChangeEntityType, Permission> = {
 
 /**
  * Only the fields that actually changed, so the reviewer sees the edit rather
- * than the whole record. Values are compared as strings — the form returns
- * numbers and dates as text, while the API returns them typed — and blank,
+ * than the whole record. Values are compared as strings - the form returns
+ * numbers and dates as text, while the API returns them typed - and blank,
  * null and undefined all count as "empty".
  */
 export function diffPayload(

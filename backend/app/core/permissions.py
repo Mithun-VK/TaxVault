@@ -7,7 +7,7 @@ TaxVault has three roles, in descending order of power:
 
   ``admin``        Sees everything the super admin sees, and may *add* records
                    (properties, individuals, bills, taxes, insurance policies,
-                   documents, gold categories, payments) — but may never edit
+                   documents, gold categories, payments) - but may never edit
                    or delete anything, and cannot manage users or alert rules.
 
   ``user``         A payables-desk login. Sees only the payment calendar,
@@ -22,7 +22,7 @@ TaxVault has three roles, in descending order of power:
 
 Permissions are plain ``resource.action`` strings so the frontend can mirror
 this table verbatim (see ``frontend/src/utils/permissions.ts``). Keep the two
-in sync — the backend is the enforcement point, the frontend only hides
+in sync - the backend is the enforcement point, the frontend only hides
 controls the caller would be refused anyway.
 """
 
@@ -70,7 +70,7 @@ INSURANCE_EDIT: Final = "insurance.edit"
 INSURANCE_DELETE: Final = "insurance.delete"
 INSURANCE_REQUEST_CHANGE: Final = "insurance.request_change"
 
-# Change requests — the maker/checker queue. Everyone sees the queue (members
+# Change requests - the maker/checker queue. Everyone sees the queue (members
 # only their own rows, enforced in the service); reviewing is admin and up.
 CHANGE_REQUESTS_VIEW: Final = "change_requests.view"
 CHANGE_REQUESTS_REVIEW: Final = "change_requests.review"

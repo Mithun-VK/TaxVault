@@ -15,7 +15,7 @@ individual's identity documents do.
 It is ON DELETE SET NULL, so archiving/removing a company never takes its
 properties with it.
 
-CIN and GSTIN are unique per vault only among rows that carry one — partial
+CIN and GSTIN are unique per vault only among rows that carry one - partial
 unique indexes, matching `uq_individual_pan` from migration 0005.
 """
 from typing import Union

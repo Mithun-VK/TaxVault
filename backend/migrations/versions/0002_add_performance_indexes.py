@@ -19,7 +19,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Tax obligations — most queried table (alerts + dashboard)
+    # Tax obligations - most queried table (alerts + dashboard)
     op.create_index(
         "ix_tax_obligations_user_due_status",
         "tax_obligations",
@@ -32,7 +32,7 @@ def upgrade() -> None:
         postgresql_where=sa.text("asset_id IS NOT NULL"),
     )
 
-    # Insurance — premium schedule scanning
+    # Insurance - premium schedule scanning
     op.create_index(
         "ix_insurance_user_next_premium",
         "insurance_policies",
@@ -44,14 +44,14 @@ def upgrade() -> None:
         ["user_id", "status"],
     )
 
-    # Recurring bills — active bill scanning
+    # Recurring bills - active bill scanning
     op.create_index(
         "ix_bills_user_due_active",
         "recurring_bills",
         ["user_id", "next_due_date", "is_active"],
     )
 
-    # Payments — unified ledger queries
+    # Payments - unified ledger queries
     op.create_index(
         "ix_payments_user_entity",
         "payments",
@@ -63,7 +63,7 @@ def upgrade() -> None:
         ["user_id", "payment_date"],
     )
 
-    # Documents — entity lookup + category filter (active rows only)
+    # Documents - entity lookup + category filter (active rows only)
     op.create_index(
         "ix_documents_user_entity",
         "documents",
@@ -77,7 +77,7 @@ def upgrade() -> None:
         postgresql_where=sa.text("is_deleted = false"),
     )
 
-    # Audit logs — recent activity feed
+    # Audit logs - recent activity feed
     op.create_index(
         "ix_audit_logs_user_created",
         "audit_logs",

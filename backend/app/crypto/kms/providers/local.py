@@ -8,7 +8,7 @@ operation rather than a flag day:
 
     1. add a higher version to ENCRYPTION_MASTER_KEYS and restart
     2. new documents wrap under it immediately; old ones keep opening
-    3. re-wrap existing rows at leisure (a database-only UPDATE — the objects
+    3. re-wrap existing rows at leisure (a database-only UPDATE - the objects
        themselves are never touched, because the DEK does not change)
     4. once no row references the old version, drop it from configuration
 
@@ -25,7 +25,7 @@ WHY A SEPARATE SECRET AND NOT ONE DERIVED FROM SECRET_KEY
 Three reasons, in order of severity:
 
 1. ``SECRET_KEY`` is the JWT signing key. It gets rotated the moment a token
-   leaks — a different cadence, a different reflex, often a different person.
+   leaks - a different cadence, a different reflex, often a different person.
    Deriving the KEK from it means a routine JWT rotation **silently makes every
    document permanently undecryptable.** That is a data-loss bug with a
    plausible trigger and no warning.
@@ -111,7 +111,7 @@ def parse_master_keys(entries: list[str]) -> dict[int, bytes]:
 
 
 def _pad_b64(s: str) -> str:
-    """Accept base64url with or without '=' padding — operators paste both."""
+    """Accept base64url with or without '=' padding - operators paste both."""
     return s + "=" * (-len(s) % 4)
 
 
@@ -226,7 +226,7 @@ class LocalKmsProvider(KeyManagementProvider):
             probe = bytearray(b"\x00" * DEK_LENGTH)
             unwrapped = await self.unwrap_dek(await self.wrap_dek(probe))
             ok = unwrapped == probe
-        except Exception as exc:  # noqa: BLE001 — health checks must never raise
+        except Exception as exc:  # noqa: BLE001 - health checks must never raise
             return KmsHealth(
                 ok=False,
                 provider=self.name,

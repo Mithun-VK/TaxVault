@@ -32,7 +32,7 @@ import { formatINR, getEntityTypeLabel, getPaymentMethodLabel } from '@/utils/fo
 import { formatDate, toInputDate, getCurrentFY, getFYOptions } from '@/utils/dates';
 import type { Payment, PaymentEntityType, PaymentMethod } from '@/types';
 
-// Sub-types offered once a category is chosen — mirrors the Analytics explorer.
+// Sub-types offered once a category is chosen - mirrors the Analytics explorer.
 type SubCategory = Exclude<PaymentEntityType, 'all'>;
 const SUBTYPES: Record<SubCategory, { value: string; label: string }[]> = {
   tax: TAX_TYPES,
@@ -116,7 +116,7 @@ function fyRange(fy: string): { from: string; to: string } {
   return { from: `${start}-04-01`, to: `${start + 1}-03-31` };
 }
 
-// Current FY + the previous five (newest first) — getFYOptions() also includes
+// Current FY + the previous five (newest first) - getFYOptions() also includes
 // next year, which isn't useful for a past-payments filter, so drop it.
 const FY_CHOICES = getFYOptions().filter((fy) => fy <= getCurrentFY());
 
@@ -268,16 +268,16 @@ export function Payments() {
     { header: 'Method', cell: (p) => getPaymentMethodLabel(p.payment_method) },
     {
       header: 'Period',
-      cell: (p) => <span className="text-slate-700">{p.period || '—'}</span>,
+      cell: (p) => <span className="text-slate-700">{p.period || '-'}</span>,
     },
     {
       header: 'Reference',
-      cell: (p) => <span className="text-slate-700">{p.reference_number || '—'}</span>,
+      cell: (p) => <span className="text-slate-700">{p.reference_number || '-'}</span>,
     },
     {
       header: 'Receipt',
       cell: (p) => {
-        if (!p.receipt_document_id) return <span className="text-slate-500">—</span>;
+        if (!p.receipt_document_id) return <span className="text-slate-500">-</span>;
         const doc = docsById.get(p.receipt_document_id);
         const label = doc?.label ?? 'Receipt';
         const tip = doc
@@ -306,7 +306,7 @@ export function Payments() {
           <div className="min-w-0">
             <p className="text-xs text-slate-700 sm:text-sm">Paid this month</p>
             <p className="mt-1 font-mono text-xl font-semibold tabular-nums text-slate-900 sm:text-2xl">
-              {summary ? formatINR(summary.total_this_month) : '—'}
+              {summary ? formatINR(summary.total_this_month) : '-'}
             </p>
           </div>
           <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-teal/10 text-brand-teal sm:flex">
@@ -317,7 +317,7 @@ export function Payments() {
           <div className="min-w-0">
             <p className="text-xs text-slate-700 sm:text-sm">Paid this financial year</p>
             <p className="mt-1 font-mono text-xl font-semibold tabular-nums text-slate-900 sm:text-2xl">
-              {summary ? formatINR(summary.total_this_fy) : '—'}
+              {summary ? formatINR(summary.total_this_fy) : '-'}
             </p>
           </div>
           <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-navy/10 text-brand-navy sm:flex">
@@ -482,7 +482,7 @@ export function Payments() {
         </div>
       </FilterBar>
 
-      {/* Selection summary — count + total for the active filter */}
+      {/* Selection summary - count + total for the active filter */}
       <div className="flex items-baseline justify-between px-0.5">
         <p className="text-sm text-slate-700">
           {filteredPayments.length} payment{filteredPayments.length === 1 ? '' : 's'}
@@ -508,7 +508,7 @@ export function Payments() {
               emptyState="No payments match these filters."
             />
           </div>
-          {/* Mobile: a tidy card list — the 7-column table can't fit a phone. */}
+          {/* Mobile: a tidy card list - the 7-column table can't fit a phone. */}
           <div className="md:hidden">
             {filteredPayments.length === 0 ? (
               <div className="rounded-xl border border-dashed border-surface-border py-10 text-center text-sm text-slate-600">

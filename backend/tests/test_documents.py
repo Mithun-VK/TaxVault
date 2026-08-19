@@ -1,5 +1,5 @@
 """
-Document tests — upload-url presign, create, list, search, update, delete, download.
+Document tests - upload-url presign, create, list, search, update, delete, download.
 
 DocumentCategory: income_tax | property | gst | vehicle | insurance | bills | other
 R2 client is mocked in the conftest client fixture.

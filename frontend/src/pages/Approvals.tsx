@@ -61,7 +61,7 @@ function humanizeKey(key: string): string {
 }
 
 function formatValue(value: unknown): string {
-  if (value === null || value === undefined || value === '') return '—';
+  if (value === null || value === undefined || value === '') return '-';
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
@@ -153,7 +153,7 @@ function RequestCard({ request, canReview }: { request: ChangeRequest; canReview
         <p className="text-xs text-slate-600">
           {humanizeKey(request.status)} by {request.reviewed_by_name}
           {request.reviewed_at ? ` on ${formatDate(request.reviewed_at)}` : ''}
-          {request.review_note ? ` — ${request.review_note}` : ''}
+          {request.review_note ? ` - ${request.review_note}` : ''}
         </p>
       )}
 

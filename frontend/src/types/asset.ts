@@ -1,10 +1,10 @@
 export type AssetType =
-  | 'land' // legacy — normalized to 'non_agricultural_land' on read (see api/assets.ts)
+  | 'land' // legacy - normalized to 'non_agricultural_land' on read (see api/assets.ts)
   | 'agricultural_land'
-  | 'vacant_land' // legacy — renamed to 'non_agricultural_land'
+  | 'vacant_land' // legacy - renamed to 'non_agricultural_land'
   | 'non_agricultural_land'
   | 'vehicle'
-  | 'building' // legacy — split into residential/commercial building
+  | 'building' // legacy - split into residential/commercial building
   | 'residential_building'
   | 'commercial_building'
   | 'gold'
@@ -12,7 +12,7 @@ export type AssetType =
 
 export type AssetCategory = 'immovable' | 'movable';
 
-/** Real-property (immovable) asset types — buildings + the land kinds. */
+/** Real-property (immovable) asset types - buildings + the land kinds. */
 export const PROPERTY_ASSET_TYPES: AssetType[] = [
   'residential_building',
   'commercial_building',
@@ -73,7 +73,7 @@ export interface PropertyMetadata {
   current_value_at?: string; // ISO datetime the current value was recorded
 }
 
-/** @deprecated use PropertyMetadata — kept as an alias for back-compat. */
+/** @deprecated use PropertyMetadata - kept as an alias for back-compat. */
 export type LandMetadata = PropertyMetadata;
 
 export interface VehicleMetadata {
@@ -117,7 +117,7 @@ export type AssetMetadata = (
   | Partial<GoldMetadata>
   | Record<string, never>
 ) & {
-  /** Legacy owner key — superseded by PropertyMetadata.owner_name. */
+  /** Legacy owner key - superseded by PropertyMetadata.owner_name. */
   owner?: string;
   /** Free-form: unknown/extra keys (deed_type, water_tax_id, lease_note, …)
    * are preserved on the record even though they aren't curated fields. */

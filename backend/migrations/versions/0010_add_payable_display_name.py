@@ -5,11 +5,11 @@ Revises: 0009
 Create Date: 2026-07-24
 
 Recurring bills, tax obligations and insurance policies gain a nullable
-`name` column — the human-readable label shown on the payment calendar,
+`name` column - the human-readable label shown on the payment calendar,
 the payments list and the reports. Previously the label was derived on the
 fly (``provider_name``/``bill_type`` for bills, ``description``/``tax_type``
 for taxes, ``provider_name - policy_number`` for policies), which made
-several otherwise-identical rows ambiguous — e.g. six "TNEB" electricity
+several otherwise-identical rows ambiguous - e.g. six "TNEB" electricity
 bills, or a wall of "Insurance Company" policies.
 
 The column is back-filled from the descriptive text the seed data already

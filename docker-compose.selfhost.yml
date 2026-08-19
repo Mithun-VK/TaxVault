@@ -1,4 +1,4 @@
-# Fully self-contained TaxVault stack — Postgres, Redis, API, Celery, and the
+# Fully self-contained TaxVault stack - Postgres, Redis, API, Celery, and the
 # SPA behind nginx. Nothing here depends on Supabase, Upstash, or R2.
 #
 # The same file runs on the workstation today and on a rented server later;
@@ -39,7 +39,7 @@ services:
     container_name: tv-redis
     restart: unless-stopped
     # AOF on: a queued alert survives a host reboot. noeviction is mandatory for
-    # a Celery broker — silently dropping keys would drop tasks.
+    # a Celery broker - silently dropping keys would drop tasks.
     command:
       - redis-server
       - --appendonly

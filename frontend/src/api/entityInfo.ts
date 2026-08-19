@@ -3,7 +3,7 @@ import { api } from './client';
 import { getStatusLabel } from '@/utils/formatters';
 
 // The backend never denormalizes a human-readable name/amount/due_date onto
-// payments, alert configs, or activity-log rows — it only stores entity_type
+// payments, alert configs, or activity-log rows - it only stores entity_type
 // + entity_id. This is the single shared resolver: one cached fetch of the
 // (small, personal-scale) tax/bill/insurance lists, keyed so TanStack Query
 // dedupes it across every caller (payments, dashboard, alerts) instead of

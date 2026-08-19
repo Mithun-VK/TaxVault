@@ -137,7 +137,7 @@ async def run(dry_run: bool) -> None:
         ).scalar()
         print(f"Individuals total: {total_ind} | assets linked: {linked}")
         if dry_run:
-            print("(dry-run — no changes written)")
+            print("(dry-run - no changes written)")
 
     await engine.dispose()
 

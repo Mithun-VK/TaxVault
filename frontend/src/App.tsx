@@ -92,7 +92,7 @@ export default function App() {
           </Route>
 
           {/* Bills. Members hold `request_change` rather than `edit`, so the
-              edit page opens for them too — submitting files it for approval. */}
+              edit page opens for them too - submitting files it for approval. */}
           <Route element={<RequirePermission permission="bills.create" />}>
             <Route path="/bills/new" element={<BillFormPage />} />
           </Route>
@@ -108,7 +108,7 @@ export default function App() {
             <Route path="/payments" element={<Payments />} />
           </Route>
 
-          {/* Document library — members can attach receipts but not browse it */}
+          {/* Document library - members can attach receipts but not browse it */}
           <Route element={<RequirePermission permission="documents.create" />}>
             <Route path="/documents/new" element={<DocumentFormPage />} />
           </Route>

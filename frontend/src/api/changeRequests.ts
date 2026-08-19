@@ -58,7 +58,7 @@ export const useChangeRequests = (status?: ChangeStatus) => {
     queryKey: changeRequestKeys.list(status),
     enabled: canView,
     // Pending requests lapse after a short window, and the backend only sweeps
-    // them when the queue is read — so keep the open queue fresh rather than
+    // them when the queue is read - so keep the open queue fresh rather than
     // leaving a reviewer looking at a request that has already expired.
     refetchInterval: 30_000,
     queryFn: async () => {
@@ -72,7 +72,7 @@ export const useChangeRequests = (status?: ChangeStatus) => {
 };
 
 /**
- * Invalidate the queue plus whatever an approval may have changed — the
+ * Invalidate the queue plus whatever an approval may have changed - the
  * entity's own cache, and the calendar/dashboard that summarise it.
  */
 function invalidateFor(entityType?: ChangeEntityType) {

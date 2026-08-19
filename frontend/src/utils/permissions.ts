@@ -3,13 +3,13 @@ import type { UserRole } from '@/types';
 /**
  * Frontend mirror of `backend/app/core/permissions.py`.
  *
- * The backend is the enforcement point — every gated endpoint refuses a caller
+ * The backend is the enforcement point - every gated endpoint refuses a caller
  * whose role lacks the permission. This table exists so the UI can hide
  * controls that would only produce a 403, and so route guards can bounce a
  * member out of a page they cannot load. Keep the two files in sync.
  *
  *   super_admin  full CRUD everywhere, plus user management
- *   admin        sees everything and may add records — never edit or delete,
+ *   admin        sees everything and may add records - never edit or delete,
  *                but is one of the two roles that approves a member's changes
  *   user         payables desk: calendar, bills, taxes, insurance, payments;
  *                may add bills, taxes and insurance and log payments. Edits and
@@ -110,8 +110,8 @@ const USER_PERMISSIONS: Permission[] = [
   'insurance.view', 'insurance.create', 'insurance.request_change',
   'payments.view', 'payments.create',
   // View + create only, so receipts upload and the payments ledger can resolve
-  // them. `documents.browse` — the Documents library page and its full-text
-  // search — is withheld.
+  // them. `documents.browse` - the Documents library page and its full-text
+  // search - is withheld.
   'documents.view', 'documents.create',
   'change_requests.view',
 ];
@@ -141,11 +141,11 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
-  super_admin: 'Full access — can add, edit and delete everything, and manage users.',
+  super_admin: 'Full access - can add, edit and delete everything, and manage users.',
   admin:
     'Sees everything and can add records. Cannot edit or delete, but approves members’ change requests.',
   user:
-    'Payables desk — bills, taxes, insurance, payments and the calendar. Can add and log payments; edits and deletions need approval.',
+    'Payables desk - bills, taxes, insurance, payments and the calendar. Can add and log payments; edits and deletions need approval.',
 };
 
 /**

@@ -2,7 +2,7 @@
 
 These pin AES-256-GCM and AES-KW against published vectors. They do not test our
 code so much as they prove the library underneath us behaves as the standards
-say — which is what lets every other test in this directory trust it. If one of
+say - which is what lets every other test in this directory trust it. If one of
 these ever fails, the problem is the environment (a swapped OpenSSL, a broken
 build), not the envelope format.
 
@@ -36,7 +36,7 @@ _TC_IV = "cafebabefacedbaddecaf888"
 
 # Test case 15 uses the full 64-byte plaintext; test case 16 truncates it to 60
 # and adds AAD. Because GCM is CTR-based, tc16's ciphertext is byte-for-byte the
-# first 60 bytes of tc15's — which makes it easy to pair the wrong tag with the
+# first 60 bytes of tc15's - which makes it easy to pair the wrong tag with the
 # wrong plaintext. The two are kept explicitly separate here for that reason.
 _TC15_PT = (
     "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a72"
@@ -66,7 +66,7 @@ GCM_VECTORS = [
         "cea7403d4d606b6e074ec5d3baf39d18",
         "d0d1c8a799996bf0265b98b5d48ab919",
     ),
-    # Test case 15: 64 bytes, no AAD — multi-block.
+    # Test case 15: 64 bytes, no AAD - multi-block.
     (
         "tc15-multiblock",
         _TC_KEY,
@@ -78,7 +78,7 @@ GCM_VECTORS = [
     ),
     # Test case 16: same key/IV, plaintext truncated to a non-block-aligned 60
     # bytes, and AAD added. The ciphertext is tc15's first 60 bytes but the tag
-    # differs — which is precisely the property our format relies on when it
+    # differs - which is precisely the property our format relies on when it
     # binds the header and the storage key into the AAD.
     ("tc16-with-aad", _TC_KEY, _TC_IV, _TC16_PT, _TC16_AAD, _TC16_CT, _TC16_TAG),
 ]
@@ -105,7 +105,7 @@ def test_gcm_decrypt_matches_published_vector(
 def test_gcm_rejects_wrong_aad() -> None:
     """AAD is authenticated: the right ciphertext with the wrong AAD must fail.
 
-    This is the primitive-level version of our cut-and-paste defence — the
+    This is the primitive-level version of our cut-and-paste defence - the
     envelope binds its header and storage key into exactly this slot.
     """
     key, iv = h(_TC_KEY), h(_TC_IV)
@@ -137,7 +137,7 @@ def test_gcm_rejects_flipped_tag_bit() -> None:
 
 
 # --------------------------------------------------------------------------
-# AES Key Wrap (RFC 3394) — how LocalKmsProvider wraps every DEK
+# AES Key Wrap (RFC 3394) - how LocalKmsProvider wraps every DEK
 # --------------------------------------------------------------------------
 
 # RFC 3394 section 4.6

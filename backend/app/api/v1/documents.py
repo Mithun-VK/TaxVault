@@ -130,7 +130,7 @@ async def create_document(
     return await document_service.create_document(db, vault_id, payload)
 
 
-# Free-text search spans the whole library, so it needs the browse permission —
+# Free-text search spans the whole library, so it needs the browse permission -
 # unlike the filtered list below, which the payments ledger relies on to resolve
 # receipts for every role.
 @router.get(

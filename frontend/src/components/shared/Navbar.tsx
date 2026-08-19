@@ -60,7 +60,7 @@ export function Navbar({ title, onMenuClick, onOpenSearch }: NavbarProps) {
   const { payables } = usePayableDeadlines();
   const can = (permission: Permission) => roleHasPermission(user?.role, permission);
 
-  // Quick-add offers exactly what this role may create — for a member that is
+  // Quick-add offers exactly what this role may create - for a member that is
   // bills alone, so the menu still earns its place.
   const createActions = CREATE_ACTIONS.filter((action) => can(action.permission));
 
@@ -87,7 +87,7 @@ export function Navbar({ title, onMenuClick, onOpenSearch }: NavbarProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Command palette trigger — pill on desktop, icon on mobile */}
+        {/* Command palette trigger - pill on desktop, icon on mobile */}
         <button
           type="button"
           onClick={onOpenSearch}
@@ -109,7 +109,7 @@ export function Navbar({ title, onMenuClick, onOpenSearch }: NavbarProps) {
           <Search className="h-5 w-5" />
         </button>
 
-        {/* Global quick-add — only what this role is allowed to create */}
+        {/* Global quick-add - only what this role is allowed to create */}
         {createActions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

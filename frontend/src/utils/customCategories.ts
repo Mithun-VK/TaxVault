@@ -2,7 +2,7 @@ import { slugifyCategory } from './constants';
 
 /**
  * Per-browser custom categories for the user-extensible pickers (tax types,
- * insurance types). Mirrors the custom gold-category / owner pattern — persisted
+ * insurance types). Mirrors the custom gold-category / owner pattern - persisted
  * in localStorage so a category the user adds sticks around across sessions even
  * before a record uses it. Bills derive their categories from data instead.
  */

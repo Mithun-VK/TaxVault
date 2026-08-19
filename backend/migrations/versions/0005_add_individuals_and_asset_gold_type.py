@@ -5,8 +5,8 @@ Revises: 0004
 Create Date: 2026-07-15
 
 Adds:
-  * individuals table — personal profiles (identity docs, visas) per user.
-  * assets.individual_id — links an asset to the individual who owns it.
+  * individuals table - personal profiles (identity docs, visas) per user.
+  * assets.individual_id - links an asset to the individual who owns it.
   * a CHECK constraint pinning asset_type to the known set, now including
     "gold" (asset_type is a plain VARCHAR, so the allowed values are
     enforced by constraint rather than a Postgres enum).

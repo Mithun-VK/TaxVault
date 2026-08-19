@@ -36,7 +36,7 @@ interface BackendLog {
 }
 
 function toConfig(c: BackendConfig | AlertConfig, infoMap: Map<string, { name: string; amount: number; due_date: string }>): AlertConfig {
-  // MSW mock mode already returns AlertConfig-shaped objects — pass through.
+  // MSW mock mode already returns AlertConfig-shaped objects - pass through.
   if ('enabled' in c) return c;
   const match = infoMap.get(c.entity_id);
   return {
@@ -53,7 +53,7 @@ function toConfig(c: BackendConfig | AlertConfig, infoMap: Map<string, { name: s
 }
 
 function toLog(l: BackendLog | AlertLog): AlertLog {
-  // MSW mock mode already returns AlertLog-shaped objects — pass through.
+  // MSW mock mode already returns AlertLog-shaped objects - pass through.
   if ('message' in l) return l;
   return {
     id: l.id,
@@ -69,7 +69,7 @@ function toLog(l: BackendLog | AlertLog): AlertLog {
 }
 
 export const useAlertConfigs = () => {
-  // Shared, cached entity-info lookup (see entityInfo.ts) — AlertConfigOut has
+  // Shared, cached entity-info lookup (see entityInfo.ts) - AlertConfigOut has
   // no entity_name/amount/due_date, and this resolver is deduped across every
   // caller (payments, dashboard, alerts) via a single query key.
   const infoMap = useEntityInfoMap();

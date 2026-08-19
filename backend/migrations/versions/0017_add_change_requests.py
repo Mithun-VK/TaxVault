@@ -8,7 +8,7 @@ Members (role "user") may add bills, taxes and insurance policies outright, but
 editing or deleting one goes through approval: the attempt is recorded here and
 an admin or super admin applies it. See app/services/change_request_service.py.
 
-Purely additive — a new table, no changes to existing ones.
+Purely additive - a new table, no changes to existing ones.
 """
 from typing import Union
 

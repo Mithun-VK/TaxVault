@@ -53,7 +53,7 @@ async def create_change_request(
     """File an edit or delete for approval.
 
     Gated per entity type, because the permission depends on what is being
-    changed — a role that may edit the record directly has no business here.
+    changed - a role that may edit the record directly has no business here.
     """
     permission = REQUEST_CHANGE_PERMISSION[payload.entity_type]
     if not has_permission(current_user.role, permission):
