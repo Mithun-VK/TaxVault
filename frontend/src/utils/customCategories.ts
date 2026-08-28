@@ -2,11 +2,17 @@ import { slugifyCategory } from './constants';
 
 /**
  * Per-browser custom categories for the user-extensible pickers (tax types,
- * insurance types). Mirrors the custom gold-category / owner pattern - persisted
- * in localStorage so a category the user adds sticks around across sessions even
- * before a record uses it. Bills derive their categories from data instead.
+ * insurance types, company document types). Mirrors the custom gold-category /
+ * owner pattern - persisted in localStorage so a category the user adds sticks
+ * around across sessions even before a record uses it. Bills derive their
+ * categories from data instead.
+ *
+ * `company_document` is a special case: the API validates `category` against a
+ * fixed enum, so a custom company document type is stored as category "other"
+ * with the type name as its label. The entry here only keeps that name in the
+ * picker so it can be reused.
  */
-export type CategoryDomain = 'tax' | 'insurance';
+export type CategoryDomain = 'tax' | 'insurance' | 'company_document';
 
 export interface CustomCategory {
   value: string;
