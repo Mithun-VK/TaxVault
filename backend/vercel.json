@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "api/index.py": {
+      "runtime": "python3.12",
+      "maxDuration": 60
+    }
+  },
+  "regions": ["bom1"],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api/index" }
+  ],
+  "crons": [
+    { "path": "/api/v1/cron/daily-scan", "schedule": "30 2 * * *" },
+    { "path": "/api/v1/cron/overdue-check", "schedule": "30 3 * * *" }
+  ]
+}

@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     # changing this takes effect immediately for requests already in flight.
     CHANGE_REQUEST_TTL_MINUTES: int = 15
 
+    # ── Serverless cron (Vercel) ─────────────────────────────
+    # Guards /api/v1/cron/*. Those routes replace Celery beat's daily-alert-scan
+    # and overdue-check on a deployment with no worker process - see
+    # app/api/v1/cron.py. Blank in self-hosted/Docker deployments, which still
+    # run the real Celery beat schedule and never hit these routes.
+    CRON_SECRET: str = ""
+
     # ── CORS ─────────────────────────────────────────────────
     # NoDecode: parse comma-separated env strings ourselves (not JSON).
     CORS_ORIGINS: Annotated[list[str], NoDecode] = [

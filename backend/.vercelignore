@@ -1,0 +1,23 @@
+# Trims the serverless function bundle - none of this is imported at request
+# time, and Vercel's Python functions have a 250MB unzipped size limit.
+tests/
+migrations/
+scripts/
+templates/
+uploads/
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+requirements-dev.txt
+Dockerfile
+alembic.ini
+.env
+.env.*
+!.env.example
+!.env.selfhost.example

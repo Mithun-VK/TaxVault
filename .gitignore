@@ -38,6 +38,9 @@ htmlcov/
 node_modules/
 frontend/dist/
 
+# Vercel CLI project-link metadata (`vercel link` writes one per project root)
+.vercel/
+
 # Editor / OS
 .vscode/
 .idea/

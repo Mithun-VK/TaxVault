@@ -7,6 +7,7 @@ from app.api.v1 import (
     bills,
     change_requests,
     companies,
+    cron,
     dashboard,
     documents,
     gold_categories,
@@ -35,3 +36,4 @@ api_router.include_router(documents.router)
 api_router.include_router(alerts.router)
 api_router.include_router(dashboard.router)
 api_router.include_router(reports.router)
+api_router.include_router(cron.router)

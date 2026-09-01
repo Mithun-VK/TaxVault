@@ -1,0 +1,134 @@
+# Render Blueprint - deploys the backend as three services from the same
+# image (backend/Dockerfile, unmodified - the exact one docker-compose.prod.yml
+# already uses). Connect this repo on Render as a new Blueprint instance and
+# it reads this file automatically. See RENDER_DEPLOYMENT.md for the full walk-
+# through, including which envVars to fill in and why.
+#
+# Unlike the Vercel backend (backend/vercel.json), Render runs real persistent
+# processes, so this uses actual Celery - a worker service consuming a real
+# queue with real retries, not the inline-dispatch workaround in
+# app/api/v1/cron.py (which stays unused here; CRON_SECRET can stay blank).
+#
+# No `celery beat` service: a 24/7 process that sleeps all day to fire two
+# tasks is wasted spend on a per-service-billed platform. The two cron jobs
+# below push the same two tasks (app.tasks.scheduler.run_daily_scan,
+# check_overdue) onto the worker's queue on the same schedule beat would have
+# used, billed only for the few seconds each `celery call` actually runs.
+
+envVarGroups:
+  - name: taxvault-backend-env
+    envVars:
+      # ── App ──────────────────────────────────────────────────────────────
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      - key: SECRET_KEY
+        sync: false # openssl rand -hex 32
+      # ── Database (Supabase) ─────────────────────────────────────────────
+      # DATABASE_URL: the POOLER connection (port 6543) - even though Render's
+      # processes are persistent (not per-request like Vercel), the pooler is
+      # still the safer default across worker + cron + web all holding their
+      # own pool simultaneously. DIRECT_DATABASE_URL isn't used at request
+      # time by any of these three services - only by `alembic upgrade head`,
+      # which you run from your own machine - but Settings() still requires
+      # it to be set for the app to construct.
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_DATABASE_URL
+        sync: false
+      - key: DB_POOL_SIZE
+        value: "5"
+      - key: DB_MAX_OVERFLOW
+        value: "10"
+      # ── Redis (Upstash, or Render's own Key Value service) ──────────────
+      - key: REDIS_URL
+        sync: false
+      - key: ENABLE_TOKEN_BLOCKLIST
+        value: "true"
+      # ── CORS ──────────────────────────────────────────────────────────────
+      # The frontend's real Vercel URL, e.g. https://taxvault-web.vercel.app
+      - key: CORS_ORIGINS
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      # ── Cloudflare R2 ────────────────────────────────────────────────────
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        value: taxvault-docs
+      # ── Encryption at rest ───────────────────────────────────────────────
+      - key: ENCRYPTION_MASTER_KEYS
+        sync: false # 1:<base64url 32 random bytes> - see backend/app/core/config.py
+      # ── WhatsApp alerts (Twilio) ─────────────────────────────────────────
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_FROM
+        sync: false
+      - key: TWILIO_WHATSAPP_TO
+        sync: false
+      # ── Email (AWS SES) ──────────────────────────────────────────────────
+      - key: AWS_REGION
+        value: ap-south-1
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      # ── Observability ────────────────────────────────────────────────────
+      - key: SENTRY_DSN
+        sync: false
+
+services:
+  - type: web
+    name: taxvault-api
+    env: docker
+    plan: starter
+    region: singapore # closest Render region to Supabase's ap-south-1
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVarGroups:
+      - taxvault-backend-env
+
+  - type: worker
+    name: taxvault-celery-worker
+    env: docker
+    plan: starter
+    region: singapore
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4
+    envVarGroups:
+      - taxvault-backend-env
+
+  - type: cron
+    name: taxvault-daily-scan
+    env: docker
+    plan: starter
+    region: singapore
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    schedule: "30 2 * * *" # 08:00 IST - same task, same time as Celery beat's own schedule
+    dockerCommand: celery -A app.tasks.celery_app call app.tasks.scheduler.run_daily_scan
+    envVarGroups:
+      - taxvault-backend-env
+
+  - type: cron
+    name: taxvault-overdue-check
+    env: docker
+    plan: starter
+    region: singapore
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    schedule: "30 3 * * *" # 09:00 IST
+    dockerCommand: celery -A app.tasks.celery_app call app.tasks.scheduler.check_overdue
+    envVarGroups:
+      - taxvault-backend-env

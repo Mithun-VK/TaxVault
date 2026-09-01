@@ -1,7 +1,8 @@
 import asyncio
 import logging
+import uuid
 from datetime import date
-from typing import Any
+from typing import Any, Awaitable, Callable
 
 from sqlalchemy import select
 
@@ -15,8 +16,27 @@ from app.tasks.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
 
+# (entity_type, entity_id, channel, days_before) -> deliver the alert.
+DispatchFn = Callable[[str, uuid.UUID, str, int], Awaitable[None]]
 
-async def _scan() -> None:
+
+async def _celery_dispatch(
+    entity_type: str, entity_id: uuid.UUID, channel: str, days_before: int
+) -> None:
+    """Default dispatch: queue onto Celery, exactly the pre-refactor behavior."""
+    from app.tasks.dispatcher import dispatch_alert
+
+    dispatch_alert.delay(str(entity_type), str(entity_id), channel, days_before)
+
+
+async def _scan(dispatch: DispatchFn = _celery_dispatch) -> None:
+    """Match due alert_configs against today's date and hand each to `dispatch`.
+
+    `dispatch` defaults to queueing onto Celery - the self-hosted/Docker path,
+    consumed by a worker process. The Vercel cron routes in app/api/v1/cron.py
+    pass an inline dispatcher instead, since serverless has no worker to drain
+    a queue.
+    """
     today = date.today()
 
     async with AsyncSessionLocal() as db:
@@ -84,13 +104,8 @@ async def _scan() -> None:
                         ).scalar_one_or_none()
 
                         if not existing:
-                            from app.tasks.dispatcher import dispatch_alert
-
-                            dispatch_alert.delay(
-                                str(config.entity_type),
-                                str(config.entity_id),
-                                channel,
-                                days_before,
+                            await dispatch(
+                                config.entity_type, config.entity_id, channel, days_before
                             )
 
 
@@ -103,7 +118,7 @@ def run_daily_scan() -> None:
 _TERMINAL_STATUS = {"paid", "exempt", "surrendered", "matured", "lapsed"}
 
 
-async def _scan_overdue() -> int:
+async def _scan_overdue(dispatch: DispatchFn = _celery_dispatch) -> int:
     today = date.today()
     sent_date = today.strftime("%Y-%m-%d")
     dispatched = 0
@@ -165,9 +180,7 @@ async def _scan_overdue() -> int:
                     )
                 ).scalar_one_or_none()
                 if not existing:
-                    from app.tasks.dispatcher import dispatch_alert
-
-                    dispatch_alert.delay(str(config.entity_type), str(config.entity_id), channel, 0)
+                    await dispatch(config.entity_type, config.entity_id, channel, 0)
                     dispatched += 1
 
     logger.info("overdue_check_complete dispatched=%d date=%s", dispatched, sent_date)
